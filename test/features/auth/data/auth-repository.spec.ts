@@ -1,5 +1,5 @@
 import {beforeEach, describe, expect, it} from "@jest/globals";
-import {GoogleAuth} from "../../../../src/features/auth/data/sources/google-auth";
+import GoogleAuth from "../../../../src/features/auth/data/sources/google-auth";
 import {instance, mock, reset, verify, when} from "ts-mockito";
 import {IAuthAPI} from "../../../../src/features/auth/data/sources/auth-api";
 import LoginResult from "../../../../src/features/auth/types/login-result";

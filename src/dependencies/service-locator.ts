@@ -1,11 +1,7 @@
 import createStore, {AppStore} from "../store/store";
 import TYPES from "./types";
-import {GoogleAuth} from "../features/auth/data/sources/google-auth";
+import GoogleAuth from "../features/auth/data/sources/google-auth";
 import IAuthRepository, {AuthRepository} from "../features/auth/data/auth-repository";
-import {
-  ILocalStorage,
-  LocalStorage
-} from "../features/auth/data/sources/local-storage";
 import {IUserAPI, UserAPI} from "../features/user/data/sources/user-api";
 import {
   IUserRepository,
@@ -46,16 +42,11 @@ class ServiceLocator {
 
 const sl = new ServiceLocator();
 const initDependencies = async () => {
-  // ILocalStorage
-  sl.register<ILocalStorage>(TYPES.ILocalStorage, new LocalStorage());
   // Auth
   sl.register<GoogleAuth>(TYPES.GoogleAuth, new GoogleAuth());
-  //sl.register<IAuthApi>(TYPES.IAuthApi, new FakeAuthApi());
-
   const authMiddleware = new ApolloLink((operation, forward) => {
     // add the authorization to the headers
     const token = sl.get<AppStore>(TYPES.AppStore).getState().auth.accessToken;
-    console.log('HHHHAAAAAAAAAAAAAAAAAAAAAAAAA: ', token);
     operation.setContext({
       headers: {
         authorization: token ? `Bearer ${token}` : "",
@@ -87,7 +78,6 @@ const initDependencies = async () => {
     TYPES.IAuthApi,
     new AuthAPI(sl.get(TYPES.ApolloClient), sl.get(TYPES.Axios))
   );
-  //sl.register<IAuthApi>(TYPES.IAuthApi, new FakeAuthApi());
   sl.register<IAuthRepository>(
     TYPES.IAuthRepository,
     new AuthRepository(
@@ -96,7 +86,6 @@ const initDependencies = async () => {
     ),
   );
   // User
-  //sl.register<IUserApi>(TYPES.IUserApi, new FakeUserApi());
   sl.register<IUserAPI>(
     TYPES.IUserApi,
     new UserAPI(sl.get<ApolloClient<any>>(TYPES.ApolloClient))

@@ -48,26 +48,3 @@ export class AuthAPI implements IAuthAPI {
     return null;
   }
 }
-
-export class FakeAuthAPI implements IAuthAPI {
-  signInWihGoogle(token: string): Promise<LoginResult> {
-    return new Promise<LoginResult>(resolve => {
-      setTimeout(
-        () => resolve({
-          accessToken: 'some_access_token',
-          displayName: null,
-          photoURL: null
-        }),
-        1000
-      );
-    });
-  }
-
-  async getAccessToken(): Promise<string> {
-    return 'access_token';
-  }
-
-  logout(): Promise<null> {
-    return Promise.resolve(null);
-  }
-}
