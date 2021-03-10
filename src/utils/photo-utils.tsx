@@ -8,7 +8,7 @@ export interface IPhotoUtils {
   getPhotoDimensions: (photoURL: string) => Promise<{ height: number, width: number }>,
 }
 
-class PhotoUtils implements IPhotoUtils {
+export class PhotoUtils implements IPhotoUtils {
   async photoToURL(photo: File) {
     return URL.createObjectURL(photo);
   }

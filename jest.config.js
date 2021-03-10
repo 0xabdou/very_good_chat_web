@@ -13,6 +13,6 @@ module.exports = {
     'src/features/**/*',
     'src/pages/**/*',
     'src/utils/**/*',
-    '!src/utils/mobile'
+    '!src/utils/mobile/*'
   ],
 };
