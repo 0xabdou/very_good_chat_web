@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   getMockStore,
   getMockUserActions,
@@ -10,7 +11,6 @@ import {Provider} from "react-redux";
 import {AppState, AppStore} from "../../../../src/store/store";
 import LoggedInScreen from "../../../../src/features/user/ui/logged-in-screen";
 import {UserActionsContext} from "../../../../src/features/user/user-actions-context";
-import {test} from "@jest/globals";
 import {UserState} from "../../../../src/features/user/user-slice";
 import UserError from "../../../../src/features/user/types/user-error";
 

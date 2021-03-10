@@ -1,5 +1,5 @@
+import React from 'react';
 import {AppState, AppStore} from "../../../../src/store/store";
-import {beforeEach, test} from "@jest/globals";
 import {
   getMockAuthActions,
   getMockStore,

@@ -9,7 +9,11 @@ import AuthError from "../../../../src/features/auth/types/auth-error";
 
 
 const token = 'token';
-const loginResult: LoginResult = {accessToken: 'access-token'};
+const loginResult: LoginResult = {
+  accessToken: 'access-token',
+  displayName: null,
+  photoURL: null,
+};
 
 const MockGoogleAuth = mock(GoogleAuth);
 const MockAuthAPI = mock<IAuthAPI>();
