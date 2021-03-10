@@ -1,0 +1,47 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type AuthUser {
+    displayName: String
+    photoUrl: String
+}
+
+type LoginResponse {
+    accessToken: String!
+    authUser: AuthUser!
+}
+
+type Mutation {
+    loginWithGoogle(input: LoginInput!): LoginResponse!
+    register(input: UserCreation!): User!
+}
+
+type Query {
+    checkUsernameExistence(username: String!): Boolean!
+    me: User!
+}
+
+type User {
+    id: String!
+    name: String
+    photoURL: String
+    username: String!
+}
+
+input LoginInput {
+    token: String!
+}
+
+input UserCreation {
+    name: String
+    photo: Upload
+    username: String!
+}
+
+
+"The `Upload` scalar type represents a file upload."
+scalar Upload
