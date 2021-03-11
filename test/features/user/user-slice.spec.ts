@@ -1,7 +1,12 @@
 import {beforeEach, describe, expect, it} from "@jest/globals";
-import {reset, verify, when} from "ts-mockito";
+import {anything, reset, verify, when} from "ts-mockito";
 import mockServices from "../../mock-services";
-import {getMockStore, mockUser, mockUserCreation} from "../../mock-objects";
+import {
+  getMockStore,
+  mockUser,
+  mockUserCreation,
+  mockUserUpdate
+} from "../../mock-objects";
 import {left, right} from "fp-ts/Either";
 import userReducer, {userActions, UserState} from "../../../src/features/user/user-slice";
 import UserError from "../../../src/features/user/types/user-error";
@@ -20,7 +25,7 @@ beforeEach(() => {
   mockStore = MockStore();
 });
 
-const {getCurrentUser, createUser} = userActions;
+const {getCurrentUser, createUser, updateUser} = userActions;
 
 describe('getCurrentUser', () => {
   const act = () => getCurrentUser()(
@@ -49,7 +54,7 @@ describe('getCurrentUser', () => {
     const initialState: UserState = {
       initialized: false,
       currentUser: null,
-      creatingUser: false,
+      updatingUser: false,
       error: null,
     };
 
@@ -113,10 +118,10 @@ describe('createUser', () => {
     const initialState: UserState = {
       initialized: true,
       currentUser: null,
-      creatingUser: false,
+      updatingUser: false,
       error: null,
     };
-    const loadingState: UserState = {...initialState, creatingUser: true};
+    const loadingState: UserState = {...initialState, updatingUser: true};
 
     it('pending reducer should return the right state', () => {
       const action: PayloadAction = {
@@ -139,6 +144,77 @@ describe('createUser', () => {
     it('rejected reducer should return the right state', () => {
       const action: PayloadAction<UserError> = {
         type: createUser.rejected.type,
+        payload: userError,
+      };
+      const result = userReducer(loadingState, action);
+      expect(result).toStrictEqual({...initialState, error: userError});
+    });
+  });
+});
+
+describe('updateUser', () => {
+  const act = () => updateUser(mockUserUpdate)(
+    mockStore.dispatch,
+    mockStore.getState,
+    mockServices.instances,
+  );
+
+  it('should return the right action if fulfilled', async () => {
+    when(MockUserRepository.updateUser(anything()))
+      .thenResolve(right(mockUser));
+    const expected: PayloadAction<User> = {
+      type: updateUser.fulfilled.type,
+      payload: mockUser,
+    };
+    const result = await act();
+    expect(result.type).toStrictEqual(expected.type);
+    expect(result.payload).toStrictEqual(expected.payload);
+    verify(MockUserRepository.updateUser(mockUserUpdate)).once();
+  });
+
+  it('should return the right action if rejected', async () => {
+    when(MockUserRepository.updateUser(mockUserUpdate))
+      .thenResolve(left(userError));
+    const expected: PayloadAction<UserError> = {
+      type: updateUser.rejected.type,
+      payload: userError,
+    };
+    const result = await act();
+    expect(result.type).toStrictEqual(expected.type);
+    expect(result.payload).toStrictEqual(expected.payload);
+    verify(MockUserRepository.updateUser(mockUserUpdate)).once();
+  });
+
+  describe('reducers', () => {
+    const initialState: UserState = {
+      initialized: true,
+      currentUser: null,
+      updatingUser: false,
+      error: null,
+    };
+    const loadingState: UserState = {...initialState, updatingUser: true};
+
+    it('pending reducer should return the right state', () => {
+      const action: PayloadAction = {
+        type: updateUser.pending.type,
+        payload: undefined,
+      };
+      const result = userReducer(initialState, action);
+      expect(result).toStrictEqual(loadingState);
+    });
+
+    it('fulfilled reducer should return the right state', () => {
+      const action: PayloadAction<User> = {
+        type: updateUser.fulfilled.type,
+        payload: mockUser,
+      };
+      const result = userReducer(loadingState, action);
+      expect(result).toStrictEqual({...initialState, currentUser: mockUser});
+    });
+
+    it('rejected reducer should return the right state', () => {
+      const action: PayloadAction<UserError> = {
+        type: updateUser.rejected.type,
         payload: userError,
       };
       const result = userReducer(loadingState, action);

@@ -15,11 +15,12 @@ import AlertDialog from "./components/alert-dialog";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import UserError from "../types/user-error";
 import {centeredLayout, wrapper} from "../../../styles/shared";
-import ErrorSnackbar from "../../../components/error-snackbar";
+import {ErrorSnackbar, SuccessSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../../auth/auth-actions-context";
 import {useUserActions} from "../user-actions-context";
 import {usePhotoUtils} from "../../../utils/photo-utils";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import {UserUpdate} from "../types/user";
 
 
 const validators = {
@@ -37,7 +38,7 @@ const validators = {
   }
 };
 
-type ProfileUpdatingScreenProps = {
+export type ProfileUpdatingScreenProps = {
   registering?: boolean,
   initialUsername?: string,
   initialName?: string,
@@ -64,12 +65,13 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const [nameError, setNameError] = useState<string>();
   // Set to true to show the logout alert dialog
   const [loggingOut, setLoggingOut] = useState(false);
+  const [success, setSuccess] = useState(0);
 
   // Redux hooks
   const state = useAppSelector(state => state.user);
   const dispatch = useAppDispatch();
   const {signOut} = useAuthActions();
-  const {createUser, resetUser} = useUserActions();
+  const {createUser, updateUser, resetUser} = useUserActions();
 
   // photo utils
   const photoUtils = usePhotoUtils();
@@ -164,27 +166,43 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
     // Don't submit if there is a validation error
     if (usernameError || nameError) return;
 
-    let photo: File | undefined;
-    if (src) {
-      photo = await photoUtils.urlToPhoto(src);
-    }
 
     if (props.registering) {
+      let photo: File | undefined;
+      if (src) {
+        photo = await photoUtils.urlToPhoto(src);
+      }
       dispatch(createUser({
         username,
         name,
         photo,
       }));
     } else {
-      // TODO: update user
+      const update: UserUpdate = {};
+      if (username != props.initialUsername) update.username = username;
+      if (name != props.initialName) {
+        if (name.length) update.name = name;
+        else if (props.initialName) update.deleteName = true;
+      }
+      if (src != props.initialPhotoURL) {
+        if (src) {
+          update.photo = await photoUtils.urlToPhoto(src);
+        } else {
+          update.deletePhoto = true;
+        }
+      }
+      if (!Object.keys(update).length) return;
+      const result = await dispatch(updateUser(update));
+      if (result.meta.requestStatus == 'fulfilled') {
+        setSuccess(s => s + 1);
+      }
     }
-
   }, [username, name, src]);
 
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper} data-testid='registration-screen'>
+    <div className={classes.wrapper} data-testid='profile-updating-screen'>
       {props.registering && <IconButton
         className={classes.logoutButton}
         onClick={askForLogoutConfirmation}
@@ -221,17 +239,17 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
             data-testid='name-text-field'
           />
           <div className={classes.saveWrapper}>
-            {!state.creatingUser &&
+            {!state.updatingUser &&
             <Button
               startIcon={<Icon>check</Icon>}
               onClick={submit}
               type='submit'
               variant='contained'
               color='primary'
-              data-testid='registration-button'>
+              data-testid='submit-button'>
               save
             </Button>}
-            {state.creatingUser &&
+            {state.updatingUser &&
             <CircularProgress data-testid='registration-loading'/>}
           </div>
         </form>
@@ -255,6 +273,9 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
           stringify={stringifyError}
           exclude={[UserError.usernameTaken]}
         />
+        <SuccessSnackbar
+          renderCount={success}
+          message='Profile updated successfully'/>
       </div>
     </div>
   );

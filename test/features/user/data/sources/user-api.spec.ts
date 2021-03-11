@@ -11,15 +11,23 @@ import {
 } from "../../../../../src/_generated/RegisterMutation";
 import {
   ME_QUERY,
-  REGISTER_MUTATION,
+  REGISTER_MUTATION, UPDATE_USER_MUTATION,
   USERNAME_EXISTENCE_QUERY
 } from "../../../../../src/features/user/data/graphql";
-import {mockUser, mockUserCreation} from "../../../../mock-objects";
+import {
+  mockUser,
+  mockUserCreation,
+  mockUserUpdate
+} from "../../../../mock-objects";
 import {MeQuery} from "../../../../../src/_generated/MeQuery";
 import {
   UsernameExistenceQuery,
   UsernameExistenceQueryVariables
 } from "../../../../../src/_generated/UsernameExistenceQuery";
+import {
+  UpdateUserMutation,
+  UpdateUserMutationVariables
+} from "../../../../../src/_generated/UpdateUserMutation";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const userAPI: IUserAPI = new UserAPI(instance(MockApolloClient));
@@ -43,9 +51,36 @@ describe('createUser', () => {
     // act
     const result = await userAPI.createUser(mockUserCreation);
     // assert
-    expect(result).toStrictEqual(mockUser);
+    expect(result).toMatchObject(mockUser);
     verify(MockApolloClient.mutate(deepEqual(
       {mutation: REGISTER_MUTATION, variables: {registerInput}}
+    ))).once();
+  });
+});
+
+describe('updateUser', () => {
+  it('should return the updated user on success', async () => {
+    // arrange
+    const updateUserInput = mockUserUpdate;
+    when(MockApolloClient.mutate
+      <UpdateUserMutation, UpdateUserMutationVariables>(
+      deepEqual({
+        mutation: UPDATE_USER_MUTATION,
+        variables: {updateUserInput},
+      }))).thenResolve({
+      data: {
+        updateUser: {
+          __typename: "User",
+          ...mockUser
+        }
+      }
+    });
+    // act
+    const result = await userAPI.updateUser(mockUserUpdate);
+    // assert
+    expect(result).toMatchObject(mockUser);
+    verify(MockApolloClient.mutate(deepEqual(
+      {mutation: UPDATE_USER_MUTATION, variables: {updateUserInput}}
     ))).once();
   });
 });
@@ -65,7 +100,7 @@ describe('getCurrentUser', () => {
     // act
     const result = await userAPI.getCurrentUser();
     // assert
-    expect(result).toStrictEqual(mockUser);
+    expect(result).toMatchObject(mockUser);
     verify(MockApolloClient.query(deepEqual({query: ME_QUERY}))).once();
   });
 });

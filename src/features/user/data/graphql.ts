@@ -22,6 +22,17 @@ export const REGISTER_MUTATION = gql`
     }
 `;
 
+export const UPDATE_USER_MUTATION = gql`
+    mutation UpdateUserMutation($updateUserInput: UserUpdate!) {
+        updateUser(input: $updateUserInput) {
+            id
+            name
+            photoURL
+            username
+        }
+    }
+`
+
 export const USERNAME_EXISTENCE_QUERY = gql`
     query UsernameExistenceQuery($username: String!) {
         checkUsernameExistence(username: $username)

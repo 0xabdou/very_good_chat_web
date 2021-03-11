@@ -1,9 +1,10 @@
-import User, {UserCreation} from "../../types/user";
+import User, {UserCreation, UserUpdate} from "../../types/user";
 import {ApolloClient} from "@apollo/client";
 import {MeQuery} from "../../../../_generated/MeQuery";
 import {
   ME_QUERY,
   REGISTER_MUTATION,
+  UPDATE_USER_MUTATION,
   USERNAME_EXISTENCE_QUERY
 } from "../graphql";
 import {
@@ -14,11 +15,17 @@ import {
   UsernameExistenceMutation,
   UsernameExistenceMutationVariables
 } from "../../../../_generated/UsernameExistenceMutation";
+import {
+  UpdateUserMutation,
+  UpdateUserMutationVariables
+} from "../../../../_generated/UpdateUserMutation";
 
 export interface IUserAPI {
   getCurrentUser(): Promise<User>;
 
   createUser(creation: UserCreation): Promise<User>;
+
+  updateUser(update: UserUpdate): Promise<User>;
 
   isUsernameTaken(username: string): Promise<boolean>;
 }
@@ -36,25 +43,23 @@ export class UserAPI implements IUserAPI {
       mutation: REGISTER_MUTATION,
       variables: {registerInput: creation},
     });
-    const user = data?.register!;
-    return {
-      id: user.id,
-      username: user.username,
-      name: user.name,
-      photoURL: user.photoURL,
-    };
+    return data?.register!;
+  }
+
+  async updateUser(update: UserUpdate): Promise<User> {
+    const {data} = await this._client.mutate<UpdateUserMutation,
+      UpdateUserMutationVariables>({
+      mutation: UPDATE_USER_MUTATION,
+      variables: {updateUserInput: update},
+    });
+    return data?.updateUser!;
   }
 
   async getCurrentUser(): Promise<User> {
     const {data: {me}} = await this._client.query<MeQuery>({
       query: ME_QUERY
     });
-    return {
-      id: me.id,
-      username: me.username,
-      name: me.name,
-      photoURL: me.photoURL,
-    };
+    return me;
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {

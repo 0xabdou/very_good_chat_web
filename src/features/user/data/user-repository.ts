@@ -1,6 +1,6 @@
 import {Either, left, right} from "fp-ts/Either";
 import UserError from "../types/user-error";
-import User, {UserCreation} from "../types/user";
+import User, {UserCreation, UserUpdate} from "../types/user";
 import {IUserAPI} from "./sources/user-api";
 import {isApolloError} from "@apollo/client";
 
@@ -8,6 +8,8 @@ export interface IUserRepository {
   getCurrentUser(): Promise<Either<UserError, User>>;
 
   createUser(creation: UserCreation): Promise<Either<UserError, User>>;
+
+  updateUser(update: UserUpdate): Promise<Either<UserError, User>>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -33,6 +35,20 @@ export class UserRepository implements IUserRepository {
         throw error;
       }
       return this._userApi.createUser(creation);
+    });
+  }
+
+  updateUser(update: UserUpdate): Promise<Either<UserError, User>> {
+    return this.leftOrRight(async () => {
+      if (update.username) {
+        const taken = await this._userApi.isUsernameTaken(update.username);
+        if (taken) {
+          const error = new Error('This username is taken');
+          error.name = UserRepository.ERROR_USERNAME_TAKEN;
+          throw error;
+        }
+      }
+      return this._userApi.updateUser(update);
     });
   }
 

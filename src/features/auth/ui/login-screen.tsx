@@ -5,7 +5,7 @@ import {Button, createStyles, Icon, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {PulseLoader} from "react-spinners";
 import {centeredLayout, nonDraggable, wrapper} from "../../../styles/shared";
-import ErrorSnackbar from "../../../components/error-snackbar";
+import {ErrorSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../auth-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 
@@ -37,18 +37,21 @@ const LoginScreen = () => {
   return (
     <div className={classes.wrapper} data-testid='login-screen'>
       <div className={classes.layout}>
-        <img className={classes.logo} src={'/images/vgc_transparent_black.png'} alt='logo'/>
+        <img className={classes.logo} src={'/images/vgc_transparent_black.png'}
+             alt='logo'/>
         <div className={classes.buttonWrapper}>
           {!state.loading && <Button
             className={classes.loginButton}
             color='primary'
             onClick={login}
             disabled={state.loading}
-            startIcon={<Icon className={'fa fa-google ' + classes.loginButtonIcon}/>}
+            startIcon={<Icon
+              className={'fa fa-google ' + classes.loginButtonIcon}/>}
             variant='contained'>
             Login with Google
           </Button>}
-          {state.loading && <span data-testid='login-spinner'><PulseLoader/></span>}
+          {state.loading &&
+          <span data-testid='login-spinner'><PulseLoader/></span>}
         </div>
         <ErrorSnackbar
           currentError={state.authError}

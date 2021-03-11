@@ -78,9 +78,11 @@ const useStyles = makeStyles({
   },
   username: {
     fontSize: '1rem',
+    textAlign: 'center',
   },
   name: {
     fontSize: '1.3rem',
+    textAlign: 'center',
   },
 });
 

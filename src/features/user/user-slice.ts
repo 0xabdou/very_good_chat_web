@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import User, {UserCreation} from "./types/user";
+import User, {UserCreation, UserUpdate} from "./types/user";
 import {ThunkApi} from "../../store/store";
 import UserError from "./types/user-error";
 import {isRight} from "fp-ts/Either";
@@ -7,14 +7,14 @@ import {isRight} from "fp-ts/Either";
 export type UserState = {
   initialized: boolean,
   currentUser: User | null,
-  creatingUser: boolean,
+  updatingUser: boolean,
   error: UserError | null,
 }
 
 const initialState: UserState = {
   initialized: false,
   currentUser: null,
-  creatingUser: false,
+  updatingUser: false,
   error: null,
 };
 
@@ -40,6 +40,17 @@ const createUser = createAsyncThunk<User, UserCreation, ThunkApi<UserError>>(
   },
 );
 
+const updateUser= createAsyncThunk<User, UserUpdate, ThunkApi<UserError>>(
+  'user/updateUser',
+  async (update, thunkApi) => {
+    const result = await thunkApi.extra.userRepository.updateUser(update);
+    if (isRight(result)) {
+      return result.right;
+    }
+    return thunkApi.rejectWithValue(result.left);
+  },
+);
+
 const handleRejected = (state: UserState, error: UserError | undefined) => {
   console.log('REJECTED WITH: ', error);
   if (error != undefined) {
@@ -55,6 +66,7 @@ const userSlice = createSlice({
     resetUser: (_) => initialState,
   },
   extraReducers: builder => {
+    // getCurrentUser
     builder
       .addCase(getCurrentUser.pending, state => {
         state.error = null;
@@ -70,22 +82,41 @@ const userSlice = createSlice({
         } else
           handleRejected(state, action.payload);
       });
+    // createUser
     builder
       .addCase(createUser.pending, state => {
-        state.creatingUser = true;
+        state.updatingUser = true;
         state.error = null;
       })
       .addCase(createUser.fulfilled, (state, action) => {
         state.currentUser = action.payload;
-        state.creatingUser = false;
-        state.error = null;
+        state.updatingUser = false;
       })
       .addCase(createUser.rejected, (state, action) => {
         handleRejected(state, action.payload);
-        state.creatingUser = false;
+        state.updatingUser = false;
+      });
+    // createUser
+    builder
+      .addCase(updateUser.pending, state => {
+        state.updatingUser = true;
+        state.error = null;
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.updatingUser = false;
+        state.currentUser = action.payload;
+      })
+      .addCase(updateUser.rejected, (state, action) => {
+        handleRejected(state, action.payload);
+        state.updatingUser = false;
       });
   },
 });
 
 export default userSlice.reducer;
-export const userActions = {getCurrentUser, createUser, ...userSlice.actions};
+export const userActions = {
+  getCurrentUser,
+  createUser,
+  updateUser,
+  ...userSlice.actions
+};

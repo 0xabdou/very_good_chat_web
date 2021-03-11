@@ -1,15 +1,20 @@
 import {IUserAPI} from "../../../../src/features/user/data/sources/user-api";
-import {instance, mock, reset, verify, when} from "ts-mockito";
+import {anything, instance, mock, reset, verify, when} from "ts-mockito";
 import {
   IUserRepository,
   UserRepository
 } from "../../../../src/features/user/data/user-repository";
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {left, right} from "fp-ts/Either";
-import {mockUser, mockUserCreation} from "../../../mock-objects";
+import {
+  mockUser,
+  mockUserCreation,
+  mockUserUpdate
+} from "../../../mock-objects";
 import {ApolloError} from "@apollo/client";
 import UserError from "../../../../src/features/user/types/user-error";
 import {GraphQLError} from "graphql";
+import {UserUpdate} from "../../../../src/features/user/types/user";
 
 const MockUserApi = mock<IUserAPI>();
 const userRepo: IUserRepository = new UserRepository(instance(MockUserApi));
@@ -73,7 +78,6 @@ describe('getCurrentUser()', () => {
 });
 
 describe('createUser()', () => {
-
   beforeAll(() => {
     when(MockUserApi.isUsernameTaken(mockUserCreation.username))
       .thenResolve(false);
@@ -102,6 +106,52 @@ describe('createUser()', () => {
       const result = await userRepo.createUser(mockUserCreation);
       expect(result).toStrictEqual(right(mockUser));
       verify(MockUserApi.createUser(mockUserCreation)).once();
+    }
+  );
+});
+
+describe('updateUser()', () => {
+  beforeEach(() => {
+    when(MockUserApi.isUsernameTaken(anything()))
+      .thenResolve(false);
+    when(MockUserApi.updateUser(anything())).thenResolve(mockUser);
+  });
+
+  it('should not check username existence if it was not there', async () => {
+    // arrange
+    const update :UserUpdate= {
+      ...mockUserUpdate,
+      username: undefined,
+    };
+    // act
+    await userRepo.updateUser(update);
+    // assert
+    verify(MockUserApi.isUsernameTaken(anything())).never();
+  });
+
+  it('should check username existence if there is one', async () => {
+    // act
+    await userRepo.updateUser(mockUserUpdate);
+    // assert
+    verify(MockUserApi.isUsernameTaken(mockUserUpdate.username!)).once();
+  });
+
+  it('should return usernameTaken error if the username is taken', async () => {
+    // arrange
+    when(MockUserApi.isUsernameTaken(mockUserCreation.username))
+      .thenResolve(true);
+    // act
+    const result = await userRepo.updateUser(mockUserUpdate);
+    // assert
+    expect(result).toStrictEqual(left(UserError.usernameTaken));
+  });
+
+  it('should return a user on success', async () => {
+      // act
+      const result = await userRepo.updateUser(mockUserUpdate);
+      // assert
+      expect(result).toStrictEqual(right(mockUser));
+      verify(MockUserApi.updateUser(mockUserUpdate)).once();
     }
   );
 });

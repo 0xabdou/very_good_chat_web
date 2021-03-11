@@ -11,4 +11,12 @@ export type UserCreation = {
   photo?: File,
 };
 
+export type UserUpdate= {
+  username?: string,
+  name?: string,
+  deleteName?: boolean,
+  photo?: File,
+  deletePhoto?: boolean,
+};
+
 export default User;

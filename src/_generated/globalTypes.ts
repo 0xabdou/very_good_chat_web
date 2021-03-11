@@ -17,6 +17,14 @@ export interface UserCreation {
   photo?: any | null;
 }
 
+export interface UserUpdate {
+  username?: string | null;
+  name?: string | null;
+  deleteName?: boolean | null;
+  photo?: any | null;
+  deletePhoto?: boolean | null;
+}
+
 //==============================================================
 // END Enums and Input Objects
 //==============================================================

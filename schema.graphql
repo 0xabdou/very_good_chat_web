@@ -18,6 +18,7 @@ type LoginResponse {
 type Mutation {
     loginWithGoogle(input: LoginInput!): LoginResponse!
     register(input: UserCreation!): User!
+    updateUser(input: UserUpdate!): User!
 }
 
 type Query {
@@ -40,6 +41,14 @@ input UserCreation {
     name: String
     photo: Upload
     username: String!
+}
+
+input UserUpdate {
+    deleteName: Boolean
+    deletePhoto: Boolean
+    name: String
+    photo: Upload
+    username: String
 }
 
 

@@ -12,7 +12,7 @@ const TopBar = ({children}: TopBarProps) => {
   const classes = useStyles();
 
   return (
-    <AppBar className={classes.appBar} position="static" elevation={0}>
+    <AppBar className={classes.appBar} position="absolute" elevation={0}>
       <Toolbar className={classes.toolBar}>
         {children}
       </Toolbar>
@@ -30,7 +30,7 @@ const useStyles = makeStyles({
   }
 );
 
-export const useTopBarStyles= makeStyles((theme: Theme) =>
+export const useTopBarStyles = makeStyles((theme: Theme) =>
   createStyles({
     wrapper: wrapper,
     leading: {

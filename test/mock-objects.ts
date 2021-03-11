@@ -1,4 +1,4 @@
-import User, {UserCreation} from "../src/features/user/types/user";
+import User, {UserCreation, UserUpdate} from "../src/features/user/types/user";
 import {instance, mock} from "ts-mockito";
 import {AppDispatch, AppState} from "../src/store/store";
 import createMockStore from "redux-mock-store";
@@ -26,7 +26,7 @@ export const initialUserState: UserState = {
   initialized: false,
   currentUser: null,
   error: null,
-  creatingUser: false,
+  updatingUser: false,
 };
 
 export const mockUser: User = {
@@ -38,6 +38,12 @@ export const mockUser: User = {
 
 export const mockUserCreation: UserCreation = {
   username: 'username',
+  photo: instance(MockFile),
+};
+
+export const mockUserUpdate : UserUpdate= {
+  username: 'username',
+  deleteName: true,
   photo: instance(MockFile),
 };
 
@@ -59,11 +65,13 @@ export const getMockAuthActions = () => ({
 export const mockUserActionObjects = {
   getCurrentUser: {type: 'getCurrentUser'},
   createUser: {type: 'createUser'},
+  updateUser: {type: 'updateUser'},
   resetUser: {type: 'resetUser'},
 };
 
 export const getMockUserActions = () => ({
   getCurrentUser: jest.fn(() => mockUserActionObjects.getCurrentUser),
   createUser: jest.fn(() => mockUserActionObjects.createUser),
+  updateUser: jest.fn(() => mockUserActionObjects.updateUser),
   resetUser: jest.fn(() => mockUserActionObjects.resetUser),
 }) as unknown as typeof userActions;
