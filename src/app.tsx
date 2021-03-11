@@ -10,6 +10,7 @@ import {StylesProvider, ThemeProvider} from "@material-ui/styles";
 import {unstable_createMuiStrictModeTheme as createMuiTheme} from "@material-ui/core";
 import PhotoUtilsProvider from "./utils/photo-utils";
 import RootScreen from "./features/auth/ui/root-screen";
+import {BrowserRouter} from "react-router-dom";
 
 
 const App = () => {
@@ -21,15 +22,17 @@ const App = () => {
   return (
     <>
       {ready &&
-      <StylesProvider injectFirst>
-        <ThemeProvider theme={theme}>
-          <PhotoUtilsProvider>
-            <Provider store={sl.get<AppStore>(TYPES.AppStore)}>
-              <RootScreen/>
-            </Provider>
-          </PhotoUtilsProvider>
-        </ThemeProvider>
-      </StylesProvider>
+      <BrowserRouter>
+        <StylesProvider injectFirst>
+          <ThemeProvider theme={theme}>
+            <PhotoUtilsProvider>
+              <Provider store={sl.get<AppStore>(TYPES.AppStore)}>
+                <RootScreen/>
+              </Provider>
+            </PhotoUtilsProvider>
+          </ThemeProvider>
+        </StylesProvider>
+      </BrowserRouter>
       }
       {!ready && <div role='splash'/>}
     </>

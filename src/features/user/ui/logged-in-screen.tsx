@@ -7,6 +7,9 @@ import {useUserActions} from "../user-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import RetryPage from "../../../components/retry-page";
 import FullscreenLoader from "../../../components/fullscreen-loader";
+import {Route, Switch} from "react-router-dom";
+import ProfileScreen from "./profile-screen";
+import EditProfileScreen from "./edit-profile-screen";
 
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.user);
@@ -32,7 +35,6 @@ const LoggedInScreen = () => {
   const onRetry = useCallback(() => {
     dispatch((getCurrentUser()));
   }, []);
-
   let child: React.ReactNode;
   if (!state.initialized) {
     if (state.error != null)
@@ -43,7 +45,19 @@ const LoggedInScreen = () => {
     if (state.currentUser == null)
       child = (<RegistrationScreen/>);
     else
-      child = (<MainScreen/>);
+      child = (
+        <Switch>
+          <Route path='/profile'>
+            <ProfileScreen/>
+          </Route>
+          <Route path='/edit-profile'>
+            <EditProfileScreen/>
+          </Route>
+          <Route path='/'>
+            <MainScreen/>
+          </Route>
+        </Switch>
+      );
   }
   return (
     <div className={classes.root} data-testid='logged-in-screen'>
