@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect} from "react";
 import MainScreen from "./main-screen";
-import RegistrationScreen from "./registraion-screen";
+import ProfileUpdatingScreen from "./profile-updating-screen";
 import {makeStyles} from "@material-ui/core";
 import UserError from "../types/user-error";
 import {useUserActions} from "../user-actions-context";
@@ -9,10 +9,11 @@ import RetryPage from "../../../components/retry-page";
 import FullscreenLoader from "../../../components/fullscreen-loader";
 import {Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
-import EditProfileScreen from "./edit-profile-screen";
+
 
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.user);
+  const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
   const {getCurrentUser} = useUserActions();
 
@@ -42,16 +43,26 @@ const LoggedInScreen = () => {
     else
       child = <FullscreenLoader/>;
   } else {
-    if (state.currentUser == null)
-      child = (<RegistrationScreen/>);
-    else
+    if (state.currentUser == null) {
+      child = (
+        <ProfileUpdatingScreen
+          registering
+          initialName={authUser?.displayName ?? undefined}
+          initialPhotoURL={authUser?.photoURL ?? undefined}
+        />
+      );
+    } else
       child = (
         <Switch>
           <Route path='/profile'>
             <ProfileScreen/>
           </Route>
           <Route path='/edit-profile'>
-            <EditProfileScreen/>
+            <ProfileUpdatingScreen
+              initialUsername={state.currentUser.username}
+              initialName={state.currentUser.name ?? undefined}
+              initialPhotoURL={state.currentUser.photoURL ?? undefined}
+            />
           </Route>
           <Route path='/'>
             <MainScreen/>

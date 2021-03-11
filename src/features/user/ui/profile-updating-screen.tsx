@@ -1,4 +1,4 @@
-import React, {ChangeEvent, useCallback, useEffect, useState} from "react";
+import React, {ChangeEvent, useCallback, useState} from "react";
 import ProfilePhotoPicker from "./components/profile-photo-picker";
 import PhotoCropper from "./components/photo-cropper";
 import {
@@ -37,22 +37,29 @@ const validators = {
   }
 };
 
-const RegistrationScreen = () => {
+type ProfileUpdatingScreenProps = {
+  registering?: boolean,
+  initialUsername?: string,
+  initialName?: string,
+  initialPhotoURL?: string,
+}
+
+const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const defaultSrc = '/images/default-pp.png';
 
   // Local state
   // Current chosen profile photo
-  const [src, setSrc] = useState<string>();
+  const [src, setSrc] = useState(props.initialPhotoURL);
   // Photo being cropped
   const [cropSrc, setCropSrc] = useState<string>();
   // Set this to true to open the photo cropper fullscreen dialog
   const [cropping, setCropping] = useState(false);
   // Chosen username
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(props.initialUsername ?? '');
   // Chosen username error (could be invalid or taken)
   const [usernameError, setUsernameError] = useState<string>();
   // Chosen name
-  const [name, setName] = useState('');
+  const [name, setName] = useState(props.initialName ?? '');
   // Chosen name error
   const [nameError, setNameError] = useState<string>();
   // Set to true to show the logout alert dialog
@@ -60,20 +67,12 @@ const RegistrationScreen = () => {
 
   // Redux hooks
   const state = useAppSelector(state => state.user);
-  const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
   const {signOut} = useAuthActions();
   const {createUser, resetUser} = useUserActions();
 
   // photo utils
   const photoUtils = usePhotoUtils();
-
-  useEffect(() => {
-    if (authUser) {
-      setSrc(authUser.photoURL ?? undefined);
-      setName(authUser.displayName ?? '');
-    }
-  }, []);
 
   const stringifyError = useCallback((e: UserError | null) => {
     switch (e) {
@@ -170,24 +169,29 @@ const RegistrationScreen = () => {
       photo = await photoUtils.urlToPhoto(src);
     }
 
-    dispatch(createUser({
-      username,
-      name,
-      photo,
-    }));
+    if (props.registering) {
+      dispatch(createUser({
+        username,
+        name,
+        photo,
+      }));
+    } else {
+      // TODO: update user
+    }
+
   }, [username, name, src]);
 
   const classes = useStyles();
 
   return (
     <div className={classes.wrapper} data-testid='registration-screen'>
-      <IconButton
+      {props.registering && <IconButton
         className={classes.logoutButton}
         onClick={askForLogoutConfirmation}
         data-testid='logout-button'
       >
         <Icon>logout</Icon>
-      </IconButton>
+      </IconButton>}
       <div className={classes.layout}>
         <ProfilePhotoPicker
           defaultSrc={defaultSrc}
@@ -284,4 +288,4 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   }
 }));
 
-export default RegistrationScreen;
+export default ProfileUpdatingScreen;

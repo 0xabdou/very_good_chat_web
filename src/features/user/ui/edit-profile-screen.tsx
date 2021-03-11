@@ -1,8 +1,8 @@
 import React from 'react';
-import RegistrationScreen from "./registraion-screen";
+import ProfileUpdatingScreen from "./profile-updating-screen";
 
 const EditProfileScreen = () => {
-  return <RegistrationScreen/>;
+  return <ProfileUpdatingScreen/>;
 }
 
 export default EditProfileScreen;

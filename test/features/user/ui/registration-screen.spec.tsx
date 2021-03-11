@@ -20,8 +20,8 @@ import {Provider} from "react-redux";
 import {UserActionsContext} from "../../../../src/features/user/user-actions-context";
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
 import {beforeEach, describe, test} from "@jest/globals";
-import RegistrationScreen
-  from "../../../../src/features/user/ui/registraion-screen";
+import ProfileUpdatingScreen
+  from "../../../../src/features/user/ui/profile-updating-screen";
 import {
   IPhotoUtils,
   PhotoUtilsContext
@@ -47,7 +47,7 @@ const renderComponent = (mockStore: AppStore) => {
       <Provider store={mockStore}>
         <AuthActionsContext.Provider value={mockAuthActions}>
           <UserActionsContext.Provider value={mockUserActions}>
-            <RegistrationScreen/>
+            <ProfileUpdatingScreen/>
           </UserActionsContext.Provider>
         </AuthActionsContext.Provider>
       </Provider>
