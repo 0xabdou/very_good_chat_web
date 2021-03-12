@@ -21,7 +21,6 @@ export const wrapper: CSSProperties = {
   display: 'flex',
   height: '100%',
   overflowY: 'auto',
-  ...nonSelectable
 };
 
 export const centeredLayout: CSSProperties = {

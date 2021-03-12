@@ -14,7 +14,7 @@ import FullScreenDialog from "./components/fullscreen-dialog";
 import AlertDialog from "./components/alert-dialog";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import UserError from "../types/user-error";
-import {centeredLayout, wrapper} from "../../../styles/shared";
+import {centeredLayout, nonSelectable, wrapper} from "../../../styles/shared";
 import {ErrorSnackbar, SuccessSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../../auth/auth-actions-context";
 import {useUserActions} from "../user-actions-context";
@@ -282,7 +282,10 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
 };
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-  wrapper: wrapper,
+  wrapper: {
+    ...wrapper,
+    ...nonSelectable,
+  },
   layout: centeredLayout,
   form: {
     display: 'flex',

@@ -4,7 +4,12 @@ import AuthError from "../types/auth-error";
 import {Button, createStyles, Icon, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {PulseLoader} from "react-spinners";
-import {centeredLayout, nonDraggable, wrapper} from "../../../styles/shared";
+import {
+  centeredLayout,
+  nonDraggable,
+  nonSelectable,
+  wrapper
+} from "../../../styles/shared";
 import {ErrorSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../auth-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
@@ -64,7 +69,10 @@ const LoginScreen = () => {
 };
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-  wrapper: wrapper,
+  wrapper: {
+    ...wrapper,
+    ...nonSelectable,
+  },
   layout: centeredLayout,
   logo: {
     height: '250px',

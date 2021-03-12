@@ -1,7 +1,7 @@
 import React from "react";
 import {AppBar, createStyles, makeStyles, Toolbar} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import {wrapper} from "../../../../styles/shared";
+import {nonSelectable} from "../../../../styles/shared";
 
 type TopBarProps = {
   children: React.ReactNode[],
@@ -26,13 +26,13 @@ const useStyles = makeStyles({
     },
     toolBar: {
       backgroundColor: 'white',
+      ...nonSelectable,
     },
   }
 );
 
 export const useTopBarStyles = makeStyles((theme: Theme) =>
   createStyles({
-    wrapper: wrapper,
     leading: {
       marginRight: theme.spacing(2),
     },
