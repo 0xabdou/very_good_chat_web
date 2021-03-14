@@ -38,3 +38,14 @@ export const USERNAME_EXISTENCE_QUERY = gql`
         checkUsernameExistence(username: $username)
     }
 `;
+
+export const FIND_USERS_QUERY = gql`
+    query FindUsersQuery($findUsersSearchQuery: String!) {
+        findUsers(searchQuery: $findUsersSearchQuery) {
+            id
+            name
+            photoURL
+            username
+        }
+    }
+`;

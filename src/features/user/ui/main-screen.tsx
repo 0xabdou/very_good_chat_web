@@ -1,6 +1,12 @@
 import React, {useCallback, useContext, useState} from "react";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
-import {Avatar, Icon, IconButton, Typography} from "@material-ui/core";
+import {
+  Avatar,
+  Icon,
+  IconButton,
+  makeStyles,
+  Typography
+} from "@material-ui/core";
 import MenuDialog, {MenuDialogItemProps} from "./components/menu-dialog";
 import {useHistory} from "react-router-dom";
 import {useSelector} from "react-redux";
@@ -8,8 +14,13 @@ import {AppState} from "../../../store/store";
 import {AuthActionsContext} from "../../auth/auth-actions-context";
 import {UserActionsContext} from "../user-actions-context";
 import {useAppDispatch} from "../../../store/hooks";
+import {wrapper} from "../../../styles/shared";
+import SearchTextField from "../../search/ui/components/search-text-field";
+import SearchScreen from "../../search/ui/search-screen";
+import SearchActionsProvider from "../../search/search-actions-context";
 
 const MainScreen = () => {
+  const [searching, setSearching] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const history = useHistory();
   const state = useSelector((state: AppState) => state.user);
@@ -32,30 +43,39 @@ const MainScreen = () => {
     dispatch(resetUser());
   };
 
+  const beginSearch = useCallback(() => {
+    setSearching(true);
+  }, []);
+
+  const endSearch = useCallback(() => {
+    setSearching(false);
+  }, []);
+
   const menuItems: MenuDialogItemProps[] = [
     {icon: 'person', label: 'profile', onClick: goToProfile},
     {icon: 'logout', label: 'sign out', onClick: logout},
   ];
 
-  const classes = useTopBarStyles();
+  const topBarClasses = useTopBarStyles();
+  const classes = useStyles();
 
   return (
     <div className={classes.wrapper} data-testid='main-screen'>
       <TopBar>
         <Avatar
-          className={classes.leading}
+          className={topBarClasses.leading}
           src={state.currentUser.photoURL ?? undefined}
           alt='profile photo'
         />
-        <Typography variant="h6" className={classes.title}>
+        <Typography variant="h6" className={topBarClasses.title}>
           Chats
         </Typography>
         <IconButton
-          className={classes.actionButton}
+          className={topBarClasses.actionButton}
           onClick={() => setMenuOpen(true)}>
           <Icon>more_horiz</Icon>
         </IconButton>
-        <IconButton className={classes.actionButton}>
+        <IconButton className={topBarClasses.actionButton}>
           <Icon>create</Icon>
         </IconButton>
         <MenuDialog
@@ -64,8 +84,44 @@ const MainScreen = () => {
           onClose={() => setMenuOpen(false)}
         />
       </TopBar>
+      <SearchTextField
+        onFocus={beginSearch}
+        onBack={endSearch}
+      />
+      {searching && <SearchScreen/>}
+      {!searching && <ChatsScreen/>}
     </div>
   );
 };
+
+const ChatsScreen = () => {
+  const classes = useStyles();
+  return (
+    <SearchActionsProvider>
+      <div className={classes.full}>Chatting</div>
+    </SearchActionsProvider>
+  );
+};
+
+const useStyles = makeStyles({
+  wrapper: {
+    ...wrapper,
+    flexDirection: 'column',
+    paddingTop: '70px',
+  },
+  spacer: {
+    height: '12%',
+  },
+  full: {
+    marginTop: '1rem',
+    background: 'red',
+    flexGrow: 1,
+    overflowY: 'auto',
+  },
+  inner: {
+    background: 'blue',
+    height: '1000px',
+  }
+});
 
 export default MainScreen;

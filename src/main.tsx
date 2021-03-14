@@ -3,7 +3,7 @@ import './index.css';
 import App from './app';
 import React from 'react';
 
-process.env = import.meta.env as NodeJS.ProcessEnv;
+viteEnv = import.meta.env;
 
 ReactDOM.render(
   <React.StrictMode>

@@ -29,7 +29,7 @@ const initialState: AuthState = {
 const getAccessToken = createAsyncThunk<string, void, ThunkApi<AuthError>>(
   'auth/getAccessToken',
   async (_, thunkAPI) => {
-    const result = await thunkAPI.extra.authRepository.getAccessToken();
+    const result = await thunkAPI.extra.authRepo.getAccessToken();
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
   },
@@ -38,7 +38,7 @@ const getAccessToken = createAsyncThunk<string, void, ThunkApi<AuthError>>(
 const signInWithGoogle = createAsyncThunk<LoginResult, void, ThunkApi<AuthError>>(
   'auth/signInWithGoogle',
   async (_, thunkApi) => {
-    const result = await thunkApi.extra.authRepository.signInWithGoogle();
+    const result = await thunkApi.extra.authRepo.signInWithGoogle();
     if (isRight(result)) {
       return result.right;
     }
@@ -49,7 +49,7 @@ const signInWithGoogle = createAsyncThunk<LoginResult, void, ThunkApi<AuthError>
 const signOut = createAsyncThunk<null, void, ThunkApi<AuthError>>(
   'auth/signOut',
   async (_, thunkApi) => {
-    const result = await thunkApi.extra.authRepository.signOut();
+    const result = await thunkApi.extra.authRepo.signOut();
     if (isRight(result)) {
       return result.right;
     }

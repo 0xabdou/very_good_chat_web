@@ -1,4 +1,4 @@
-import {GoogleAuth} from "./sources/google-auth";
+import GoogleAuth from "./sources/google-auth";
 import {Either, left, right} from "fp-ts/Either";
 import LoginResult from "../types/login-result";
 import {IAuthAPI} from "./sources/auth-api";

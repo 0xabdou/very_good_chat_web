@@ -2,6 +2,7 @@ import User, {UserCreation, UserUpdate} from "../../types/user";
 import {ApolloClient} from "@apollo/client";
 import {MeQuery} from "../../../../_generated/MeQuery";
 import {
+  FIND_USERS_QUERY,
   ME_QUERY,
   REGISTER_MUTATION,
   UPDATE_USER_MUTATION,
@@ -19,6 +20,10 @@ import {
   UpdateUserMutation,
   UpdateUserMutationVariables
 } from "../../../../_generated/UpdateUserMutation";
+import {
+  FindUsersQuery,
+  FindUsersQueryVariables
+} from "../../../../_generated/FindUsersQuery";
 
 export interface IUserAPI {
   getCurrentUser(): Promise<User>;
@@ -28,6 +33,8 @@ export interface IUserAPI {
   updateUser(update: UserUpdate): Promise<User>;
 
   isUsernameTaken(username: string): Promise<boolean>;
+
+  findUsers(searchQuery: string) : Promise<User[]>
 }
 
 export class UserAPI implements IUserAPI {
@@ -68,7 +75,15 @@ export class UserAPI implements IUserAPI {
       query: USERNAME_EXISTENCE_QUERY,
       variables: {username}
     });
+    return data.checkUsernameExistence;
+  }
 
-    return data.checkUsernameExistence!;
+  async findUsers(searchQuery: string) : Promise<User[]> {
+    const {data} = await this._client.query<FindUsersQuery,
+      FindUsersQueryVariables>({
+      query: FIND_USERS_QUERY,
+      variables: {findUsersSearchQuery: searchQuery}
+    });
+    return data.findUsers;
   }
 }

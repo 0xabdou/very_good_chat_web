@@ -1,11 +1,14 @@
 import {combineReducers, configureStore, getDefaultMiddleware} from "@reduxjs/toolkit";
 import authReducer from '../features/auth/auth-slice';
 import userReducer from '../features/user/user-slice';
+import searchReducer from '../features/search/search-slice';
+
 import StoreExtraArg from "./store-extra-arg";
 
 const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
+  search: searchReducer,
 });
 
 const createStore = (services: StoreExtraArg) => {

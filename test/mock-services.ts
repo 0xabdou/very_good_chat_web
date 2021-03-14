@@ -2,15 +2,18 @@ import {instance, mock, reset} from "ts-mockito";
 import IAuthRepository from "../src/features/auth/data/auth-repository";
 import {IUserRepository} from "../src/features/user/data/user-repository";
 import StoreExtraArg from "../src/store/store-extra-arg";
+import {ISearchRepository} from "../src/features/search/data/search-repository";
 
 const mocks: StoreExtraArg = {
-  authRepository: mock<IAuthRepository>(),
-  userRepository: mock<IUserRepository>(),
+  authRepo: mock<IAuthRepository>(),
+  userRepo: mock<IUserRepository>(),
+  searchRepo: mock<ISearchRepository>(),
 };
 
 const instances: StoreExtraArg = {
-  authRepository: instance(mocks.authRepository),
-  userRepository: instance(mocks.userRepository),
+  authRepo: instance(mocks.authRepo),
+  userRepo: instance(mocks.userRepo),
+  searchRepo: instance(mocks.searchRepo),
 };
 
 const mockServices = {

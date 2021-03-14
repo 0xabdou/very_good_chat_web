@@ -21,7 +21,7 @@ const initialState: UserState = {
 const getCurrentUser = createAsyncThunk<User | null, void, ThunkApi<UserError>>(
   'user/getCurrentUser',
   async (_, thunkApi) => {
-    const result = await thunkApi.extra.userRepository.getCurrentUser();
+    const result = await thunkApi.extra.userRepo.getCurrentUser();
     if (isRight(result)) {
       return result.right;
     }
@@ -32,7 +32,7 @@ const getCurrentUser = createAsyncThunk<User | null, void, ThunkApi<UserError>>(
 const createUser = createAsyncThunk<User, UserCreation, ThunkApi<UserError>>(
   'user/createUser',
   async (creation, thunkApi) => {
-    const result = await thunkApi.extra.userRepository.createUser(creation);
+    const result = await thunkApi.extra.userRepo.createUser(creation);
     if (isRight(result)) {
       return result.right;
     }
@@ -43,7 +43,7 @@ const createUser = createAsyncThunk<User, UserCreation, ThunkApi<UserError>>(
 const updateUser= createAsyncThunk<User, UserUpdate, ThunkApi<UserError>>(
   'user/updateUser',
   async (update, thunkApi) => {
-    const result = await thunkApi.extra.userRepository.updateUser(update);
+    const result = await thunkApi.extra.userRepo.updateUser(update);
     if (isRight(result)) {
       return result.right;
     }

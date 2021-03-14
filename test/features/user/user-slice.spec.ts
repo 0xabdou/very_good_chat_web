@@ -15,7 +15,7 @@ import User from "../../../src/features/user/types/user";
 import {AppStore} from "../../../src/store/store";
 
 
-const MockUserRepository = mockServices.mocks.userRepository;
+const MockUserRepository = mockServices.mocks.userRepo;
 const MockStore = getMockStore();
 const userError = UserError.general;
 let mockStore: AppStore;

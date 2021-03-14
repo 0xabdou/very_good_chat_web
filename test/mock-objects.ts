@@ -5,6 +5,7 @@ import createMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import {authActions, AuthState} from "../src/features/auth/auth-slice";
 import {userActions, UserState} from "../src/features/user/user-slice";
+import {searchActions} from "../src/features/search/search-slice";
 
 export const MockFile = mock<File>();
 
@@ -75,3 +76,11 @@ export const getMockUserActions = () => ({
   updateUser: jest.fn(() => mockUserActionObjects.updateUser),
   resetUser: jest.fn(() => mockUserActionObjects.resetUser),
 }) as unknown as typeof userActions;
+
+export const mockSearchActionObjects = {
+  searchForUsers: {type: 'searchForUsers'},
+};
+
+export const getMockSearchActions = () => ({
+  searchForUsers: jest.fn(() => mockSearchActionObjects.searchForUsers),
+}) as unknown as typeof searchActions;

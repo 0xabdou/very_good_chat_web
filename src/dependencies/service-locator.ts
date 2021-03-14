@@ -12,6 +12,10 @@ import {ApolloClient, ApolloLink, concat, InMemoryCache} from "@apollo/client";
 import {AuthAPI, IAuthAPI} from "../features/auth/data/sources/auth-api";
 import {createUploadLink} from 'apollo-upload-client';
 import axios, {AxiosInstance} from "axios";
+import {
+  ISearchRepository,
+  SearchRepository
+} from "../features/search/data/search-repository";
 
 
 type Dependencies = { [key in TYPES]?: any };
@@ -94,12 +98,18 @@ const initDependencies = async () => {
     TYPES.IUserRepository,
     new UserRepository(sl.get(TYPES.IUserApi))
   );
+  // Search
+  sl.register<ISearchRepository>(
+    TYPES.ISearchRepository,
+    new SearchRepository(sl.get(TYPES.IUserApi))
+  );
   // Redux
   sl.register<StoreExtraArg>(
     TYPES.StoreExtraArgs,
     {
-      authRepository: sl.get(TYPES.IAuthRepository),
-      userRepository: sl.get(TYPES.IUserRepository),
+      authRepo: sl.get(TYPES.IAuthRepository),
+      userRepo: sl.get(TYPES.IUserRepository),
+      searchRepo: sl.get(TYPES.ISearchRepository),
     },
   );
   sl.register(

@@ -23,6 +23,7 @@ type Mutation {
 
 type Query {
     checkUsernameExistence(username: String!): Boolean!
+    findUsers(searchQuery: String!): [User!]!
     me: User!
 }
 

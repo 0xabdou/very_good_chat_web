@@ -14,6 +14,7 @@ import {UserActionsContext} from "../../../../src/features/user/user-actions-con
 import {UserState} from "../../../../src/features/user/user-slice";
 import UserError from "../../../../src/features/user/types/user-error";
 import {MemoryRouter} from "react-router-dom";
+import {initialSearchState} from "../../../../src/features/search/search-slice";
 
 const mockUserActions = getMockUserActions();
 const MockStore = getMockStore();
@@ -27,6 +28,7 @@ const initialUserState: UserState = {
 const initialState = {
   user: initialUserState,
   auth: loggedInAuthState,
+  search: initialSearchState,
 } as AppState;
 
 const renderComponent = (mockStore: AppStore, path: string = '/') => {

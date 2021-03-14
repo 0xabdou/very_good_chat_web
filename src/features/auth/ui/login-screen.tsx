@@ -13,6 +13,7 @@ import {
 import {ErrorSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../auth-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import logoUrl from '../../../images/vgc_transparent_black.png';
 
 
 const LoginScreen = () => {
@@ -42,7 +43,7 @@ const LoginScreen = () => {
   return (
     <div className={classes.wrapper} data-testid='login-screen'>
       <div className={classes.layout}>
-        <img className={classes.logo} src={'/images/vgc_transparent_black.png'}
+        <img className={classes.logo} src={logoUrl}
              alt='logo'/>
         <div className={classes.buttonWrapper}>
           {!state.loading && <Button

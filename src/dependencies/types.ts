@@ -9,6 +9,8 @@ enum TYPES {
   // User
   IUserApi = 'IUserApi',
   IUserRepository = 'IUserRepository',
+  // Search
+  ISearchRepository = 'ISearchRepository',
   // Other
   StoreExtraArgs = 'StoreExtraArgs',
   AppStore = 'AppStore',

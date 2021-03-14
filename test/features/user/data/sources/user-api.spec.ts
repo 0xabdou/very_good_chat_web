@@ -1,4 +1,4 @@
-import {deepEqual, instance, mock, verify, when} from "ts-mockito";
+import {anything, deepEqual, instance, mock, verify, when} from "ts-mockito";
 import {ApolloClient, ApolloQueryResult} from "@apollo/client";
 import {
   IUserAPI,
@@ -10,6 +10,7 @@ import {
   RegisterMutationVariables
 } from "../../../../../src/_generated/RegisterMutation";
 import {
+  FIND_USERS_QUERY,
   ME_QUERY,
   REGISTER_MUTATION, UPDATE_USER_MUTATION,
   USERNAME_EXISTENCE_QUERY
@@ -28,6 +29,10 @@ import {
   UpdateUserMutation,
   UpdateUserMutationVariables
 } from "../../../../../src/_generated/UpdateUserMutation";
+import {
+  FindUsersQuery,
+  FindUsersQueryVariables
+} from "../../../../../src/_generated/FindUsersQuery";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const userAPI: IUserAPI = new UserAPI(instance(MockApolloClient));
@@ -125,5 +130,24 @@ describe('isUsernameTaken', () => {
     verify(MockApolloClient.query(
       deepEqual({query: USERNAME_EXISTENCE_QUERY, variables: {username}}))
     ).once();
+  });
+});
+
+describe('findUsers', () => {
+  it('should return a list of users', async () => {
+    // arrange
+    const searchQuery = 'search query';
+    when(MockApolloClient.query(anything())).thenResolve({
+      data: {
+        findUsers:[{__typename: "User", ...mockUser}]
+      }
+    } as ApolloQueryResult<FindUsersQuery>);
+    // act
+    const result = await userAPI.findUsers(searchQuery);
+    verify(MockApolloClient.query<FindUsersQuery, FindUsersQueryVariables>(deepEqual({
+      query: FIND_USERS_QUERY,
+      variables: {findUsersSearchQuery: searchQuery},
+    }))).once();
+    expect(result[0]).toMatchObject(mockUser);
   });
 });

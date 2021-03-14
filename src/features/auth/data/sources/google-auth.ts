@@ -4,7 +4,7 @@ export default class GoogleAuth {
     return new Promise<string>((resolve, reject) => {
       gapi.load('auth2', () => {
         gapi.auth2.init({
-          client_id: process.env.VITE_GOOGLE_CLIENT,
+          client_id: `${viteEnv.VITE_GOOGLE_CLIENT}`,
           scope: 'profile',
         }).then(async (ga) => {
           const x = await ga.signIn();
