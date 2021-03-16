@@ -7,6 +7,15 @@
 // START Enums and Input Objects
 //==============================================================
 
+export enum FriendshipStatus {
+  BLOCKED = "BLOCKED",
+  BLOCKING = "BLOCKING",
+  FRIENDS = "FRIENDS",
+  REQUEST_RECEIVED = "REQUEST_RECEIVED",
+  REQUEST_SENT = "REQUEST_SENT",
+  STRANGERS = "STRANGERS",
+}
+
 export interface LoginInput {
   token: string;
 }

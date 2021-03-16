@@ -1,16 +1,11 @@
 import React, {useCallback} from "react";
-import {
-  Avatar,
-  Icon,
-  IconButton,
-  makeStyles,
-  Typography
-} from "@material-ui/core";
+import {Icon, IconButton, makeStyles, Typography} from "@material-ui/core";
 import {centeredLayout, wrapper} from "../../../styles/shared";
 import {useAppSelector} from "../../../store/hooks";
 import FullscreenLoader from "../../../components/fullscreen-loader";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
 import {useHistory} from "react-router-dom";
+import CommonProfileInfo from "./components/common-profile-info";
 
 const ProfileScreen = () => {
   const userState = useAppSelector(state => state.user);
@@ -49,17 +44,7 @@ const ProfileScreen = () => {
           <Icon>settings</Icon>
         </IconButton>
       </TopBar>
-      <div className={classes.wrapper}>
-        <div className={classes.layout}>
-          <Avatar className={classes.photo} src={user.photoURL ?? undefined}/>
-          <Typography className={classes.username}>
-            @{user.username}
-          </Typography>
-          {user.name && <Typography className={classes.name}>
-            {user.name}
-          </Typography>}
-        </div>
-      </div>
+      <CommonProfileInfo user={user}/>
     </div>
   );
 };
@@ -71,19 +56,6 @@ const useStyles = makeStyles({
   },
   wrapper: wrapper,
   layout: centeredLayout,
-  photo: {
-    width: '150px',
-    height: '150px',
-    border: '1px solid black'
-  },
-  username: {
-    fontSize: '1rem',
-    textAlign: 'center',
-  },
-  name: {
-    fontSize: '1.3rem',
-    textAlign: 'center',
-  },
 });
 
 export default ProfileScreen;

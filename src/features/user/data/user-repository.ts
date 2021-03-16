@@ -72,6 +72,4 @@ export class UserRepository implements IUserRepository {
       return left(UserError.general);
     }
   }
-
-
 }

@@ -6,6 +6,10 @@ import thunk from "redux-thunk";
 import {authActions, AuthState} from "../src/features/auth/auth-slice";
 import {userActions, UserState} from "../src/features/user/user-slice";
 import {searchActions} from "../src/features/search/search-slice";
+import {
+  Friendship, FriendshipInfo,
+  FriendshipStatus
+} from "../src/features/friend/types/friendship";
 
 export const MockFile = mock<File>();
 
@@ -47,6 +51,16 @@ export const mockUserUpdate : UserUpdate= {
   deleteName: true,
   photo: instance(MockFile),
 };
+
+export const mockFriendship : Friendship = {
+  status: FriendshipStatus.FRIENDS,
+  date: new Date()
+}
+
+export const mockFriendshipInfo : FriendshipInfo = {
+  user: mockUser,
+  friendship: mockFriendship
+}
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);
 

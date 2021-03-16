@@ -12,9 +12,11 @@ import {FixedSizeList} from "react-window";
 import AutoSizer from 'react-virtualized-auto-sizer';
 import User from "../../user/types/user";
 import {SearchError} from "../types/search-error";
+import {useHistory} from "react-router-dom";
 
 const SearchScreen = () => {
   const state = useAppSelector(state => state.search);
+  const history = useHistory();
   const classes = useStyles();
 
   const itemKey = useCallback((index: number) => {
@@ -24,8 +26,7 @@ const SearchScreen = () => {
   }, [state.results]);
 
   const onItemClicked = useCallback((user: User) => {
-    // TODO: go to user profile
-    console.log(user);
+    history.push(`/u/${user.username}`);
   }, []);
 
   let child: React.ReactNode;

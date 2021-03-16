@@ -10,20 +10,36 @@ type AuthUser {
     photoUrl: String
 }
 
+type Friendship {
+    date: Timestamp!
+    status: FriendshipStatus!
+}
+
+type FriendshipInfo {
+    friendship: Friendship!
+    user: User!
+}
+
 type LoginResponse {
     accessToken: String!
     authUser: AuthUser!
 }
 
 type Mutation {
+    acceptFriendRequest(userID: String!): Friendship!
+    cancelFriendRequest(userID: String!): Friendship!
+    declineFriendRequest(userID: String!): Friendship!
     loginWithGoogle(input: LoginInput!): LoginResponse!
     register(input: UserCreation!): User!
+    sendFriendRequest(userID: String!): Friendship!
+    unfriend(userID: String!): Friendship!
     updateUser(input: UserUpdate!): User!
 }
 
 type Query {
     checkUsernameExistence(username: String!): Boolean!
     findUsers(searchQuery: String!): [User!]!
+    getFriendshipInfo(userID: String!): FriendshipInfo!
     me: User!
 }
 
@@ -32,6 +48,15 @@ type User {
     name: String
     photoURL: String
     username: String!
+}
+
+enum FriendshipStatus {
+    BLOCKED
+    BLOCKING
+    FRIENDS
+    REQUEST_RECEIVED
+    REQUEST_SENT
+    STRANGERS
 }
 
 input LoginInput {
@@ -52,6 +77,9 @@ input UserUpdate {
     username: String
 }
 
+
+"The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch."
+scalar Timestamp
 
 "The `Upload` scalar type represents a file upload."
 scalar Upload
