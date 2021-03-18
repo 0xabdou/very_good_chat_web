@@ -11,7 +11,9 @@ export interface FindUsersQuery_findUsers {
   __typename: "User";
   id: string;
   name: string | null;
-  photoURL: string | null;
+  photoURLSource: string | null;
+  photoURLMedium: string | null;
+  photoURLSmall: string | null;
   username: string;
 }
 

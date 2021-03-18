@@ -6,6 +6,7 @@ import {ApolloError} from "@apollo/client";
 import {left, right} from "fp-ts/Either";
 import FriendError from "../../../../src/features/friend/types/friend-error";
 import {mockFriendship, mockFriendshipInfo} from "../../../mock-objects";
+import {GetUserArgs} from "../../../../src/features/user/types/user";
 
 const MockFriendAPI = mock<IFriendAPI>();
 const friendRepo = new FriendRepository(instance(MockFriendAPI));
@@ -36,11 +37,14 @@ describe('getFriendshipInfo', async () => {
     // arrange
     when(MockFriendAPI.getFriendshipInfo(anything()))
       .thenResolve(mockFriendshipInfo);
+    const args : GetUserArgs  = {
+      userID
+    }
     // act
-    const result = await friendRepo.getFriendshipInfo(userID);
+    const result = await friendRepo.getFriendshipInfo(args);
     // assert
     expect(result).toStrictEqual(right(mockFriendshipInfo));
-    verify(MockFriendAPI.getFriendshipInfo(userID)).once();
+    verify(MockFriendAPI.getFriendshipInfo(args)).once();
   });
 });
 

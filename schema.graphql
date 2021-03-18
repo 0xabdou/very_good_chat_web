@@ -11,7 +11,7 @@ type AuthUser {
 }
 
 type Friendship {
-    date: Timestamp!
+    date: Timestamp
     status: FriendshipStatus!
 }
 
@@ -39,14 +39,16 @@ type Mutation {
 type Query {
     checkUsernameExistence(username: String!): Boolean!
     findUsers(searchQuery: String!): [User!]!
-    getFriendshipInfo(userID: String!): FriendshipInfo!
+    getFriendshipInfo(id: String, username: String): FriendshipInfo!
     me: User!
 }
 
 type User {
     id: String!
     name: String
-    photoURL: String
+    photoURLMedium: String
+    photoURLSmall: String
+    photoURLSource: String
     username: String!
 }
 

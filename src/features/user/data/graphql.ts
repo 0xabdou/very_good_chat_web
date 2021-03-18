@@ -5,8 +5,10 @@ export const ME_QUERY = gql`
         me {
             id
             name
-            photoURL
             username
+            photoURLSource
+            photoURLMedium
+            photoURLSmall
         }
     }
 `;
@@ -16,8 +18,10 @@ export const REGISTER_MUTATION = gql`
         register(input: $registerInput) {
             id
             name
-            photoURL
             username
+            photoURLSource
+            photoURLMedium
+            photoURLSmall
         }
     }
 `;
@@ -27,11 +31,13 @@ export const UPDATE_USER_MUTATION = gql`
         updateUser(input: $updateUserInput) {
             id
             name
-            photoURL
             username
+            photoURLSource
+            photoURLMedium
+            photoURLSmall
         }
     }
-`
+`;
 
 export const USERNAME_EXISTENCE_QUERY = gql`
     query UsernameExistenceQuery($username: String!) {
@@ -44,7 +50,9 @@ export const FIND_USERS_QUERY = gql`
         findUsers(searchQuery: $findUsersSearchQuery) {
             id
             name
-            photoURL
+            photoURLSource
+            photoURLMedium
+            photoURLSmall
             username
         }
     }

@@ -2,6 +2,7 @@ import {combineReducers, configureStore, getDefaultMiddleware} from "@reduxjs/to
 import authReducer from '../features/auth/auth-slice';
 import userReducer from '../features/user/user-slice';
 import searchReducer from '../features/search/search-slice';
+import friendProfileReducer from '../features/friend/friend-profile-slice';
 
 import StoreExtraArg from "./store-extra-arg";
 
@@ -9,6 +10,7 @@ const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   search: searchReducer,
+  friendProfile: friendProfileReducer
 });
 
 const createStore = (services: StoreExtraArg) => {

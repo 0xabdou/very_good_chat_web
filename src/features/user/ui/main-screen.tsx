@@ -64,7 +64,7 @@ const MainScreen = () => {
       <TopBar>
         <Avatar
           className={topBarClasses.leading}
-          src={state.currentUser.photoURL ?? undefined}
+          src={state.currentUser.photo?.small}
           alt='profile photo'
         />
         <Typography variant="h6" className={topBarClasses.title}>

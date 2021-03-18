@@ -69,13 +69,13 @@ it('should display results if there are any', async () => {
       id: 'id1',
       username: 'username1',
       name: null,
-      photoURL: null,
+      photo: null,
     },
     {
       id: 'id2',
       username: 'username2',
       name: null,
-      photoURL: null,
+      photo: null,
     }
   ];
   const state = {

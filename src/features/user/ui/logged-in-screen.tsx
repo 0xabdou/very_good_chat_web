@@ -9,7 +9,7 @@ import RetryPage from "../../../components/retry-page";
 import FullscreenLoader from "../../../components/fullscreen-loader";
 import {Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
-import UserProfileScreen from "./user-profile-screen";
+import UserProfileScreen from "../../friend/ui/user-profile-screen";
 
 
 const LoggedInScreen = () => {
@@ -62,7 +62,7 @@ const LoggedInScreen = () => {
             <ProfileUpdatingScreen
               initialUsername={state.currentUser.username}
               initialName={state.currentUser.name ?? undefined}
-              initialPhotoURL={state.currentUser.photoURL ?? undefined}
+              initialPhotoURL={state.currentUser.photo?.source}
             />
           </Route>
           <Route path='/u/:id'>

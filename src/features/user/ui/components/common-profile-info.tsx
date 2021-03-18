@@ -1,34 +1,35 @@
 import User from "../../types/user";
 import {Avatar, makeStyles, Typography} from "@material-ui/core";
 import React from "react";
-import {centeredLayout, wrapper} from "../../../../styles/shared";
 
 type CommonProfileInfoProps = {
   user: User
 }
 
-const CommonProfileInfo = ({user} : CommonProfileInfoProps) => {
+const CommonProfileInfo = ({user}: CommonProfileInfoProps) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper}>
-      <div className={classes.layout}>
-        <Avatar className={classes.photo} src={user.photoURL ?? undefined}/>
-        <Typography className={classes.username}>
-          @{user.username}
-        </Typography>
-        {user.name && <Typography className={classes.name}>
-          {user.name}
-        </Typography>}
-      </div>
+    <div className={classes.layout}>
+      <Avatar className={classes.photo} src={user.photo?.medium}/>
+      <Typography className={classes.username}>
+        @{user.username}
+      </Typography>
+      {user.name && <Typography className={classes.name}>
+        {user.name}
+      </Typography>}
     </div>
   );
 };
 
 
 const useStyles = makeStyles({
-  wrapper: wrapper,
-  layout: centeredLayout,
+  layout: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   photo: {
     width: '150px',
     height: '150px',

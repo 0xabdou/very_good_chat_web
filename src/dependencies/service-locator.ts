@@ -16,6 +16,8 @@ import {
   ISearchRepository,
   SearchRepository
 } from "../features/search/data/search-repository";
+import FriendRepository, {IFriendRepository} from "../features/friend/data/friend-repository";
+import FriendAPI, {IFriendAPI} from "../features/friend/data/sources/friend-api";
 
 
 type Dependencies = { [key in TYPES]?: any };
@@ -103,6 +105,15 @@ const initDependencies = async () => {
     TYPES.ISearchRepository,
     new SearchRepository(sl.get(TYPES.IUserApi))
   );
+  // Friend
+  sl.register<IFriendAPI>(
+    TYPES.IFriendAPI,
+    new FriendAPI(sl.get(TYPES.ApolloClient))
+  );
+  sl.register<IFriendRepository>(
+    TYPES.IFriendRepository,
+    new FriendRepository(sl.get(TYPES.IFriendAPI))
+  );
   // Redux
   sl.register<StoreExtraArg>(
     TYPES.StoreExtraArgs,
@@ -110,6 +121,7 @@ const initDependencies = async () => {
       authRepo: sl.get(TYPES.IAuthRepository),
       userRepo: sl.get(TYPES.IUserRepository),
       searchRepo: sl.get(TYPES.ISearchRepository),
+      friendRepo: sl.get(TYPES.IFriendRepository)
     },
   );
   sl.register(

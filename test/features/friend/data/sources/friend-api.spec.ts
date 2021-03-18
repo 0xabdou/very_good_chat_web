@@ -3,7 +3,11 @@ import {ApolloClient, ApolloQueryResult} from "@apollo/client";
 import FriendAPI
   from "../../../../../src/features/friend/data/sources/friend-api";
 import {GetFriendshipInfo} from "../../../../../src/_generated/GetFriendshipInfo";
-import {mockFriendship, mockFriendshipInfo} from "../../../../mock-objects";
+import {
+  mockFriendship,
+  mockFriendshipInfo,
+  mockGQLFriendshipInfo
+} from "../../../../mock-objects";
 import {
   ACCEPT_FRIEND_REQUEST_MUTATION,
   CANCEL_FRIEND_REQUEST_MUTATION,
@@ -17,6 +21,7 @@ import {AcceptFriendRequest} from "../../../../../src/_generated/AcceptFriendReq
 import {DeclineFriendRequest} from "../../../../../src/_generated/DeclineFriendRequest";
 import {CancelFriendRequest} from "../../../../../src/_generated/CancelFriendRequest";
 import {Unfriend} from "../../../../../src/_generated/Unfriend";
+import {GetUserArgs} from "../../../../../src/features/user/types/user";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const friendAPI = new FriendAPI(instance(MockApolloClient));
@@ -26,20 +31,19 @@ describe('getFriendshipInfo', () => {
   it('should return the friendship info', async () => {
     // arrange
     when(MockApolloClient.query(anything())).thenResolve({
-      data: {
-        getFriendshipInfo: {
-          __typename: 'FriendshipInfo',
-          ...mockFriendshipInfo
-        }
-      }
-    } as ApolloQueryResult<GetFriendshipInfo>);
+      data: {getFriendshipInfo: mockGQLFriendshipInfo}
+    } as unknown as ApolloQueryResult<GetFriendshipInfo>);
+    const args: GetUserArgs = {
+      username: 'sssssssss',
+      userID: 'ddddddddddd'
+    };
     // act
-    const result = await friendAPI.getFriendshipInfo(userID);
+    const result = await friendAPI.getFriendshipInfo(args);
     // assert
     expect(result).toMatchObject(mockFriendshipInfo);
     verify(MockApolloClient.query(deepEqual({
       query: GET_FRIENDSHIP_INFO_QUERY,
-      variables: {userID}
+      variables: args
     }))).once();
   });
 });

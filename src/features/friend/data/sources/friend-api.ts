@@ -28,9 +28,11 @@ import {
   CancelFriendRequestVariables
 } from "../../../../_generated/CancelFriendRequest";
 import {Unfriend, UnfriendVariables} from "../../../../_generated/Unfriend";
+import {GetUserArgs} from "../../../user/types/user";
+import {UserAPI} from "../../../user/data/sources/user-api";
 
 export interface IFriendAPI {
-  getFriendshipInfo(userID: string) : Promise<FriendshipInfo>;
+  getFriendshipInfo(args: GetUserArgs): Promise<FriendshipInfo>;
   sendFriendRequest(userID: string) : Promise<Friendship>;
   acceptFriendRequest(userID: string) : Promise<Friendship>;
   declineFriendRequest(userID: string) : Promise<Friendship>;
@@ -45,15 +47,17 @@ export default class  FriendAPI implements IFriendAPI {
     this._client = client;
   }
 
-  async getFriendshipInfo(userID: string): Promise<FriendshipInfo> {
+  async getFriendshipInfo(args: GetUserArgs): Promise<FriendshipInfo> {
     const {data} = await this._client.query<
       GetFriendshipInfo, GetFriendshipInfoVariables
       >({
       query: GET_FRIENDSHIP_INFO_QUERY,
-      variables: {userID}
+      variables: args
     });
-
-    return data.getFriendshipInfo;
+    return {
+      ...data.getFriendshipInfo,
+      user: UserAPI.parseUser(data.getFriendshipInfo.user)
+    };
   }
 
   async sendFriendRequest(userID: string) : Promise<Friendship> {

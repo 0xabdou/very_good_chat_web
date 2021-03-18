@@ -11,7 +11,7 @@ import { FriendshipStatus } from "./globalTypes";
 
 export interface SendFriendRequest_sendFriendRequest {
   __typename: "Friendship";
-  date: any;
+  date: any | null;
   status: FriendshipStatus;
 }
 

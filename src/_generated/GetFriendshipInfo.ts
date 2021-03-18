@@ -14,13 +14,15 @@ export interface GetFriendshipInfo_getFriendshipInfo_user {
   id: string;
   username: string;
   name: string | null;
-  photoURL: string | null;
+  photoURLSource: string | null;
+  photoURLMedium: string | null;
+  photoURLSmall: string | null;
 }
 
 export interface GetFriendshipInfo_getFriendshipInfo_friendship {
   __typename: "Friendship";
   status: FriendshipStatus;
-  date: any;
+  date: any | null;
 }
 
 export interface GetFriendshipInfo_getFriendshipInfo {
@@ -34,5 +36,6 @@ export interface GetFriendshipInfo {
 }
 
 export interface GetFriendshipInfoVariables {
-  userID: string;
+  userID?: string | null;
+  username?: string | null;
 }

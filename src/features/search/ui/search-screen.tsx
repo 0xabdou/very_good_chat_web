@@ -108,7 +108,7 @@ const UserListItem = ({user, style, onClick}: UserListItemProps) => {
       onClick={onTap}
       data-testid='search-result-item'>
       <ListItemAvatar>
-        <Avatar src={user.photoURL ?? undefined}/>
+        <Avatar src={user.photo?.small}/>
       </ListItemAvatar>
       <ListItemText primary={primary} secondary={secondary}/>
     </ListItem>

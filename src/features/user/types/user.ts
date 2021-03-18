@@ -1,8 +1,14 @@
-type User = {
+export type User = {
   id: string,
   username: string,
   name: string | null,
-  photoURL: string | null,
+  photo: Photo | null,
+}
+
+export type Photo = {
+  source: string,
+  medium: string,
+  small: string
 }
 
 export type UserCreation = {
@@ -18,5 +24,10 @@ export type UserUpdate= {
   photo?: File,
   deletePhoto?: boolean,
 };
+
+export type GetUserArgs = {
+  userID?: string,
+  username?: string,
+}
 
 export default User;

@@ -7,9 +7,12 @@ import {authActions, AuthState} from "../src/features/auth/auth-slice";
 import {userActions, UserState} from "../src/features/user/user-slice";
 import {searchActions} from "../src/features/search/search-slice";
 import {
-  Friendship, FriendshipInfo,
+  Friendship,
+  FriendshipInfo,
   FriendshipStatus
 } from "../src/features/friend/types/friendship";
+import {MeQuery_me} from "../src/_generated/MeQuery";
+import {GetFriendshipInfo_getFriendshipInfo} from "../src/_generated/GetFriendshipInfo";
 
 export const MockFile = mock<File>();
 
@@ -38,7 +41,21 @@ export const mockUser: User = {
   id: 'id',
   username: 'username',
   name: 'name',
-  photoURL: 'photoUrl',
+  photo: {
+    source: 'source',
+    medium: 'medium',
+    small: 'small'
+  }
+};
+
+export const mockGQLUser: MeQuery_me = {
+  __typename: "User",
+  id: mockUser.id,
+  username: mockUser.username,
+  name: mockUser.name,
+  photoURLSource: mockUser.photo?.source || null,
+  photoURLMedium: mockUser.photo?.medium || null,
+  photoURLSmall: mockUser.photo?.small || null,
 };
 
 export const mockUserCreation: UserCreation = {
@@ -46,21 +63,30 @@ export const mockUserCreation: UserCreation = {
   photo: instance(MockFile),
 };
 
-export const mockUserUpdate : UserUpdate= {
+export const mockUserUpdate: UserUpdate = {
   username: 'username',
   deleteName: true,
   photo: instance(MockFile),
 };
 
-export const mockFriendship : Friendship = {
+export const mockFriendship: Friendship = {
   status: FriendshipStatus.FRIENDS,
   date: new Date()
-}
+};
 
-export const mockFriendshipInfo : FriendshipInfo = {
+export const mockFriendshipInfo: FriendshipInfo = {
   user: mockUser,
   friendship: mockFriendship
-}
+};
+
+export const mockGQLFriendshipInfo: GetFriendshipInfo_getFriendshipInfo = {
+  __typename: 'FriendshipInfo',
+  friendship: {
+    __typename: 'Friendship',
+    ...mockFriendship
+  },
+  user: mockGQLUser,
+};
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);
 

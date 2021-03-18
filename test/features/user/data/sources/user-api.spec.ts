@@ -16,6 +16,7 @@ import {
   USERNAME_EXISTENCE_QUERY
 } from "../../../../../src/features/user/data/graphql";
 import {
+  mockGQLUser,
   mockUser,
   mockUserCreation,
   mockUserUpdate
@@ -46,12 +47,7 @@ describe('createUser', () => {
         mutation: REGISTER_MUTATION,
         variables: {registerInput},
       }))).thenResolve({
-      data: {
-        register: {
-          __typename: "User",
-          ...mockUser
-        }
-      }
+      data: {register: mockGQLUser}
     });
     // act
     const result = await userAPI.createUser(mockUserCreation);
@@ -73,12 +69,7 @@ describe('updateUser', () => {
         mutation: UPDATE_USER_MUTATION,
         variables: {updateUserInput},
       }))).thenResolve({
-      data: {
-        updateUser: {
-          __typename: "User",
-          ...mockUser
-        }
-      }
+      data: {updateUser: mockGQLUser}
     });
     // act
     const result = await userAPI.updateUser(mockUserUpdate);
@@ -95,12 +86,7 @@ describe('getCurrentUser', () => {
     // arrange
     when(MockApolloClient.query<MeQuery>(deepEqual({query: ME_QUERY})))
       .thenResolve({
-        data: {
-          me: {
-            __typename: "User",
-            ...mockUser
-          }
-        }
+        data: {me: mockGQLUser}
       } as ApolloQueryResult<MeQuery>);
     // act
     const result = await userAPI.getCurrentUser();
@@ -138,9 +124,7 @@ describe('findUsers', () => {
     // arrange
     const searchQuery = 'search query';
     when(MockApolloClient.query(anything())).thenResolve({
-      data: {
-        findUsers:[{__typename: "User", ...mockUser}]
-      }
+      data: {findUsers:[mockGQLUser]}
     } as ApolloQueryResult<FindUsersQuery>);
     // act
     const result = await userAPI.findUsers(searchQuery);

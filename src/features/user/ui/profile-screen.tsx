@@ -51,6 +51,7 @@ const ProfileScreen = () => {
 
 const useStyles = makeStyles({
   outer: {
+    display: 'flex',
     height: '100%',
     width: '100%',
   },

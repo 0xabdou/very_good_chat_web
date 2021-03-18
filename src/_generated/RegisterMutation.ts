@@ -13,8 +13,10 @@ export interface RegisterMutation_register {
   __typename: "User";
   id: string;
   name: string | null;
-  photoURL: string | null;
   username: string;
+  photoURLSource: string | null;
+  photoURLMedium: string | null;
+  photoURLSmall: string | null;
 }
 
 export interface RegisterMutation {

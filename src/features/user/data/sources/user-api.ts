@@ -1,6 +1,6 @@
 import User, {UserCreation, UserUpdate} from "../../types/user";
 import {ApolloClient} from "@apollo/client";
-import {MeQuery} from "../../../../_generated/MeQuery";
+import {MeQuery, MeQuery_me} from "../../../../_generated/MeQuery";
 import {
   FIND_USERS_QUERY,
   ME_QUERY,
@@ -13,9 +13,9 @@ import {
   RegisterMutationVariables
 } from "../../../../_generated/RegisterMutation";
 import {
-  UsernameExistenceMutation,
-  UsernameExistenceMutationVariables
-} from "../../../../_generated/UsernameExistenceMutation";
+  UsernameExistenceQuery,
+  UsernameExistenceQueryVariables
+} from "../../../../_generated/UsernameExistenceQuery";
 import {
   UpdateUserMutation,
   UpdateUserMutationVariables
@@ -50,7 +50,15 @@ export class UserAPI implements IUserAPI {
       mutation: REGISTER_MUTATION,
       variables: {registerInput: creation},
     });
-    return data?.register!;
+    const user = data?.register!;
+    return {
+      ...user,
+      photo: {
+        source: user.photoURLSource!,
+        medium: user.photoURLMedium!,
+        small: user.photoURLSmall!
+      }
+    }
   }
 
   async updateUser(update: UserUpdate): Promise<User> {
@@ -59,19 +67,19 @@ export class UserAPI implements IUserAPI {
       mutation: UPDATE_USER_MUTATION,
       variables: {updateUserInput: update},
     });
-    return data?.updateUser!;
+    return UserAPI.parseUser(data?.updateUser!);
   }
 
   async getCurrentUser(): Promise<User> {
     const {data: {me}} = await this._client.query<MeQuery>({
       query: ME_QUERY
     });
-    return me;
+    return UserAPI.parseUser(me);
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {
-    const {data} = await this._client.query<UsernameExistenceMutation,
-      UsernameExistenceMutationVariables>({
+    const {data} = await this._client.query<UsernameExistenceQuery,
+      UsernameExistenceQueryVariables>({
       query: USERNAME_EXISTENCE_QUERY,
       variables: {username}
     });
@@ -84,6 +92,19 @@ export class UserAPI implements IUserAPI {
       query: FIND_USERS_QUERY,
       variables: {findUsersSearchQuery: searchQuery}
     });
-    return data.findUsers;
+    return data.findUsers.map(user => UserAPI.parseUser(user));
+  }
+
+  static parseUser(user: MeQuery_me) {
+    return {
+      id: user.id,
+      username: user.username,
+      name: user.name,
+      photo: {
+        source: user.photoURLSource!,
+        medium: user.photoURLMedium!,
+        small: user.photoURLSmall!
+      }
+    }
   }
 }

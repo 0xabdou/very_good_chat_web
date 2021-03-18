@@ -1,13 +1,15 @@
 import {gql} from "@apollo/client";
 
 export const GET_FRIENDSHIP_INFO_QUERY = gql`
-    query GetFriendshipInfo($userID: String!) {
-        getFriendshipInfo(userID: $userID) {
+    query GetFriendshipInfo($userID: String, $username: String) {
+        getFriendshipInfo(id: $userID, username: $username) {
             user {
                 id
                 username
                 name
-                photoURL
+                photoURLSource
+                photoURLMedium
+                photoURLSmall
             }
             friendship {
                 status
