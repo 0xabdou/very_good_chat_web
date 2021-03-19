@@ -7,7 +7,7 @@ import {useUserActions} from "../user-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import RetryPage from "../../../components/retry-page";
 import FullscreenLoader from "../../../components/fullscreen-loader";
-import {Route, Switch} from "react-router-dom";
+import {Redirect, Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
 import UserProfileScreen from "../../friend/ui/user-profile-screen";
 
@@ -52,7 +52,8 @@ const LoggedInScreen = () => {
           initialPhotoURL={authUser?.photoURL ?? undefined}
         />
       );
-    } else
+    } else {
+      const user = state.currentUser;
       child = (
         <Switch>
           <Route path='/profile'>
@@ -60,11 +61,12 @@ const LoggedInScreen = () => {
           </Route>
           <Route path='/edit-profile'>
             <ProfileUpdatingScreen
-              initialUsername={state.currentUser.username}
-              initialName={state.currentUser.name ?? undefined}
-              initialPhotoURL={state.currentUser.photo?.source}
+              initialUsername={user.username}
+              initialName={user.name ?? undefined}
+              initialPhotoURL={user.photo?.source}
             />
           </Route>
+          <Redirect exact from={`/u/${user.username}`} to='/profile'/>
           <Route path='/u/:id'>
             <UserProfileScreen/>
           </Route>
@@ -73,6 +75,7 @@ const LoggedInScreen = () => {
           </Route>
         </Switch>
       );
+    }
   }
   return (
     <div className={classes.root} data-testid='logged-in-screen'>

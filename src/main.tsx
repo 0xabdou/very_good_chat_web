@@ -3,7 +3,7 @@ import './index.css';
 import App from './app';
 import React from 'react';
 
-viteEnv = import.meta.env;
+Object.assign(viteEnv, import.meta.env);
 
 ReactDOM.render(
   <React.StrictMode>

@@ -7,7 +7,7 @@ import CommonProfileInfo from "../../user/ui/components/common-profile-info";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {shallowEqual} from "react-redux";
 import {useFriendActions} from "../friend-profile-actions-context";
-import {PulseLoader} from "react-spinners";
+import FriendshipButton from "./components/friendship-button";
 
 const UserProfileScreen = () => {
   const state = useAppSelector(state => state.friendProfile, shallowEqual);
@@ -21,17 +21,19 @@ const UserProfileScreen = () => {
     dispatch(actions.getFriendshipInfo(routeParams.id));
     const searchedUser = searchResults?.find(u => u.username == routeParams.id);
     setCachedUser(searchedUser);
+    return () => {
+      dispatch(actions.reset());
+    };
   }, []);
 
   const classes = useStyles();
 
   const user = state.user ?? cachedUser;
   return (
-    <div className={classes.wrapper}>
-      <div className={classes.outer}>
+    <div className={classes.outer}>
+      <div className={classes.wrapper}>
         {!!user && <CommonProfileInfo user={user}/>}
-        {state.loading && <PulseLoader/>}
-        {!!state.friendship && state.friendship.status}
+        <FriendshipButton/>
         {!!state.error && state.error}
       </div>
     </div>
@@ -39,14 +41,15 @@ const UserProfileScreen = () => {
 };
 
 const useStyles = makeStyles({
-  wrapper: {
+  outer: {
     display: 'flex',
     height: '100%',
     width: '100%',
   },
-  outer: {
+  wrapper: {
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'center',
     margin: 'auto',
   },
 });

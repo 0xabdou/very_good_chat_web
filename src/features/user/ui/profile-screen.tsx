@@ -1,13 +1,13 @@
 import React, {useCallback} from "react";
 import {Icon, IconButton, makeStyles, Typography} from "@material-ui/core";
-import {centeredLayout, wrapper} from "../../../styles/shared";
+import {centeredLayout} from "../../../styles/shared";
 import {useAppSelector} from "../../../store/hooks";
 import FullscreenLoader from "../../../components/fullscreen-loader";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
 import {useHistory} from "react-router-dom";
 import CommonProfileInfo from "./components/common-profile-info";
 
-const ProfileScreen = () => {
+const ProfileScreen : React.FC = () => {
   const userState = useAppSelector(state => state.user);
   const history = useHistory();
 
@@ -44,7 +44,9 @@ const ProfileScreen = () => {
           <Icon>settings</Icon>
         </IconButton>
       </TopBar>
-      <CommonProfileInfo user={user}/>
+      <div className={classes.wrapper}>
+        <CommonProfileInfo user={user}/>
+      </div>
     </div>
   );
 };
@@ -55,7 +57,9 @@ const useStyles = makeStyles({
     height: '100%',
     width: '100%',
   },
-  wrapper: wrapper,
+  wrapper: {
+    margin: 'auto'
+  },
   layout: centeredLayout,
 });
 
