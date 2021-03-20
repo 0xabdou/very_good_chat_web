@@ -31,7 +31,6 @@ const FriendProfileScreen = () => {
 
   const classes = useStyles();
 
-
   const user = state.user ?? cachedUser;
   return (
     <div className={classes.outer}>

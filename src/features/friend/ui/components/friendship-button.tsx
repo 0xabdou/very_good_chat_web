@@ -48,7 +48,7 @@ const FriendshipButton = () => {
     setAnchorEl3(null);
   }, []);
 
-  const handleError = async (promise: Promise<{
+  const handleError = useCallback(async (promise: Promise<{
     meta: { requestStatus: 'fulfilled' | 'rejected' }
     payload: Friendship | FriendError | undefined
   }>) => {
@@ -57,7 +57,7 @@ const FriendshipButton = () => {
     if (result.meta.requestStatus == 'rejected') {
       dispatch(actions.getFriendshipInfo(state.user!.username));
     }
-  };
+  }, [state]);
 
   const sendFR = useCallback(() => {
     void handleError(dispatch(actions.sendFriendRequest()));
