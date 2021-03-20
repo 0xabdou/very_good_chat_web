@@ -10,8 +10,12 @@ import {
 import {IFriendRepository} from "../../../src/features/friend/data/friend-repository";
 import StoreExtraArg from "../../../src/store/store-extra-arg";
 import reducer, {
+  _handleFSChanged,
+  _handleFSChanging,
+  _handleRejected,
   friendProfileActions,
-  FriendProfileState, initialFriendProfileState
+  FriendProfileState,
+  initialFriendProfileState
 } from "../../../src/features/friend/friend-profile-slice";
 import {
   getMockStore,
@@ -19,10 +23,11 @@ import {
   mockFriendshipInfo,
   mockUser
 } from "../../mock-objects";
-import {AppStore} from "../../../src/store/store";
+import {AppState, AppStore} from "../../../src/store/store";
 import {left, right} from "fp-ts/Either";
 import FriendError from "../../../src/features/friend/types/friend-error";
 import {PayloadAction} from "@reduxjs/toolkit";
+import {FriendshipInfo} from "../../../src/features/friend/types/friendship";
 
 const MockFriendRepo = mock<IFriendRepository>();
 const MockStore = getMockStore();
@@ -30,13 +35,29 @@ let mockStore: AppStore;
 const extraArg = {
   friendRepo: instance(MockFriendRepo)
 } as StoreExtraArg;
-const username= 'usernameeeeeeee';
+const username = 'usernameeeeeeee';
 const friendError = FriendError.network;
+const loadedState: FriendProfileState = {
+  ...initialFriendProfileState,
+  user: mockUser,
+  friendship: mockFriendship
+};
 
-const {reset, getFriendshipInfo} = friendProfileActions;
+const {
+  reset,
+  getFriendshipInfo,
+  sendFriendRequest,
+  cancelFriendRequest,
+  acceptFriendRequest,
+  declineFriendRequest,
+  unfriend
+} = friendProfileActions;
+
 
 beforeEach(() => {
-  mockStore = MockStore();
+  mockStore = MockStore({
+    friendProfile: loadedState
+  } as AppState);
   resetCalls(MockFriendRepo);
 });
 
@@ -46,7 +67,7 @@ describe('reset', () => {
     type: reset.type,
     payload: undefined
   };
-  const state : FriendProfileState = {
+  const state: FriendProfileState = {
     user: mockUser,
     friendship: mockFriendship,
     loading: false,
@@ -89,4 +110,287 @@ describe('getFriendshipInfo', () => {
     expect(result.payload).toBe(friendError);
     verify(MockFriendRepo.getFriendshipInfo(deepEqual({username}))).once();
   });
+
+  describe('reducers', () => {
+    it('should return the right state when pending', () => {
+      // arrange
+      const action: PayloadAction = {
+        type: getFriendshipInfo.pending.type, payload: undefined
+      };
+      const initialState: FriendProfileState = {
+        ...initialFriendProfileState,
+        error: FriendError.general,
+      };
+      // act
+      const result = reducer(initialState, action);
+      // assert
+      expect(result).toStrictEqual({
+        ...initialState,
+        loading: true,
+        error: null,
+      });
+    });
+
+    it('should return the right state when fulfilled', () => {
+      // arrange
+      const action: PayloadAction<FriendshipInfo> = {
+        type: getFriendshipInfo.fulfilled.type, payload: {
+          friendship: mockFriendship,
+          user: mockUser
+        }
+      };
+      const initialState: FriendProfileState = {
+        ...initialFriendProfileState,
+        loading: true,
+      };
+      // act
+      const result = reducer(initialState, action);
+      // assert
+      expect(result).toStrictEqual({
+        ...initialState,
+        loading: false,
+        friendship: mockFriendship,
+        user: mockUser
+      });
+    });
+
+    it('should return the right state when rejected', () => {
+      // arrange
+      const action: PayloadAction<FriendError> = {
+        type: getFriendshipInfo.rejected.type, payload: FriendError.general
+      };
+      const initialState: FriendProfileState = {
+        ...initialFriendProfileState,
+        loading: true,
+      };
+      // act
+      const result = reducer(initialState, action);
+      // assert
+      expect(result).toStrictEqual({
+        ...initialState,
+        loading: false,
+        error: FriendError.general
+      });
+    });
+  });
+});
+
+describe('reducer logic', () => {
+  describe('_handleRejected', () => {
+    test('defined error', () => {
+      const state: FriendProfileState = {
+        ...initialFriendProfileState,
+        loading: true,
+        modifyingFriendship: true
+      };
+      _handleRejected(state, {type: 'any', payload: FriendError.network});
+      expect(state.loading).toBe(false);
+      expect(state.modifyingFriendship).toBe(false);
+      expect(state.error).toBe(FriendError.network);
+    });
+
+    test('undefined error', () => {
+      const state: FriendProfileState = {
+        ...initialFriendProfileState,
+        loading: true,
+        modifyingFriendship: true
+      };
+      _handleRejected(state, {type: 'any', payload: undefined});
+      expect(state.loading).toBe(false);
+      expect(state.modifyingFriendship).toBe(false);
+      expect(state.error).toBe(FriendError.general);
+    });
+  });
+
+  test('_handleFSChanging', () => {
+    const state: FriendProfileState = {
+      ...initialFriendProfileState,
+      error: FriendError.general
+    };
+    _handleFSChanging(state);
+    expect(state.modifyingFriendship).toBe(true);
+    expect(state.error).toBeNull();
+  });
+
+  test('_handleFSChanged', () => {
+    const state: FriendProfileState = {
+      ...initialFriendProfileState,
+      modifyingFriendship: true
+    };
+    _handleFSChanged(state, {type: 'any', payload: mockFriendship});
+    expect(state.modifyingFriendship).toBe(false);
+    expect(state.friendship).toStrictEqual(mockFriendship);
+  });
+});
+
+const friendshipAct = (
+  actionCreator: typeof sendFriendRequest,
+  store: AppStore = mockStore) => {
+  return actionCreator()(
+    store.dispatch,
+    store.getState,
+    extraArg
+  );
+};
+
+const whenNoUserExists = (act: (store: AppStore) => Promise<any>) => {
+  it('should reject if no user exists in the state', async () => {
+    // arrange
+    const customState: FriendProfileState = {...loadedState, user: null};
+    const customStore = MockStore({friendProfile: customState} as AppState);
+    // act
+    const result = await act(customStore);
+    // assert
+    expect(result.payload).toBe(FriendError.general);
+  });
+};
+
+describe('sendFriendRequest', () => {
+  const act = () => friendshipAct(sendFriendRequest);
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.sendFriendRequest(anything()))
+      .thenResolve(right(mockFriendship));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(sendFriendRequest.fulfilled.type);
+    expect(result.payload).toStrictEqual(mockFriendship);
+    verify(MockFriendRepo.sendFriendRequest(loadedState.user!.id)).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    when(MockFriendRepo.sendFriendRequest(anything()))
+      .thenResolve(left(FriendError.network));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(sendFriendRequest.rejected.type);
+    expect(result.payload).toStrictEqual(FriendError.network);
+    verify(MockFriendRepo.sendFriendRequest(loadedState.user!.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(sendFriendRequest, s));
+});
+
+describe('cancelFriendRequest', () => {
+  const act = () => friendshipAct(cancelFriendRequest);
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.cancelFriendRequest(anything()))
+      .thenResolve(right(mockFriendship));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(cancelFriendRequest.fulfilled.type);
+    expect(result.payload).toStrictEqual(mockFriendship);
+    verify(MockFriendRepo.cancelFriendRequest(loadedState.user!.id)).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    when(MockFriendRepo.cancelFriendRequest(anything()))
+      .thenResolve(left(FriendError.network));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(cancelFriendRequest.rejected.type);
+    expect(result.payload).toStrictEqual(FriendError.network);
+    verify(MockFriendRepo.cancelFriendRequest(loadedState.user!.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(cancelFriendRequest, s));
+});
+
+describe('acceptFriendRequest', () => {
+  const act = () => friendshipAct(acceptFriendRequest);
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.acceptFriendRequest(anything()))
+      .thenResolve(right(mockFriendship));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(acceptFriendRequest.fulfilled.type);
+    expect(result.payload).toStrictEqual(mockFriendship);
+    verify(MockFriendRepo.acceptFriendRequest(loadedState.user!.id)).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    when(MockFriendRepo.acceptFriendRequest(anything()))
+      .thenResolve(left(FriendError.network));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(acceptFriendRequest.rejected.type);
+    expect(result.payload).toStrictEqual(FriendError.network);
+    verify(MockFriendRepo.acceptFriendRequest(loadedState.user!.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(acceptFriendRequest, s));
+});
+
+describe('declineFriendRequest', () => {
+  const act = () => friendshipAct(declineFriendRequest);
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.declineFriendRequest(anything()))
+      .thenResolve(right(mockFriendship));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(declineFriendRequest.fulfilled.type);
+    expect(result.payload).toStrictEqual(mockFriendship);
+    verify(MockFriendRepo.declineFriendRequest(loadedState.user!.id)).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    when(MockFriendRepo.declineFriendRequest(anything()))
+      .thenResolve(left(FriendError.network));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(declineFriendRequest.rejected.type);
+    expect(result.payload).toStrictEqual(FriendError.network);
+    verify(MockFriendRepo.declineFriendRequest(loadedState.user!.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(declineFriendRequest, s));
+});
+
+describe('unfriend', () => {
+  const act = () => friendshipAct(unfriend);
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.unfriend(anything()))
+      .thenResolve(right(mockFriendship));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(unfriend.fulfilled.type);
+    expect(result.payload).toStrictEqual(mockFriendship);
+    verify(MockFriendRepo.unfriend(loadedState.user!.id)).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    when(MockFriendRepo.unfriend(anything()))
+      .thenResolve(left(FriendError.network));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(unfriend.rejected.type);
+    expect(result.payload).toStrictEqual(FriendError.network);
+    verify(MockFriendRepo.unfriend(loadedState.user!.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(unfriend, s));
 });

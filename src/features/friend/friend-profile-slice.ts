@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import User from "../user/types/user";
 import {Friendship, FriendshipInfo} from "./types/friendship";
 import {ThunkApi} from "../../store/store";
@@ -13,21 +13,17 @@ export type FriendProfileState = {
   error: FriendError | null;
 }
 
-const getFriendshipInfo = createAsyncThunk<
-  FriendshipInfo, string, ThunkApi<FriendError>
-  >(
-    'friendProfile/getFriendshipInfo',
+const getFriendshipInfo = createAsyncThunk<FriendshipInfo, string, ThunkApi<FriendError>>(
+  'friendProfile/getFriendshipInfo',
   async (username, thunkAPI) => {
-     const result = await thunkAPI.extra.friendRepo
-       .getFriendshipInfo({username});
-     if (isRight(result)) return result.right;
-     return thunkAPI.rejectWithValue(result.left);
+    const result = await thunkAPI.extra.friendRepo
+      .getFriendshipInfo({username});
+    if (isRight(result)) return result.right;
+    return thunkAPI.rejectWithValue(result.left);
   }
 );
 
-const sendFriendRequest= createAsyncThunk<
-  Friendship, void, ThunkApi<FriendError>
-  >(
+const sendFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
   'friendProfile/sendFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -42,9 +38,7 @@ const sendFriendRequest= createAsyncThunk<
   }
 );
 
-const cancelFriendRequest = createAsyncThunk<
-  Friendship, void, ThunkApi<FriendError>
-  >(
+const cancelFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
   'friendProfile/cancelFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -59,9 +53,7 @@ const cancelFriendRequest = createAsyncThunk<
   }
 );
 
-const acceptFriendRequest = createAsyncThunk<
-  Friendship, void, ThunkApi<FriendError>
-  >(
+const acceptFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
   'friendProfile/acceptFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -76,9 +68,7 @@ const acceptFriendRequest = createAsyncThunk<
   }
 );
 
-const declineFriendRequest = createAsyncThunk<
-  Friendship, void, ThunkApi<FriendError>
-  >(
+const declineFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
   'friendProfile/declineFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -93,9 +83,7 @@ const declineFriendRequest = createAsyncThunk<
   }
 );
 
-const unfriend= createAsyncThunk<
-  Friendship, void, ThunkApi<FriendError>
-  >(
+const unfriend = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
   'friendProfile/unfriend',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -107,7 +95,7 @@ const unfriend= createAsyncThunk<
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
   }
-)
+);
 
 export const initialFriendProfileState: FriendProfileState = {
   user: null,
@@ -117,22 +105,22 @@ export const initialFriendProfileState: FriendProfileState = {
   error: null
 };
 
-const _handleRejected = (state: FriendProfileState, error? : FriendError) => {
-  if (error == undefined) state.error = FriendError.general;
-  else state.error = error;
+export const _handleRejected = (state: FriendProfileState, action: PayloadAction<FriendError | undefined>) => {
+  if (action.payload == undefined) state.error = FriendError.general;
+  else state.error = action.payload;
   state.modifyingFriendship = false;
   state.loading = false;
-}
+};
 
-const _handleFSChanging = (state: FriendProfileState) => {
+export const _handleFSChanging = (state: FriendProfileState) => {
   state.modifyingFriendship = true;
   state.error = null;
-}
+};
 
-const _handleFSChanged= (state: FriendProfileState, fs: Friendship) => {
+export const _handleFSChanged = (state: FriendProfileState, action: PayloadAction<Friendship>) => {
   state.modifyingFriendship = false;
-  state.friendship = fs;
-}
+  state.friendship = action.payload;
+};
 
 const friendProfileSlice = createSlice({
   name: 'friendProfile',
@@ -146,70 +134,38 @@ const friendProfileSlice = createSlice({
         return {
           ...initialFriendProfileState,
           loading: true
-        }
+        };
       })
-      .addCase(getFriendshipInfo.fulfilled, (state, action)=> {
+      .addCase(getFriendshipInfo.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
         state.friendship = action.payload.friendship;
       })
-      .addCase(getFriendshipInfo.rejected, (state, action) => {
-        _handleRejected(state, action.payload);
-      });
+      .addCase(getFriendshipInfo.rejected, _handleRejected);
     builder
-      .addCase(sendFriendRequest.pending, state => {
-        _handleFSChanging(state);
-      })
-      .addCase(sendFriendRequest.fulfilled, (state, action) => {
-        _handleFSChanged(state, action.payload);
-      })
-      .addCase(sendFriendRequest.rejected, (state, action) => {
-        _handleRejected(state, action.payload);
-      });
+      .addCase(sendFriendRequest.pending, _handleFSChanging)
+      .addCase(sendFriendRequest.fulfilled, _handleFSChanged)
+      .addCase(sendFriendRequest.rejected, _handleRejected);
     builder
-      .addCase(cancelFriendRequest.pending, state => {
-        _handleFSChanging(state);
-      })
-      .addCase(cancelFriendRequest.fulfilled, (state, action) => {
-        _handleFSChanged(state, action.payload);
-      })
-      .addCase(cancelFriendRequest.rejected, (state, action) => {
-        _handleRejected(state, action.payload);
-      });
+      .addCase(cancelFriendRequest.pending, _handleFSChanging)
+      .addCase(cancelFriendRequest.fulfilled, _handleFSChanged)
+      .addCase(cancelFriendRequest.rejected, _handleRejected);
     builder
-      .addCase(acceptFriendRequest.pending, state => {
-        _handleFSChanging(state);
-      })
-      .addCase(acceptFriendRequest.fulfilled, (state, action) => {
-        _handleFSChanged(state, action.payload);
-      })
-      .addCase(acceptFriendRequest.rejected, (state, action) => {
-        _handleRejected(state, action.payload);
-      });
+      .addCase(acceptFriendRequest.pending, _handleFSChanging)
+      .addCase(acceptFriendRequest.fulfilled, _handleFSChanged)
+      .addCase(acceptFriendRequest.rejected, _handleRejected);
     builder
-      .addCase(declineFriendRequest.pending, state => {
-        _handleFSChanging(state);
-      })
-      .addCase(declineFriendRequest.fulfilled, (state, action) => {
-        _handleFSChanged(state, action.payload);
-      })
-      .addCase(declineFriendRequest.rejected, (state, action) => {
-        _handleRejected(state, action.payload);
-      });
+      .addCase(declineFriendRequest.pending, _handleFSChanging)
+      .addCase(declineFriendRequest.fulfilled, _handleFSChanged)
+      .addCase(declineFriendRequest.rejected, _handleRejected);
     builder
-      .addCase(unfriend.pending, state => {
-        _handleFSChanging(state);
-      })
-      .addCase(unfriend.fulfilled, (state, action) => {
-        _handleFSChanged(state, action.payload);
-      })
-      .addCase(unfriend.rejected, (state, action) => {
-        _handleRejected(state, action.payload);
-      });
+      .addCase(unfriend.pending, _handleFSChanging)
+      .addCase(unfriend.fulfilled, _handleFSChanged)
+      .addCase(unfriend.rejected, _handleRejected);
   }
 });
 
-export default  friendProfileSlice.reducer;
+export default friendProfileSlice.reducer;
 
 export const friendProfileActions = {
   getFriendshipInfo,
@@ -219,4 +175,4 @@ export const friendProfileActions = {
   declineFriendRequest,
   unfriend,
   ...friendProfileSlice.actions,
-}
+};

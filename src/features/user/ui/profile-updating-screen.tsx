@@ -11,7 +11,7 @@ import {
   TextField
 } from "@material-ui/core";
 import FullScreenDialog from "./components/fullscreen-dialog";
-import AlertDialog from "./components/alert-dialog";
+import AlertDialog from "../../../components/alert-dialog";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import UserError from "../types/user-error";
 import {centeredLayout, nonSelectable, wrapper} from "../../../styles/shared";

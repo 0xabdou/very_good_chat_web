@@ -1,6 +1,9 @@
-enum FriendError  {
+enum FriendError {
   general,
   network,
+  requestAlreadyReceived,
+  requestRemoved,
+  alreadyFriends
 }
 
-export default  FriendError;
+export default FriendError;

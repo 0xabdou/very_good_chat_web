@@ -3,7 +3,7 @@ import {Icon, makeStyles,} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import CircleButton from "./circle-button";
 import MenuDialog from "./menu-dialog";
-import AlertDialog from "./alert-dialog";
+import AlertDialog from "../../../../components/alert-dialog";
 import {nonDraggable} from "../../../../styles/shared";
 import {useDropzone} from "react-dropzone";
 
@@ -88,7 +88,8 @@ const ProfilePhotoPicker = (props: ProfilePhotoPickerProps) => {
       <div {...rootProps} data-testid='profile-photo-drop-zone'>
         <Icon className={classes.dragIcon}>camera_alt</Icon>
       </div>
-      <img className={classes.photo} src={props.src ?? props.defaultSrc} alt='profile photo'/>
+      <img className={classes.photo} src={props.src ?? props.defaultSrc}
+           alt='profile photo'/>
       <div className={classes.buttonWrapper}>
         <CircleButton
           onClick={openMenu}

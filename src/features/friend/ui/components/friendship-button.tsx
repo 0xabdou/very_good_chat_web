@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
 import {
   Icon,
@@ -8,9 +8,11 @@ import {
   MenuItem,
   MenuProps
 } from "@material-ui/core";
-import {FriendshipStatus} from "../../types/friendship";
+import {Friendship, FriendshipStatus} from "../../types/friendship";
 import {PulseLoader} from "react-spinners";
 import {useFriendActions} from "../../friend-profile-actions-context";
+import FriendError from "../../types/friend-error";
+import AlertDialog from "../../../../components/alert-dialog";
 
 const FMenu = (props: MenuProps) => {
   return (
@@ -35,44 +37,72 @@ const FriendshipButton = () => {
   const actions = useFriendActions();
   const [anchorEl1, setAnchorEl1] = useState<HTMLElement | null>(null);
   const [anchorEl2, setAnchorEl2] = useState<HTMLElement | null>(null);
+  const [anchorEl3, setAnchorEl3] = useState<HTMLElement | null>(null);
+  const [alerting, setAlerting] = useState(false);
 
   const classes = useStyles();
 
-  const onClose = () => {
+  const onClose = useCallback(() => {
     setAnchorEl1(null);
     setAnchorEl2(null);
+    setAnchorEl3(null);
+  }, []);
+
+  const handleError = async (promise: Promise<{
+    meta: { requestStatus: 'fulfilled' | 'rejected' }
+    payload: Friendship | FriendError | undefined
+  }>) => {
+    const result = await promise;
+    console.log(result);
+    if (result.meta.requestStatus == 'rejected') {
+      dispatch(actions.getFriendshipInfo(state.user!.username));
+    }
   };
 
-  const sendFR = () => {
-    dispatch(actions.sendFriendRequest());
-  };
+  const sendFR = useCallback(() => {
+    void handleError(dispatch(actions.sendFriendRequest()));
+  }, []);
 
-  const cancelFR = () => {
-    dispatch(actions.cancelFriendRequest());
+  const cancelFR = useCallback(() => {
     setAnchorEl2(null);
-  };
+    void handleError(dispatch(actions.cancelFriendRequest()));
+  }, []);
 
-  const acceptFR = () => {
-    dispatch(actions.acceptFriendRequest());
+  const acceptFR = useCallback(() => {
     setAnchorEl1(null);
-  };
+    void handleError(dispatch(actions.acceptFriendRequest()));
+  }, []);
 
-  const declineFR = () => {
-    dispatch(actions.declineFriendRequest());
+  const declineFR = useCallback(() => {
     setAnchorEl1(null);
-  };
+    void handleError(dispatch(actions.declineFriendRequest()));
+  }, []);
 
-  const removeFriend = () => {
-    dispatch(actions.unfriend());
-  };
-
-  const onRequestSentTapped = (e: React.MouseEvent<HTMLElement>) => {
+  const onRequestSentTapped = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl2(e.currentTarget);
-  };
+  }, []);
 
-  const onRequestReceivedTapped = (e: React.MouseEvent<HTMLElement>) => {
+  const onRequestReceivedTapped = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl1(e.currentTarget);
-  };
+  }, []);
+
+  const askForUnfriendConfirmation = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl3(e.currentTarget);
+  }, []);
+
+  const onUnfriendTapped = useCallback(() => {
+    setAlerting(true);
+    onClose();
+  }, []);
+
+  const onUnfriendCanceled = useCallback(() => {
+    setAlerting(false);
+  }, []);
+
+  const onUnfriendConfirmed = useCallback(() => {
+    setAlerting(false);
+    void handleError(dispatch(actions.unfriend()));
+  }, []);
 
   let child: React.ReactElement;
   if (state.loading || !state.friendship) {
@@ -90,7 +120,7 @@ const FriendshipButton = () => {
       case FriendshipStatus.FRIENDS:
         icon = 'fas fa-user-check';
         label = "You're friends!";
-        onTap = removeFriend;
+        onTap = askForUnfriendConfirmation;
         break;
       case FriendshipStatus.REQUEST_SENT:
         icon = 'fas fa-user-clock';
@@ -112,6 +142,7 @@ const FriendshipButton = () => {
             aria-haspopup="true"
             onClick={onTap}
             disabled={state.modifyingFriendship}
+            data-testid={icon}
           >
             <i className={icon}/>
           </IconButton>
@@ -126,19 +157,18 @@ const FriendshipButton = () => {
     }
   }
   return (
-    <div className={classes.wrapper}>
+    <div className={classes.wrapper} data-testid='friendship-button'>
       {child}
       <FMenu
         anchorEl={anchorEl1}
         open={Boolean(anchorEl1)}
         onClose={onClose}
-        keepMounted
       >
-        <MenuItem onClick={acceptFR}>
+        <MenuItem onClick={acceptFR} data-testid='accept request'>
           <Icon className={classes.checkIcon}>check</Icon>
           Accept
         </MenuItem>
-        <MenuItem onClick={declineFR}>
+        <MenuItem onClick={declineFR} data-testid='decline request'>
           <Icon className={classes.clearIcon}>clear</Icon>
           Decline
         </MenuItem>
@@ -147,13 +177,29 @@ const FriendshipButton = () => {
         anchorEl={anchorEl2}
         open={Boolean(anchorEl2)}
         onClose={onClose}
-        keepMounted
       >
-        <MenuItem onClick={cancelFR}>
+        <MenuItem onClick={cancelFR} data-testid='cancel request'>
           <Icon className={classes.clearIcon}>clear</Icon>
           Cancel
         </MenuItem>
       </FMenu>
+      <FMenu
+        anchorEl={anchorEl3}
+        open={Boolean(anchorEl3)}
+        onClose={onClose}
+      >
+        <MenuItem onClick={onUnfriendTapped} data-testid='unfriend'>
+          <Icon className={classes.clearIcon}>clear</Icon>
+          Remove friend
+        </MenuItem>
+      </FMenu>
+      <AlertDialog
+        title='Unfriend'
+        content='Are you sure you want to remove this friend?'
+        open={alerting}
+        onCancel={onUnfriendCanceled}
+        onConfirm={onUnfriendConfirmed}
+      />
     </div>
   );
 };

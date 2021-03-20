@@ -1,11 +1,14 @@
 import {anything, instance, mock, verify, when} from "ts-mockito";
 import {IFriendAPI} from "../../../../src/features/friend/data/sources/friend-api";
-import FriendRepository
-  from "../../../../src/features/friend/data/friend-repository";
+import FriendRepository, {friendErrors} from "../../../../src/features/friend/data/friend-repository";
 import {ApolloError} from "@apollo/client";
 import {left, right} from "fp-ts/Either";
 import FriendError from "../../../../src/features/friend/types/friend-error";
-import {mockFriendship, mockFriendshipInfo} from "../../../mock-objects";
+import {
+  getApolloError,
+  mockFriendship,
+  mockFriendshipInfo
+} from "../../../mock-objects";
 import {GetUserArgs} from "../../../../src/features/user/types/user";
 
 const MockFriendAPI = mock<IFriendAPI>();
@@ -30,6 +33,33 @@ describe('error catching', () => {
     // assert
     expect(error).toStrictEqual(left(FriendError.network));
   });
+
+  it('requestAlreadyReceived error', async () => {
+    // act
+    const error = await friendRepo._leftOrRight(() => {
+      throw getApolloError(friendErrors.REQUEST_RECEIVED);
+    });
+    // assert
+    expect(error).toStrictEqual(left(FriendError.requestAlreadyReceived));
+  });
+
+  it('requestRemoved error', async () => {
+    // act
+    const error = await friendRepo._leftOrRight(() => {
+      throw getApolloError(friendErrors.REQUEST_REMOVED);
+    });
+    // assert
+    expect(error).toStrictEqual(left(FriendError.requestRemoved));
+  });
+
+  it('alreadyFriends error', async () => {
+    // act
+    const error = await friendRepo._leftOrRight(() => {
+      throw getApolloError(friendErrors.ALREADY_FRIENDS);
+    });
+    // assert
+    expect(error).toStrictEqual(left(FriendError.alreadyFriends));
+  });
 });
 
 describe('getFriendshipInfo', async () => {
@@ -37,9 +67,9 @@ describe('getFriendshipInfo', async () => {
     // arrange
     when(MockFriendAPI.getFriendshipInfo(anything()))
       .thenResolve(mockFriendshipInfo);
-    const args : GetUserArgs  = {
+    const args: GetUserArgs = {
       userID
-    }
+    };
     // act
     const result = await friendRepo.getFriendshipInfo(args);
     // assert

@@ -9,7 +9,7 @@ import RetryPage from "../../../components/retry-page";
 import FullscreenLoader from "../../../components/fullscreen-loader";
 import {Redirect, Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
-import UserProfileScreen from "../../friend/ui/user-profile-screen";
+import FriendProfileScreen from "../../friend/ui/friend-profile-screen";
 
 
 const LoggedInScreen = () => {
@@ -67,8 +67,8 @@ const LoggedInScreen = () => {
             />
           </Route>
           <Redirect exact from={`/u/${user.username}`} to='/profile'/>
-          <Route path='/u/:id'>
-            <UserProfileScreen/>
+          <Route path='/u/:username'>
+            <FriendProfileScreen/>
           </Route>
           <Route path='/'>
             <MainScreen/>

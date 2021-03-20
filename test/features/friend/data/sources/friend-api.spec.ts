@@ -43,7 +43,8 @@ describe('getFriendshipInfo', () => {
     expect(result).toMatchObject(mockFriendshipInfo);
     verify(MockApolloClient.query(deepEqual({
       query: GET_FRIENDSHIP_INFO_QUERY,
-      variables: args
+      variables: args,
+      fetchPolicy: 'no-cache',
     }))).once();
   });
 });
@@ -65,7 +66,8 @@ describe('sendFriendRequest', () => {
     expect(result).toMatchObject(mockFriendship);
     verify(MockApolloClient.mutate(deepEqual({
       mutation: SEND_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     }))).once();
   });
 });
@@ -87,7 +89,8 @@ describe('acceptFriendRequest', () => {
     expect(result).toMatchObject(mockFriendship);
     verify(MockApolloClient.mutate(deepEqual({
       mutation: ACCEPT_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     }))).once();
   });
 });
@@ -109,7 +112,8 @@ describe('declineFriendRequest', () => {
     expect(result).toMatchObject(mockFriendship);
     verify(MockApolloClient.mutate(deepEqual({
       mutation: DECLINE_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     }))).once();
   });
 });
@@ -131,7 +135,8 @@ describe('cancelFriendRequest', () => {
     expect(result).toMatchObject(mockFriendship);
     verify(MockApolloClient.mutate(deepEqual({
       mutation: CANCEL_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     }))).once();
   });
 });
@@ -153,7 +158,8 @@ describe('unfriend', () => {
     expect(result).toMatchObject(mockFriendship);
     verify(MockApolloClient.mutate(deepEqual({
       mutation: UNFRIEND_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     }))).once();
   });
 });

@@ -9,7 +9,8 @@ import {
   CANCEL_FRIEND_REQUEST_MUTATION,
   DECLINE_FRIEND_REQUEST_MUTATION,
   GET_FRIENDSHIP_INFO_QUERY,
-  SEND_FRIEND_REQUEST_MUTATION, UNFRIEND_MUTATION
+  SEND_FRIEND_REQUEST_MUTATION,
+  UNFRIEND_MUTATION
 } from "../graphql";
 import {
   SendFriendRequest,
@@ -33,26 +34,30 @@ import {UserAPI} from "../../../user/data/sources/user-api";
 
 export interface IFriendAPI {
   getFriendshipInfo(args: GetUserArgs): Promise<FriendshipInfo>;
-  sendFriendRequest(userID: string) : Promise<Friendship>;
-  acceptFriendRequest(userID: string) : Promise<Friendship>;
-  declineFriendRequest(userID: string) : Promise<Friendship>;
-  cancelFriendRequest(userID: string) : Promise<Friendship>;
-  unfriend(userID: string) : Promise<Friendship>;
+
+  sendFriendRequest(userID: string): Promise<Friendship>;
+
+  acceptFriendRequest(userID: string): Promise<Friendship>;
+
+  declineFriendRequest(userID: string): Promise<Friendship>;
+
+  cancelFriendRequest(userID: string): Promise<Friendship>;
+
+  unfriend(userID: string): Promise<Friendship>;
 }
 
-export default class  FriendAPI implements IFriendAPI {
-  private readonly _client : ApolloClient<any>;
+export default class FriendAPI implements IFriendAPI {
+  private readonly _client: ApolloClient<any>;
 
   constructor(client: ApolloClient<any>) {
     this._client = client;
   }
 
   async getFriendshipInfo(args: GetUserArgs): Promise<FriendshipInfo> {
-    const {data} = await this._client.query<
-      GetFriendshipInfo, GetFriendshipInfoVariables
-      >({
+    const {data} = await this._client.query<GetFriendshipInfo, GetFriendshipInfoVariables>({
       query: GET_FRIENDSHIP_INFO_QUERY,
-      variables: args
+      variables: args,
+      fetchPolicy: 'no-cache',
     });
     return {
       ...data.getFriendshipInfo,
@@ -60,54 +65,51 @@ export default class  FriendAPI implements IFriendAPI {
     };
   }
 
-  async sendFriendRequest(userID: string) : Promise<Friendship> {
-    const {data} = await this._client.mutate<
-      SendFriendRequest, SendFriendRequestVariables
-      >({
+  async sendFriendRequest(userID: string): Promise<Friendship> {
+    const {data} = await this._client.mutate<SendFriendRequest, SendFriendRequestVariables>({
       mutation: SEND_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     });
 
     return data!.sendFriendRequest;
   }
 
-  async acceptFriendRequest(userID: string) : Promise<Friendship> {
-    const {data} = await this._client.mutate<
-      AcceptFriendRequest, AcceptFriendRequestVariables
-      >({
+  async acceptFriendRequest(userID: string): Promise<Friendship> {
+    const {data} = await this._client.mutate<AcceptFriendRequest, AcceptFriendRequestVariables>({
       mutation: ACCEPT_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     });
 
     return data!.acceptFriendRequest;
   }
 
-  async declineFriendRequest(userID: string) : Promise<Friendship> {
-    const {data} = await this._client.mutate<
-      DeclineFriendRequest, DeclineFriendRequestVariables
-      >({
+  async declineFriendRequest(userID: string): Promise<Friendship> {
+    const {data} = await this._client.mutate<DeclineFriendRequest, DeclineFriendRequestVariables>({
       mutation: DECLINE_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     });
 
     return data!.declineFriendRequest;
   }
 
-  async cancelFriendRequest(userID: string) : Promise<Friendship> {
-    const {data} = await this._client.mutate<
-      CancelFriendRequest, CancelFriendRequestVariables
-      >({
+  async cancelFriendRequest(userID: string): Promise<Friendship> {
+    const {data} = await this._client.mutate<CancelFriendRequest, CancelFriendRequestVariables>({
       mutation: CANCEL_FRIEND_REQUEST_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     });
 
     return data!.cancelFriendRequest;
   }
 
-  async unfriend(userID: string) : Promise<Friendship> {
-    const {data} = await this._client.mutate<Unfriend,UnfriendVariables>({
+  async unfriend(userID: string): Promise<Friendship> {
+    const {data} = await this._client.mutate<Unfriend, UnfriendVariables>({
       mutation: UNFRIEND_MUTATION,
-      variables: {userID}
+      variables: {userID},
+      fetchPolicy: 'no-cache',
     });
 
     return data!.unfriend;

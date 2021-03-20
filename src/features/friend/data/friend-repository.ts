@@ -24,6 +24,12 @@ export interface IFriendRepository {
   unfriend(userID: string): Promise<Either<FriendError, Friendship>>;
 }
 
+export const friendErrors = {
+  REQUEST_RECEIVED: 'REQUEST_RECEIVED',
+  REQUEST_REMOVED: 'REQUEST_REMOVED',
+  ALREADY_FRIENDS: 'ALREADY_FRIENDS',
+};
+
 export default class FriendRepository implements IFriendRepository {
   private readonly _friendAPI: IFriendAPI;
 
@@ -69,6 +75,14 @@ export default class FriendRepository implements IFriendRepository {
         if (!code) {
           // Probably an internet error, not sure
           return left(FriendError.network);
+        }
+        switch (code) {
+          case friendErrors.REQUEST_REMOVED:
+            return left(FriendError.requestRemoved);
+          case friendErrors.REQUEST_RECEIVED:
+            return left(FriendError.requestAlreadyReceived);
+          case friendErrors.ALREADY_FRIENDS:
+            return left(FriendError.alreadyFriends);
         }
       }
       return left(FriendError.general);

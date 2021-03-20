@@ -10,7 +10,7 @@ const CommonProfileInfo = ({user}: CommonProfileInfoProps) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.layout}>
+    <div className={classes.layout} data-testid='common-profile-info'>
       <Avatar className={classes.photo} src={user.photo?.medium}/>
       <Typography className={classes.username}>
         @{user.username}

@@ -13,6 +13,8 @@ import {
 } from "../src/features/friend/types/friendship";
 import {MeQuery_me} from "../src/_generated/MeQuery";
 import {GetFriendshipInfo_getFriendshipInfo} from "../src/_generated/GetFriendshipInfo";
+import {GraphQLError} from "graphql";
+import {ApolloError} from "@apollo/client";
 
 export const MockFile = mock<File>();
 
@@ -83,7 +85,8 @@ export const mockGQLFriendshipInfo: GetFriendshipInfo_getFriendshipInfo = {
   __typename: 'FriendshipInfo',
   friendship: {
     __typename: 'Friendship',
-    ...mockFriendship
+    ...mockFriendship,
+    date: null
   },
   user: mockGQLUser,
 };
@@ -124,3 +127,17 @@ export const mockSearchActionObjects = {
 export const getMockSearchActions = () => ({
   searchForUsers: jest.fn(() => mockSearchActionObjects.searchForUsers),
 }) as unknown as typeof searchActions;
+
+export const getGraphQLError = (code: string) => {
+  return new GraphQLError(
+    'some message', undefined, undefined, undefined, undefined, undefined,
+    {code}
+  );
+};
+
+export const getApolloError = (code: string) => {
+  return new ApolloError({
+    errorMessage: 'some message',
+    graphQLErrors: [getGraphQLError(code)]
+  });
+};

@@ -35,11 +35,9 @@ export function ErrorSnackbar<ErrorType>(props: ErrorSnackbarProps<ErrorType>) {
   const [error, setError] = useState<ErrorType | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
 
-  // Show the snackbar if there was an error (must not be an abortedByUser error)
+  // Show the snackbar if there was an error (must not be excluded)
   useEffect(() => {
-    if (props.currentError == null)
-      setSnackbarVisible(false);
-    else if (props.exclude.indexOf(props.currentError) == -1) {
+    if (props.currentError != null && props.exclude.indexOf(props.currentError) == -1) {
       setError(props.currentError);
       setSnackbarVisible(true);
     }
