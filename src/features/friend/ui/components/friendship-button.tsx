@@ -48,35 +48,36 @@ const FriendshipButton = () => {
     setAnchorEl3(null);
   }, []);
 
-  const handleError = useCallback(async (promise: Promise<{
+  console.log('OUTER STATE IS: ',  state);
+  const handleError = async (promise: Promise<{
     meta: { requestStatus: 'fulfilled' | 'rejected' }
     payload: Friendship | FriendError | undefined
   }>) => {
     const result = await promise;
-    console.log(result);
+    console.log('STATE IS: ', state);
     if (result.meta.requestStatus == 'rejected') {
       dispatch(actions.getFriendshipInfo(state.user!.username));
     }
-  }, [state]);
+  };
 
   const sendFR = useCallback(() => {
     void handleError(dispatch(actions.sendFriendRequest()));
-  }, []);
+  }, [state.user]);
 
   const cancelFR = useCallback(() => {
     setAnchorEl2(null);
     void handleError(dispatch(actions.cancelFriendRequest()));
-  }, []);
+  }, [state.user]);
 
   const acceptFR = useCallback(() => {
     setAnchorEl1(null);
     void handleError(dispatch(actions.acceptFriendRequest()));
-  }, []);
+  }, [state.user]);
 
   const declineFR = useCallback(() => {
     setAnchorEl1(null);
     void handleError(dispatch(actions.declineFriendRequest()));
-  }, []);
+  }, [state.user]);
 
   const onRequestSentTapped = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl2(e.currentTarget);
@@ -102,7 +103,7 @@ const FriendshipButton = () => {
   const onUnfriendConfirmed = useCallback(() => {
     setAlerting(false);
     void handleError(dispatch(actions.unfriend()));
-  }, []);
+  }, [state.user]);
 
   let child: React.ReactElement;
   if (state.loading || !state.friendship) {
