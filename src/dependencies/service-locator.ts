@@ -19,11 +19,7 @@ import {
 import FriendRepository, {IFriendRepository} from "../features/friend/data/friend-repository";
 import FriendAPI, {IFriendAPI} from "../features/friend/data/sources/friend-api";
 
-
 type Dependencies = { [key in TYPES]?: any };
-
-Object.assign(viteEnv, import.meta.env);
-export const SERVER_URL = viteEnv.VITE_BACKEND_URL!.toString();
 
 class ServiceLocator {
   private _dependencies: Dependencies = {};
@@ -49,6 +45,8 @@ class ServiceLocator {
 
 const sl = new ServiceLocator();
 const initDependencies = async () => {
+  const SERVER_URL = `${viteEnv.VITE_BACKEND_URL}`;
+  console.log('TOOOOOOOOOOOo: ', SERVER_URL);
   // Auth
   sl.register<GoogleAuth>(TYPES.GoogleAuth, new GoogleAuth());
   const authMiddleware = new ApolloLink((operation, forward) => {

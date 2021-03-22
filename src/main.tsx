@@ -3,7 +3,6 @@ import './index.css';
 import App from './app';
 import React from 'react';
 
-
 Object.assign(viteEnv, import.meta.env);
 
 ReactDOM.render(
