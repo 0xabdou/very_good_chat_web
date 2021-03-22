@@ -6,6 +6,7 @@ import {left, right} from "fp-ts/Either";
 import FriendError from "../../../../src/features/friend/types/friend-error";
 import {
   getApolloError,
+  mockFriendRequests,
   mockFriendship,
   mockFriendshipInfo
 } from "../../../mock-objects";
@@ -62,7 +63,18 @@ describe('error catching', () => {
   });
 });
 
-describe('getFriendshipInfo', async () => {
+describe('getFriendRequests', () => {
+  it('should return the friend requests', async () => {
+    // arrange
+    when(MockFriendAPI.getFriendRequests()).thenResolve(mockFriendRequests);
+    // act
+    const result = await friendRepo.getFriendRequests();
+    // assert
+    expect(result).toStrictEqual(right(mockFriendRequests));
+  });
+});
+
+describe('getFriendshipInfo', () => {
   it('should return the friendship info', async () => {
     // arrange
     when(MockFriendAPI.getFriendshipInfo(anything()))
@@ -78,7 +90,7 @@ describe('getFriendshipInfo', async () => {
   });
 });
 
-describe('sendFriendRequest', async () => {
+describe('sendFriendRequest', () => {
   it('should send the FR and return the friendship', async () => {
     // arrange
     when(MockFriendAPI.sendFriendRequest(anything()))
@@ -91,7 +103,7 @@ describe('sendFriendRequest', async () => {
   });
 });
 
-describe('acceptFriendRequest', async () => {
+describe('acceptFriendRequest', () => {
   it('should accept the FR and return the friendship', async () => {
     // arrange
     when(MockFriendAPI.acceptFriendRequest(anything()))
@@ -104,7 +116,7 @@ describe('acceptFriendRequest', async () => {
   });
 });
 
-describe('declineFriendRequest', async () => {
+describe('declineFriendRequest', () => {
   it('should decline the FR and return the friendship', async () => {
     // arrange
     when(MockFriendAPI.declineFriendRequest(anything()))
@@ -117,7 +129,7 @@ describe('declineFriendRequest', async () => {
   });
 });
 
-describe('cancelFriendRequest', async () => {
+describe('cancelFriendRequest', () => {
   it('should cancel the FR and return the friendship', async () => {
     // arrange
     when(MockFriendAPI.cancelFriendRequest(anything()))
@@ -130,7 +142,7 @@ describe('cancelFriendRequest', async () => {
   });
 });
 
-describe('unfriend', async () => {
+describe('unfriend', () => {
   it('should unfriend and return the friendship', async () => {
     // arrange
     when(MockFriendAPI.unfriend(anything()))

@@ -63,3 +63,32 @@ export const UNFRIEND_MUTATION = gql`
         }
     }
 `;
+
+export const GET_FRIEND_REQUESTS = gql`
+    query GetFriendRequests{
+        getFriendRequests {
+            received {
+                user {
+                    id
+                    name
+                    photoURLMedium
+                    photoURLSmall
+                    photoURLSource
+                    username
+                }
+                date
+            }
+            sent {
+                user {
+                    id
+                    name
+                    photoURLMedium
+                    photoURLSmall
+                    photoURLSource
+                    username
+                }
+                date
+            }
+        }
+    }
+`;

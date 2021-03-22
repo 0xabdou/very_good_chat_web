@@ -4,6 +4,7 @@ import FriendAPI
   from "../../../../../src/features/friend/data/sources/friend-api";
 import {GetFriendshipInfo} from "../../../../../src/_generated/GetFriendshipInfo";
 import {
+  mockFriendRequests,
   mockFriendship,
   mockFriendshipInfo,
   mockGQLFriendshipInfo
@@ -12,6 +13,7 @@ import {
   ACCEPT_FRIEND_REQUEST_MUTATION,
   CANCEL_FRIEND_REQUEST_MUTATION,
   DECLINE_FRIEND_REQUEST_MUTATION,
+  GET_FRIEND_REQUESTS,
   GET_FRIENDSHIP_INFO_QUERY,
   SEND_FRIEND_REQUEST_MUTATION,
   UNFRIEND_MUTATION
@@ -22,10 +24,69 @@ import {DeclineFriendRequest} from "../../../../../src/_generated/DeclineFriendR
 import {CancelFriendRequest} from "../../../../../src/_generated/CancelFriendRequest";
 import {Unfriend} from "../../../../../src/_generated/Unfriend";
 import {GetUserArgs} from "../../../../../src/features/user/types/user";
+import {GetFriendRequests} from "../../../../../src/_generated/GetFriendRequests";
+import {
+  FriendRequest,
+  FriendRequests
+} from "../../../../../src/features/friend/types/friend-request";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const friendAPI = new FriendAPI(instance(MockApolloClient));
 const userID = 'userIDDDD';
+
+describe('getFriendRequests', () => {
+  it('should return friend requests', async () => {
+    // arrange
+    const sentReq = mockFriendRequests.sent[0];
+    const receivedReq = mockFriendRequests.received[0];
+    const mockResponse: GetFriendRequests = {
+      getFriendRequests: {
+        __typename: 'FriendRequests',
+        received: [
+          {
+            __typename: 'FriendRequest',
+            user: {
+              __typename: 'User',
+              id: receivedReq.user.id,
+              username: receivedReq.user.username,
+              name: receivedReq.user.name,
+              photoURLSource: receivedReq.user.photo?.source ?? null,
+              photoURLMedium: receivedReq.user.photo?.medium ?? null,
+              photoURLSmall: receivedReq.user.photo?.small ?? null,
+            },
+            date: receivedReq.date
+          }
+        ],
+        sent: [
+          {
+            __typename: 'FriendRequest',
+            user: {
+              __typename: 'User',
+              id: sentReq.user.id,
+              username: sentReq.user.username,
+              name: sentReq.user.name,
+              photoURLSource: sentReq.user.photo?.source ?? null,
+              photoURLMedium: sentReq.user.photo?.medium ?? null,
+              photoURLSmall: sentReq.user.photo?.small ?? null,
+            },
+            date: sentReq.date
+          }
+        ]
+      }
+    };
+    when(MockApolloClient.query(anything())).thenResolve({
+      data: mockResponse
+    } as unknown as ApolloQueryResult<GetFriendRequests>);
+    // act
+    const result = await friendAPI.getFriendRequests();
+    // assert
+    expect(result).toStrictEqual(mockFriendRequests);
+    verify(MockApolloClient.query(deepEqual({
+      query: GET_FRIEND_REQUESTS,
+      fetchPolicy: 'no-cache'
+    }))).once();
+  });
+});
 
 describe('getFriendshipInfo', () => {
   it('should return the friendship info', async () => {

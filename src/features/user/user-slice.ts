@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import User, {UserCreation, UserUpdate} from "./types/user";
-import {ThunkApi} from "../../store/store";
+import {ThunkAPI} from "../../store/store";
 import UserError from "./types/user-error";
 import {isRight} from "fp-ts/Either";
 
@@ -18,7 +18,7 @@ const initialState: UserState = {
   error: null,
 };
 
-const getCurrentUser = createAsyncThunk<User | null, void, ThunkApi<UserError>>(
+const getCurrentUser = createAsyncThunk<User | null, void, ThunkAPI<UserError>>(
   'user/getCurrentUser',
   async (_, thunkApi) => {
     const result = await thunkApi.extra.userRepo.getCurrentUser();
@@ -29,7 +29,7 @@ const getCurrentUser = createAsyncThunk<User | null, void, ThunkApi<UserError>>(
   }
 );
 
-const createUser = createAsyncThunk<User, UserCreation, ThunkApi<UserError>>(
+const createUser = createAsyncThunk<User, UserCreation, ThunkAPI<UserError>>(
   'user/createUser',
   async (creation, thunkApi) => {
     const result = await thunkApi.extra.userRepo.createUser(creation);
@@ -40,7 +40,7 @@ const createUser = createAsyncThunk<User, UserCreation, ThunkApi<UserError>>(
   },
 );
 
-const updateUser= createAsyncThunk<User, UserUpdate, ThunkApi<UserError>>(
+const updateUser = createAsyncThunk<User, UserUpdate, ThunkAPI<UserError>>(
   'user/updateUser',
   async (update, thunkApi) => {
     const result = await thunkApi.extra.userRepo.updateUser(update);

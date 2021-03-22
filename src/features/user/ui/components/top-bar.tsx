@@ -4,7 +4,7 @@ import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {nonSelectable} from "../../../../styles/shared";
 
 type TopBarProps = {
-  children: React.ReactNode[],
+  children: React.ReactNode,
 }
 
 const TopBar = ({children}: TopBarProps) => {
@@ -42,6 +42,9 @@ export const useTopBarStyles = makeStyles((theme: Theme) =>
     },
     actionButton: {
       color: 'black',
+      '& .material-icons': {
+        fontSize: '1.8rem'
+      }
     }
   }),
 );

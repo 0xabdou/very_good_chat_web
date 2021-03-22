@@ -4,8 +4,11 @@ import {Friendship, FriendshipInfo} from "../types/friendship";
 import {isApolloError} from "@apollo/client";
 import {IFriendAPI} from "./sources/friend-api";
 import {GetUserArgs} from "../../user/types/user";
+import {FriendRequests} from "../types/friend-request";
 
 export interface IFriendRepository {
+  getFriendRequests(): Promise<Either<FriendError, FriendRequests>>;
+
   getFriendshipInfo(args: GetUserArgs):
     Promise<Either<FriendError, FriendshipInfo>>;
 
@@ -35,6 +38,10 @@ export default class FriendRepository implements IFriendRepository {
 
   constructor(friendAPI: IFriendAPI) {
     this._friendAPI = friendAPI;
+  }
+
+  getFriendRequests(): Promise<Either<FriendError, FriendRequests>> {
+    return this._leftOrRight(() => this._friendAPI.getFriendRequests());
   }
 
   getFriendshipInfo(args: GetUserArgs): Promise<Either<FriendError, FriendshipInfo>> {

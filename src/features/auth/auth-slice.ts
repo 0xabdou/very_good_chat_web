@@ -1,5 +1,5 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {ThunkApi} from "../../store/store";
+import {ThunkAPI} from "../../store/store";
 import AuthError from "./types/auth-error";
 import {isRight} from "fp-ts/Either";
 import LoginResult from "./types/login-result";
@@ -26,7 +26,7 @@ const initialState: AuthState = {
 };
 
 
-const getAccessToken = createAsyncThunk<string, void, ThunkApi<AuthError>>(
+const getAccessToken = createAsyncThunk<string, void, ThunkAPI<AuthError>>(
   'auth/getAccessToken',
   async (_, thunkAPI) => {
     const result = await thunkAPI.extra.authRepo.getAccessToken();
@@ -35,7 +35,7 @@ const getAccessToken = createAsyncThunk<string, void, ThunkApi<AuthError>>(
   },
 );
 
-const signInWithGoogle = createAsyncThunk<LoginResult, void, ThunkApi<AuthError>>(
+const signInWithGoogle = createAsyncThunk<LoginResult, void, ThunkAPI<AuthError>>(
   'auth/signInWithGoogle',
   async (_, thunkApi) => {
     const result = await thunkApi.extra.authRepo.signInWithGoogle();
@@ -46,7 +46,7 @@ const signInWithGoogle = createAsyncThunk<LoginResult, void, ThunkApi<AuthError>
   },
 );
 
-const signOut = createAsyncThunk<null, void, ThunkApi<AuthError>>(
+const signOut = createAsyncThunk<null, void, ThunkAPI<AuthError>>(
   'auth/signOut',
   async (_, thunkApi) => {
     const result = await thunkApi.extra.authRepo.signOut();

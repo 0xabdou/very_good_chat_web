@@ -1,8 +1,13 @@
-import {combineReducers, configureStore, getDefaultMiddleware} from "@reduxjs/toolkit";
+import {
+  combineReducers,
+  configureStore,
+  getDefaultMiddleware
+} from "@reduxjs/toolkit";
 import authReducer from '../features/auth/auth-slice';
 import userReducer from '../features/user/user-slice';
 import searchReducer from '../features/search/search-slice';
 import friendProfileReducer from '../features/friend/friend-profile-slice';
+import friendsReducer from '../features/friend/friends-slice';
 
 import StoreExtraArg from "./store-extra-arg";
 
@@ -10,7 +15,8 @@ const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
   search: searchReducer,
-  friendProfile: friendProfileReducer
+  friendProfile: friendProfileReducer,
+  friends: friendsReducer
 });
 
 const createStore = (services: StoreExtraArg) => {
@@ -28,7 +34,7 @@ export type AppState = ReturnType<typeof rootReducer>;
 
 export type AppDispatch = AppStore['dispatch'];
 
-export type ThunkApi<RejectType> = {
+export type ThunkAPI<RejectType> = {
   dispatch: AppDispatch,
   state: AppState,
   extra: StoreExtraArg,

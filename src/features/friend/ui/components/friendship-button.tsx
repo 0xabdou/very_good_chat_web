@@ -10,31 +10,14 @@ import {
 } from "@material-ui/core";
 import {Friendship, FriendshipStatus} from "../../types/friendship";
 import {PulseLoader} from "react-spinners";
-import {useFriendActions} from "../../friend-profile-actions-context";
+import {useFriendProfileActions} from "../../friend-profile-actions-context";
 import FriendError from "../../types/friend-error";
 import AlertDialog from "../../../../components/alert-dialog";
-
-const FMenu = (props: MenuProps) => {
-  return (
-    <Menu
-      getContentAnchorEl={null}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      {...props}
-    />
-  );
-};
 
 const FriendshipButton = () => {
   const state = useAppSelector(state => state.friendProfile);
   const dispatch = useAppDispatch();
-  const actions = useFriendActions();
+  const actions = useFriendProfileActions();
   const [anchorEl1, setAnchorEl1] = useState<HTMLElement | null>(null);
   const [anchorEl2, setAnchorEl2] = useState<HTMLElement | null>(null);
   const [anchorEl3, setAnchorEl3] = useState<HTMLElement | null>(null);
@@ -48,7 +31,7 @@ const FriendshipButton = () => {
     setAnchorEl3(null);
   }, []);
 
-  console.log('OUTER STATE IS: ',  state);
+  console.log('OUTER STATE IS: ', state);
   const handleError = async (promise: Promise<{
     meta: { requestStatus: 'fulfilled' | 'rejected' }
     payload: Friendship | FriendError | undefined
@@ -202,6 +185,23 @@ const FriendshipButton = () => {
         onConfirm={onUnfriendConfirmed}
       />
     </div>
+  );
+};
+
+const FMenu = (props: MenuProps) => {
+  return (
+    <Menu
+      getContentAnchorEl={null}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'center',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+      {...props}
+    />
   );
 };
 

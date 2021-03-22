@@ -10,7 +10,7 @@ export type RetryPageProps = {
 const RetryPage = (props: RetryPageProps) => {
   const classes = useStyles();
   return (
-    <div className={classes.root} data-testid='retry-button'>
+    <div className={classes.root}>
       <RetryButton onClick={props.onRetry} message={props.errorMessage}/>
     </div>
   );

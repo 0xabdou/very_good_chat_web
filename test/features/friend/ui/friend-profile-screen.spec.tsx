@@ -9,9 +9,10 @@ import {
   initialFriendProfileState
 } from "../../../../src/features/friend/friend-profile-slice";
 import {MemoryRouter, Route} from "react-router-dom";
-import FriendProfileScreen, {stringifyError} from "../../../../src/features/friend/ui/friend-profile-screen";
+import FriendProfileScreen
+  from "../../../../src/features/friend/ui/friend-profile-screen";
 import {getMockStore, mockFriendship, mockUser} from "../../../mock-objects";
-import FriendError from "../../../../src/features/friend/types/friend-error";
+import FriendError, {stringifyFriendError} from "../../../../src/features/friend/types/friend-error";
 
 const MockFriendsActions = mock<typeof friendProfileActions>();
 const MockStore = getMockStore();
@@ -108,7 +109,8 @@ const testError = (error: FriendError) => {
     // render
     renderIt(mockStore);
     // assert
-    expect(await screen.findByText(stringifyError(error))).toBeInTheDocument();
+    expect(await screen.findByText(stringifyFriendError(error)))
+      .toBeInTheDocument();
   });
 };
 

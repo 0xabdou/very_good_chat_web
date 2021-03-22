@@ -10,6 +10,7 @@ import FullscreenLoader from "../../../components/fullscreen-loader";
 import {Redirect, Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
 import FriendProfileScreen from "../../friend/ui/friend-profile-screen";
+import FriendRequestsScreen from "../../friend/ui/friend-requests-screen";
 
 
 const LoggedInScreen = () => {
@@ -66,6 +67,8 @@ const LoggedInScreen = () => {
               initialPhotoURL={user.photo?.source}
             />
           </Route>
+          <Route path='/requests'><FriendRequestsScreen received/></Route>
+          <Route path='/sent-requests'><FriendRequestsScreen/></Route>
           <Redirect exact from={`/u/${user.username}`} to='/profile'/>
           <Route path='/u/:username'>
             <FriendProfileScreen/>

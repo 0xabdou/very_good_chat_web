@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import User from "../user/types/user";
 import {SearchError} from "./types/search-error";
-import {ThunkApi} from "../../store/store";
+import {ThunkAPI} from "../../store/store";
 import {isRight} from "fp-ts/These";
 
 export type SearchState = {
@@ -18,7 +18,7 @@ export const initialSearchState: SearchState = {
   error: null,
 };
 
-const searchForUsers = createAsyncThunk<User[], string, ThunkApi<SearchError>>(
+const searchForUsers = createAsyncThunk<User[], string, ThunkAPI<SearchError>>(
   'search/searchForUsers',
   async (searchQuery, thunkAPI) => {
     const result = await thunkAPI.extra.searchRepo.findUsers(searchQuery);

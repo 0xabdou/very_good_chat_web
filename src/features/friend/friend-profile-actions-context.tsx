@@ -4,7 +4,7 @@ import React, {useContext} from "react";
 export const FriendProfileActionsContext =
   React.createContext(friendProfileActions);
 
-export const useFriendActions = () => useContext(FriendProfileActionsContext);
+export const useFriendProfileActions = () => useContext(FriendProfileActionsContext);
 
 const FriendProfileActionsProvider =
   ({children}: { children: React.ReactNode }) => {

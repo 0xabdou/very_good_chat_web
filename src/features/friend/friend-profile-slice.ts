@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import User from "../user/types/user";
 import {Friendship, FriendshipInfo} from "./types/friendship";
-import {ThunkApi} from "../../store/store";
+import {ThunkAPI} from "../../store/store";
 import FriendError from "./types/friend-error";
 import {isRight} from "fp-ts/Either";
 
@@ -13,7 +13,7 @@ export type FriendProfileState = {
   error: FriendError | null;
 }
 
-const getFriendshipInfo = createAsyncThunk<FriendshipInfo, string, ThunkApi<FriendError>>(
+const getFriendshipInfo = createAsyncThunk<FriendshipInfo, string, ThunkAPI<FriendError>>(
   'friendProfile/getFriendshipInfo',
   async (username, thunkAPI) => {
     const result = await thunkAPI.extra.friendRepo
@@ -23,7 +23,7 @@ const getFriendshipInfo = createAsyncThunk<FriendshipInfo, string, ThunkApi<Frie
   }
 );
 
-const sendFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
+const sendFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
   'friendProfile/sendFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -38,7 +38,7 @@ const sendFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendErro
   }
 );
 
-const cancelFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
+const cancelFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
   'friendProfile/cancelFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -53,7 +53,7 @@ const cancelFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendEr
   }
 );
 
-const acceptFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
+const acceptFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
   'friendProfile/acceptFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -68,7 +68,7 @@ const acceptFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendEr
   }
 );
 
-const declineFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
+const declineFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
   'friendProfile/declineFriendRequest',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;
@@ -83,7 +83,7 @@ const declineFriendRequest = createAsyncThunk<Friendship, void, ThunkApi<FriendE
   }
 );
 
-const unfriend = createAsyncThunk<Friendship, void, ThunkApi<FriendError>>(
+const unfriend = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
   'friendProfile/unfriend',
   async (_, thunkAPI) => {
     const userID = thunkAPI.getState().friendProfile.user?.id;

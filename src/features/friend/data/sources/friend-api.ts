@@ -8,6 +8,7 @@ import {
   ACCEPT_FRIEND_REQUEST_MUTATION,
   CANCEL_FRIEND_REQUEST_MUTATION,
   DECLINE_FRIEND_REQUEST_MUTATION,
+  GET_FRIEND_REQUESTS,
   GET_FRIENDSHIP_INFO_QUERY,
   SEND_FRIEND_REQUEST_MUTATION,
   UNFRIEND_MUTATION
@@ -31,8 +32,13 @@ import {
 import {Unfriend, UnfriendVariables} from "../../../../_generated/Unfriend";
 import {GetUserArgs} from "../../../user/types/user";
 import {UserAPI} from "../../../user/data/sources/user-api";
+import {FriendRequests} from "../../types/friend-request";
+import {GetFriendRequests} from "../../../../_generated/GetFriendRequests";
 
 export interface IFriendAPI {
+
+  getFriendRequests(): Promise<FriendRequests>;
+
   getFriendshipInfo(args: GetUserArgs): Promise<FriendshipInfo>;
 
   sendFriendRequest(userID: string): Promise<Friendship>;
@@ -51,6 +57,25 @@ export default class FriendAPI implements IFriendAPI {
 
   constructor(client: ApolloClient<any>) {
     this._client = client;
+  }
+
+  async getFriendRequests(): Promise<FriendRequests> {
+    const {data} = await this._client.query<GetFriendRequests>({
+      query: GET_FRIEND_REQUESTS,
+      fetchPolicy: 'no-cache'
+    });
+
+    const requests = data.getFriendRequests;
+    return {
+      sent: requests.sent.map(r => ({
+        user: UserAPI.parseUser(r.user),
+        date: r.date,
+      })),
+      received: requests.received.map(r => ({
+        user: UserAPI.parseUser(r.user),
+        date: r.date,
+      })),
+    };
   }
 
   async getFriendshipInfo(args: GetUserArgs): Promise<FriendshipInfo> {

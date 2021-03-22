@@ -1,19 +1,16 @@
-import React, {useCallback, useContext, useState} from "react";
+import React, {useCallback, useState} from "react";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
 import {
   Avatar,
+  Badge,
   Icon,
   IconButton,
   makeStyles,
   Typography
 } from "@material-ui/core";
-import MenuDialog, {MenuDialogItemProps} from "./components/menu-dialog";
 import {useHistory} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {AppState} from "../../../store/store";
-import {AuthActionsContext} from "../../auth/auth-actions-context";
-import {UserActionsContext} from "../user-actions-context";
-import {useAppDispatch} from "../../../store/hooks";
 import {wrapper} from "../../../styles/shared";
 import SearchTextField from "../../search/ui/components/search-text-field";
 import SearchScreen from "../../search/ui/search-screen";
@@ -21,27 +18,19 @@ import SearchActionsProvider from "../../search/search-actions-context";
 
 const MainScreen = () => {
   const [searching, setSearching] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const history = useHistory();
   const state = useSelector((state: AppState) => state.user);
-  const {signOut} = useContext(AuthActionsContext);
-  const {resetUser} = useContext(UserActionsContext);
-  const dispatch = useAppDispatch();
 
   if (!state.currentUser)
     return <div/>;
 
   const goToProfile = useCallback(() => {
-    setMenuOpen(false);
     history.push('/profile');
-  }, [menuOpen, history]);
+  }, [history]);
 
-  const logout = async () => {
-    setMenuOpen(false);
-    await dispatch(signOut());
-    // TODO: check if signOut succeeded, then resetUser
-    dispatch(resetUser());
-  };
+  const goToRequests = useCallback(() => {
+    history.push('/requests');
+  }, [history]);
 
   const beginSearch = useCallback(() => {
     setSearching(true);
@@ -51,11 +40,6 @@ const MainScreen = () => {
     setSearching(false);
   }, []);
 
-  const menuItems: MenuDialogItemProps[] = [
-    {icon: 'person', label: 'profile', onClick: goToProfile},
-    {icon: 'logout', label: 'sign out', onClick: logout},
-  ];
-
   const topBarClasses = useTopBarStyles();
   const classes = useStyles();
 
@@ -63,26 +47,25 @@ const MainScreen = () => {
     <div className={classes.wrapper} data-testid='main-screen'>
       <TopBar>
         <Avatar
-          className={topBarClasses.leading}
+          className={topBarClasses.leading + ' ' + classes.avatar}
           src={state.currentUser.photo?.small}
           alt='profile photo'
+          onClick={goToProfile}
         />
         <Typography variant="h6" className={topBarClasses.title}>
           Chats
         </Typography>
-        <IconButton
-          className={topBarClasses.actionButton}
-          onClick={() => setMenuOpen(true)}>
-          <Icon>more_horiz</Icon>
+        <IconButton className={topBarClasses.actionButton}
+                    onClick={goToRequests}>
+          <Badge badgeContent={0} className={classes.badge}>
+            <Icon>people</Icon>
+          </Badge>
         </IconButton>
         <IconButton className={topBarClasses.actionButton}>
-          <Icon>create</Icon>
+          <Badge badgeContent={2} className={classes.badge}>
+            <Icon>notifications</Icon>
+          </Badge>
         </IconButton>
-        <MenuDialog
-          visible={menuOpen}
-          items={menuItems}
-          onClose={() => setMenuOpen(false)}
-        />
       </TopBar>
       <SearchTextField
         onFocus={beginSearch}
@@ -121,6 +104,15 @@ const useStyles = makeStyles({
   inner: {
     background: 'blue',
     height: '1000px',
+  },
+  avatar: {
+    cursor: 'pointer'
+  },
+  badge: {
+    '& .MuiBadge-badge': {
+      background: 'red',
+      color: 'white',
+    }
   }
 });
 

@@ -15,6 +15,7 @@ import {MeQuery_me} from "../src/_generated/MeQuery";
 import {GetFriendshipInfo_getFriendshipInfo} from "../src/_generated/GetFriendshipInfo";
 import {GraphQLError} from "graphql";
 import {ApolloError} from "@apollo/client";
+import {FriendRequests} from "../src/features/friend/types/friend-request";
 
 export const MockFile = mock<File>();
 
@@ -86,9 +87,20 @@ export const mockGQLFriendshipInfo: GetFriendshipInfo_getFriendshipInfo = {
   friendship: {
     __typename: 'Friendship',
     ...mockFriendship,
-    date: null
+    date: mockFriendship.date ?? null,
   },
   user: mockGQLUser,
+};
+
+export const mockFriendRequests: FriendRequests = {
+  sent: [{
+    user: {...mockUser, id: 'sentID', username: 'sentUsername'},
+    date: new Date(),
+  }],
+  received: [{
+    user: {...mockUser, id: 'receivedUsername', username: 'receivedUsername'},
+    date: new Date(),
+  }]
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);

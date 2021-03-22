@@ -6,16 +6,15 @@ import User from "../../user/types/user";
 import CommonProfileInfo from "../../user/ui/components/common-profile-info";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {shallowEqual} from "react-redux";
-import {useFriendActions} from "../friend-profile-actions-context";
+import {useFriendProfileActions} from "../friend-profile-actions-context";
 import FriendshipButton from "./components/friendship-button";
 import {ErrorSnackbar} from "../../../components/snackbars";
-import FriendError from "../types/friend-error";
-
+import FriendError, {stringifyFriendError} from "../types/friend-error";
 
 const FriendProfileScreen = () => {
   const state = useAppSelector(state => state.friendProfile, shallowEqual);
   const dispatch = useAppDispatch();
-  const actions = useFriendActions();
+  const actions = useFriendProfileActions();
   const [cachedUser, setCachedUser] = useState<User>();
   const searchResults = useAppSelector(state => state.search.results);
   const routeParams = useParams<{ username: string }>();
@@ -40,7 +39,7 @@ const FriendProfileScreen = () => {
       </div>
       <ErrorSnackbar<FriendError>
         currentError={state.error}
-        stringify={stringifyError}
+        stringify={stringifyFriendError}
         exclude={[]}
       />
     </div>
@@ -60,20 +59,5 @@ const useStyles = makeStyles({
     margin: 'auto',
   },
 });
-
-export const stringifyError = (e: FriendError | null) => {
-  switch (e) {
-    case FriendError.alreadyFriends:
-      return "You're already friends";
-    case FriendError.requestRemoved:
-      return "This request was deleted";
-    case FriendError.requestAlreadyReceived:
-      return "This user already sent you a request";
-    case FriendError.network:
-      return "Check your internet";
-    default:
-      return "Something weird happened";
-  }
-};
 
 export default FriendProfileScreen;
