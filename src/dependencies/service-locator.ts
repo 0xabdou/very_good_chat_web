@@ -22,7 +22,7 @@ import FriendAPI, {IFriendAPI} from "../features/friend/data/sources/friend-api"
 
 type Dependencies = { [key in TYPES]?: any };
 
-export const SERVER_URL = 'http://localhost:4000';
+export const SERVER_URL = viteEnv.VITE_BACKEND_URL!.toString();
 
 class ServiceLocator {
   private _dependencies: Dependencies = {};
