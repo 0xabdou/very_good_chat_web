@@ -12,7 +12,8 @@ import {
 import {
   FIND_USERS_QUERY,
   ME_QUERY,
-  REGISTER_MUTATION, UPDATE_USER_MUTATION,
+  REGISTER_MUTATION,
+  UPDATE_USER_MUTATION,
   USERNAME_EXISTENCE_QUERY
 } from "../../../../../src/features/user/data/graphql";
 import {
@@ -64,7 +65,7 @@ describe('updateUser', () => {
     // arrange
     const updateUserInput = mockUserUpdate;
     when(MockApolloClient.mutate
-      <UpdateUserMutation, UpdateUserMutationVariables>(
+      < UpdateUserMutation, UpdateUserMutationVariables > (
       deepEqual({
         mutation: UPDATE_USER_MUTATION,
         variables: {updateUserInput},
@@ -124,7 +125,7 @@ describe('findUsers', () => {
     // arrange
     const searchQuery = 'search query';
     when(MockApolloClient.query(anything())).thenResolve({
-      data: {findUsers:[mockGQLUser]}
+      data: {findUsers: [mockGQLUser]}
     } as ApolloQueryResult<FindUsersQuery>);
     // act
     const result = await userAPI.findUsers(searchQuery);

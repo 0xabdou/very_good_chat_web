@@ -1,5 +1,12 @@
 import React from "react";
-import {Button, unstable_createMuiStrictModeTheme as createMuiTheme, getLuminance, Icon, makeStyles, Theme} from "@material-ui/core";
+import {
+  Button,
+  getLuminance,
+  Icon,
+  makeStyles,
+  Theme,
+  unstable_createMuiStrictModeTheme as createMuiTheme
+} from "@material-ui/core";
 
 
 export type CircleButtonStyle = {

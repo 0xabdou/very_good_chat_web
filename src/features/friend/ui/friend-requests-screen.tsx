@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from "react";
+import React, {useCallback} from "react";
 import {Button, makeStyles, Typography} from "@material-ui/core";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {PulseLoader} from "react-spinners";
@@ -25,12 +25,6 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
   const history = useHistory();
   const classes = useStyles();
   const topBarClasses = useTopBarStyles();
-
-  useEffect(() => {
-    if (state.error == null && !state.friendRequests) {
-      dispatch(actions.getFriendRequests());
-    }
-  }, []);
 
   const goToUserProfile = useCallback((user: User) => {
     history.push(`/u/${user.username}`);

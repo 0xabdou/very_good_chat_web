@@ -17,7 +17,6 @@ import FriendError from "../../../../../src/features/friend/types/friend-error";
 
 const MockStore = getMockStore();
 const MockFriendsActions = mock<typeof friendsActions>();
-const getRequestsAction = {type: 'get'} as any;
 const declineRequestAction = {type: 'decline'} as any;
 const acceptRequestAction = {type: 'accept'} as any;
 const cancelRequestAction = {type: 'cancel'} as any;
@@ -56,7 +55,6 @@ const renderIt = (store: AppStore, path: string = '/requests') => {
 
 beforeEach(() => {
   reset(MockFriendsActions);
-  when(MockFriendsActions.getFriendRequests()).thenReturn(getRequestsAction);
   when(MockFriendsActions.cancelFriendRequest(anything()))
     .thenReturn(cancelRequestAction);
   when(MockFriendsActions.declineFriendRequest(anything()))
@@ -83,9 +81,6 @@ describe('received', () => {
     renderIt(mockStore);
     // assert
     expect(screen.getByTestId('requests-loading')).toBeInTheDocument();
-    verify(MockFriendsActions.getFriendRequests()).once();
-    expect(mockStore.getActions()).toHaveLength(1);
-    expect(mockStore.getActions()[0]).toBe(getRequestsAction);
   });
 
   it('should display some text if there are no requests', () => {
@@ -185,9 +180,6 @@ describe('sent', () => {
     renderSent(mockStore);
     // assert
     expect(screen.getByTestId('requests-loading')).toBeInTheDocument();
-    verify(MockFriendsActions.getFriendRequests()).once();
-    expect(mockStore.getActions()).toHaveLength(1);
-    expect(mockStore.getActions()[0]).toBe(getRequestsAction);
   });
 
   it('should display some text if there are no requests', () => {

@@ -12,7 +12,8 @@ const MenuDialog = (props: MenuDialogProps) => {
   const classes = useStyles();
 
   const menuItems = props.items.map(
-    (item, idx) => <MenuDialogItem className={classes.item} {...item} key={idx}/>
+    (item, idx) => <MenuDialogItem className={classes.item} {...item}
+                                   key={idx}/>
   );
 
   return (

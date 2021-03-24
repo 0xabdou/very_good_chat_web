@@ -8,7 +8,7 @@ import {
   UserRepository
 } from "../features/user/data/user-repository";
 import StoreExtraArg from "../store/store-extra-arg";
-import {ApolloClient, ApolloLink, concat, InMemoryCache} from "@apollo/client";
+import {ApolloClient, ApolloLink, InMemoryCache} from "@apollo/client";
 import {AuthAPI, IAuthAPI} from "../features/auth/data/sources/auth-api";
 import {createUploadLink} from 'apollo-upload-client';
 import axios, {AxiosInstance} from "axios";
@@ -18,6 +18,9 @@ import {
 } from "../features/search/data/search-repository";
 import FriendRepository, {IFriendRepository} from "../features/friend/data/friend-repository";
 import FriendAPI, {IFriendAPI} from "../features/friend/data/sources/friend-api";
+import BadgeAPI, {IBadgeAPI} from "../features/badge/data/sources/badge-api";
+import BadgeRepository, {IBadgeRepository} from "../features/badge/data/badge-repository";
+import {onError} from "@apollo/client/link/error";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -46,7 +49,6 @@ class ServiceLocator {
 const sl = new ServiceLocator();
 const initDependencies = async () => {
   const SERVER_URL = `${viteEnv.VITE_BACKEND_URL}`;
-  console.log('TOOOOOOOOOOOo: ', SERVER_URL);
   // Auth
   sl.register<GoogleAuth>(TYPES.GoogleAuth, new GoogleAuth());
   const authMiddleware = new ApolloLink((operation, forward) => {
@@ -64,11 +66,19 @@ const initDependencies = async () => {
     uri: `${SERVER_URL}/graphql`,
     credentials: 'include',
   });
+  const errorLink = onError(({graphQLErrors, networkError}) => {
+    if (graphQLErrors) {
+      console.log('graphQLErrors', JSON.stringify(graphQLErrors));
+    }
+    if (networkError) {
+      console.log('networkError', JSON.stringify(networkError));
+    }
+  });
 
   const client = new ApolloClient({
     cache: new InMemoryCache({}),
     connectToDevTools: true,
-    link: concat(authMiddleware, httpLink),
+    link: ApolloLink.from([errorLink, authMiddleware, httpLink]),
   });
   sl.register<ApolloClient<any>>(TYPES.ApolloClient, client);
   sl.register<AxiosInstance>(
@@ -113,6 +123,15 @@ const initDependencies = async () => {
     TYPES.IFriendRepository,
     new FriendRepository(sl.get(TYPES.IFriendAPI))
   );
+  // Badge
+  sl.register<IBadgeAPI>(
+    TYPES.IBadgeAPI,
+    new BadgeAPI(sl.get(TYPES.ApolloClient))
+  );
+  sl.register<IBadgeRepository>(
+    TYPES.IBadgeRepository,
+    new BadgeRepository(sl.get(TYPES.IBadgeAPI))
+  );
   // Redux
   sl.register<StoreExtraArg>(
     TYPES.StoreExtraArgs,
@@ -120,7 +139,8 @@ const initDependencies = async () => {
       authRepo: sl.get(TYPES.IAuthRepository),
       userRepo: sl.get(TYPES.IUserRepository),
       searchRepo: sl.get(TYPES.ISearchRepository),
-      friendRepo: sl.get(TYPES.IFriendRepository)
+      friendRepo: sl.get(TYPES.IFriendRepository),
+      badgeRepo: sl.get(TYPES.IBadgeRepository)
     },
   );
   sl.register(

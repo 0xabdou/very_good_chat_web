@@ -16,6 +16,9 @@ import {GetFriendshipInfo_getFriendshipInfo} from "../src/_generated/GetFriendsh
 import {GraphQLError} from "graphql";
 import {ApolloError} from "@apollo/client";
 import {FriendRequests} from "../src/features/friend/types/friend-request";
+import {UpdateBadge_updateBadge} from "../src/_generated/UpdateBadge";
+import {BadgeName as GQLBadgeName} from "../src/_generated/globalTypes";
+import {Badge, BadgeName} from "../src/features/badge/types/badge";
 
 export const MockFile = mock<File>();
 
@@ -101,6 +104,17 @@ export const mockFriendRequests: FriendRequests = {
     user: {...mockUser, id: 'receivedUsername', username: 'receivedUsername'},
     date: new Date(),
   }]
+};
+
+export const mockGQLBadge: UpdateBadge_updateBadge = {
+  __typename: 'Badge',
+  badgeName: GQLBadgeName.FRIEND_REQUESTS,
+  lastOpened: new Date()
+};
+
+export const mockBadge: Badge = {
+  badgeName: BadgeName.FRIEND_REQUESTS,
+  lastOpened: new Date()
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);

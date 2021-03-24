@@ -10,6 +10,11 @@ type AuthUser {
     photoUrl: String
 }
 
+type Badge {
+    badgeName: BadgeName!
+    lastOpened: Timestamp!
+}
+
 type FriendRequest {
     date: Timestamp!
     user: User!
@@ -43,12 +48,14 @@ type Mutation {
     register(input: UserCreation!): User!
     sendFriendRequest(userID: String!): Friendship!
     unfriend(userID: String!): Friendship!
+    updateBadge(badgeName: BadgeName!): Badge!
     updateUser(input: UserUpdate!): User!
 }
 
 type Query {
     checkUsernameExistence(username: String!): Boolean!
     findUsers(searchQuery: String!): [User!]!
+    getBadges: [Badge!]!
     getFriendRequests: FriendRequests!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
     me: User!
@@ -61,6 +68,11 @@ type User {
     photoURLSmall: String
     photoURLSource: String
     username: String!
+}
+
+enum BadgeName {
+    FRIEND_REQUESTS
+    NOTIFICATIONS
 }
 
 enum FriendshipStatus {

@@ -7,6 +7,11 @@
 // START Enums and Input Objects
 //==============================================================
 
+export enum BadgeName {
+  FRIEND_REQUESTS = "FRIEND_REQUESTS",
+  NOTIFICATIONS = "NOTIFICATIONS",
+}
+
 export enum FriendshipStatus {
   BLOCKED = "BLOCKED",
   BLOCKING = "BLOCKING",

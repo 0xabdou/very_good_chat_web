@@ -8,6 +8,7 @@ import userReducer from '../features/user/user-slice';
 import searchReducer from '../features/search/search-slice';
 import friendProfileReducer from '../features/friend/friend-profile-slice';
 import friendsReducer from '../features/friend/friends-slice';
+import badgeReducer from '../features/badge/badge-slice';
 
 import StoreExtraArg from "./store-extra-arg";
 
@@ -16,7 +17,8 @@ const rootReducer = combineReducers({
   user: userReducer,
   search: searchReducer,
   friendProfile: friendProfileReducer,
-  friends: friendsReducer
+  friends: friendsReducer,
+  badge: badgeReducer
 });
 
 const createStore = (services: StoreExtraArg) => {

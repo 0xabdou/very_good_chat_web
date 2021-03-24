@@ -18,7 +18,8 @@ type FullScreenDialogProps = {
 const FullScreenDialog = (props: FullScreenDialogProps) => {
 
   return (
-    <Dialog fullScreen open={props.visible} onClose={props.onClose} TransitionComponent={Transition}>
+    <Dialog fullScreen open={props.visible} onClose={props.onClose}
+            TransitionComponent={Transition}>
       {props.children}
     </Dialog>
   );

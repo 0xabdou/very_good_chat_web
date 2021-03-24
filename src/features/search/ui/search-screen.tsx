@@ -45,7 +45,7 @@ const SearchScreen = () => {
   } else if (state.results) {
     if (state.results.length) {
       child = (
-        <AutoSizer >
+        <AutoSizer>
           {({height, width}) => {
             return <FixedSizeList
               itemCount={state.results!.length}

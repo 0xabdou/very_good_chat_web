@@ -1,5 +1,4 @@
 import {PhotoUtils} from "../../src/utils/photo-utils";
-import {instance, mock, when} from "ts-mockito";
 
 const photo = {} as File;
 const url = 'photo url';
@@ -10,7 +9,7 @@ beforeAll(() => {
   global.URL = {
     createObjectURL: jest.fn(() => url),
   } as unknown as typeof global.URL;
-})
+});
 
 describe('photoToURL', () => {
   it('should call URL.createObjectURL', async () => {
@@ -21,4 +20,4 @@ describe('photoToURL', () => {
     expect(global.URL.createObjectURL).toBeCalledTimes(1);
     expect(res).toBe(url);
   });
-})
+});

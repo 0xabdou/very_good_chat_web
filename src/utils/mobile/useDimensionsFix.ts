@@ -15,7 +15,7 @@ const useDimensionsFix = () => {
   useEffect(() => {
     _setDimensions();
     window.addEventListener('resize', _setDimensions);
-  },[]);
+  }, []);
 };
 
 export default useDimensionsFix;

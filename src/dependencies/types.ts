@@ -12,8 +12,11 @@ enum TYPES {
   // Search
   ISearchRepository = 'ISearchRepository',
   // Friend
-  IFriendAPI= 'IFriendAPI',
+  IFriendAPI = 'IFriendAPI',
   IFriendRepository = 'IFriendRepository',
+  // Badge
+  IBadgeAPI = 'IBadgeAPI',
+  IBadgeRepository = 'IBadgeRepository',
   // Other
   StoreExtraArgs = 'StoreExtraArgs',
   AppStore = 'AppStore',

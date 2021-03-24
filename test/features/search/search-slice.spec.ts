@@ -15,7 +15,7 @@ const {searchForUsers} = searchActions;
 const mockStore = getMockStore()();
 const MockSearchRepository = mock<ISearchRepository>();
 const extraArg = {
- searchRepo: instance(MockSearchRepository),
+  searchRepo: instance(MockSearchRepository),
 } as StoreExtraArg;
 
 beforeEach(() => {
@@ -56,12 +56,12 @@ describe('searchForUsers', () => {
 
   describe('reducers', () => {
     const initialState = initialSearchState;
-    const loadingState = {...initialState, loading: true}
+    const loadingState = {...initialState, loading: true};
 
-    it('pending reducer should return the right state', async ()  => {
+    it('pending reducer should return the right state', async () => {
       // arrange
       const searchQuery = 'akjdhklsjk';
-      const action :PayloadAction<undefined, string, {arg: string}> = {
+      const action: PayloadAction<undefined, string, { arg: string }> = {
         type: searchForUsers.pending.type,
         payload: undefined,
         meta: {arg: searchQuery}
@@ -72,9 +72,9 @@ describe('searchForUsers', () => {
       expect(result).toStrictEqual({...loadingState, searchQuery});
     });
 
-    it('fulfilled reducer should return the right state', async ()  => {
+    it('fulfilled reducer should return the right state', async () => {
       // arrange
-      const action :PayloadAction<User[]> = {
+      const action: PayloadAction<User[]> = {
         type: searchForUsers.fulfilled.type,
         payload: [mockUser],
       };
@@ -88,9 +88,9 @@ describe('searchForUsers', () => {
       });
     });
 
-    it('rejected reducer should return the right state', async ()  => {
+    it('rejected reducer should return the right state', async () => {
       // arrange
-      const action :PayloadAction<SearchError> = {
+      const action: PayloadAction<SearchError> = {
         type: searchForUsers.rejected.type,
         payload: SearchError.network,
       };

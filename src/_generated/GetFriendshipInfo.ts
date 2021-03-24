@@ -3,7 +3,7 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
-import { FriendshipStatus } from "./globalTypes";
+import {FriendshipStatus} from "./globalTypes";
 
 // ====================================================
 // GraphQL query operation: GetFriendshipInfo

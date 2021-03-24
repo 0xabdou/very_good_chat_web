@@ -1,4 +1,11 @@
-import {Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle} from "@material-ui/core";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from "@material-ui/core";
 import React from "react";
 
 type AlertDialogProps = {
@@ -20,13 +27,16 @@ const AlertDialog = (props: AlertDialogProps) => {
     >
       <DialogTitle id="alert-dialog-title">{props.title}</DialogTitle>
       <DialogContent>
-        <DialogContentText id="alert-dialog-description">{props.content}</DialogContentText>
+        <DialogContentText
+          id="alert-dialog-description">{props.content}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={props.onCancel} color="primary" data-testid='alert-cancel'>
+        <Button onClick={props.onCancel} color="primary"
+                data-testid='alert-cancel'>
           Cancel
         </Button>
-        <Button onClick={props.onConfirm} color="primary" autoFocus data-testid='alert-confirm'>
+        <Button onClick={props.onConfirm} color="primary" autoFocus
+                data-testid='alert-confirm'>
           Confirm
         </Button>
       </DialogActions>

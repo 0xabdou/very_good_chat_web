@@ -34,7 +34,7 @@ export interface IUserAPI {
 
   isUsernameTaken(username: string): Promise<boolean>;
 
-  findUsers(searchQuery: string) : Promise<User[]>
+  findUsers(searchQuery: string): Promise<User[]>
 }
 
 export class UserAPI implements IUserAPI {
@@ -58,7 +58,7 @@ export class UserAPI implements IUserAPI {
         medium: user.photoURLMedium!,
         small: user.photoURLSmall!
       }
-    }
+    };
   }
 
   async updateUser(update: UserUpdate): Promise<User> {
@@ -86,7 +86,7 @@ export class UserAPI implements IUserAPI {
     return data.checkUsernameExistence;
   }
 
-  async findUsers(searchQuery: string) : Promise<User[]> {
+  async findUsers(searchQuery: string): Promise<User[]> {
     const {data} = await this._client.query<FindUsersQuery,
       FindUsersQueryVariables>({
       query: FIND_USERS_QUERY,
@@ -105,6 +105,6 @@ export class UserAPI implements IUserAPI {
         medium: user.photoURLMedium!,
         small: user.photoURLSmall!
       }
-    }
+    };
   }
 }

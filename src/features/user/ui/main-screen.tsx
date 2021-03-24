@@ -1,13 +1,6 @@
 import React, {useCallback, useState} from "react";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
-import {
-  Avatar,
-  Badge,
-  Icon,
-  IconButton,
-  makeStyles,
-  Typography
-} from "@material-ui/core";
+import {Avatar, makeStyles, Typography} from "@material-ui/core";
 import {useHistory} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {AppState} from "../../../store/store";
@@ -15,6 +8,7 @@ import {wrapper} from "../../../styles/shared";
 import SearchTextField from "../../search/ui/components/search-text-field";
 import SearchScreen from "../../search/ui/search-screen";
 import SearchActionsProvider from "../../search/search-actions-context";
+import Badges from "../../badge/ui/components/badges";
 
 const MainScreen = () => {
   const [searching, setSearching] = useState(false);
@@ -26,10 +20,6 @@ const MainScreen = () => {
 
   const goToProfile = useCallback(() => {
     history.push('/profile');
-  }, [history]);
-
-  const goToRequests = useCallback(() => {
-    history.push('/requests');
   }, [history]);
 
   const beginSearch = useCallback(() => {
@@ -55,17 +45,7 @@ const MainScreen = () => {
         <Typography variant="h6" className={topBarClasses.title}>
           Chats
         </Typography>
-        <IconButton className={topBarClasses.actionButton}
-                    onClick={goToRequests}>
-          <Badge badgeContent={0} className={classes.badge}>
-            <Icon>people</Icon>
-          </Badge>
-        </IconButton>
-        <IconButton className={topBarClasses.actionButton}>
-          <Badge badgeContent={2} className={classes.badge}>
-            <Icon>notifications</Icon>
-          </Badge>
-        </IconButton>
+        <Badges/>
       </TopBar>
       <SearchTextField
         onFocus={beginSearch}
@@ -108,12 +88,6 @@ const useStyles = makeStyles({
   avatar: {
     cursor: 'pointer'
   },
-  badge: {
-    '& .MuiBadge-badge': {
-      background: 'red',
-      color: 'white',
-    }
-  }
 });
 
 export default MainScreen;

@@ -8,7 +8,10 @@ import {
   mockUserUpdate
 } from "../../mock-objects";
 import {left, right} from "fp-ts/Either";
-import userReducer, {userActions, UserState} from "../../../src/features/user/user-slice";
+import userReducer, {
+  userActions,
+  UserState
+} from "../../../src/features/user/user-slice";
 import UserError from "../../../src/features/user/types/user-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import User from "../../../src/features/user/types/user";
@@ -59,9 +62,16 @@ describe('getCurrentUser', () => {
     };
 
     it('should return the right state if fulfilled', () => {
-      const action: PayloadAction<User> = {type: getCurrentUser.fulfilled.type, payload: mockUser};
+      const action: PayloadAction<User> = {
+        type: getCurrentUser.fulfilled.type,
+        payload: mockUser
+      };
       const result = userReducer(initialState, action);
-      expect(result).toStrictEqual({...initialState, currentUser: mockUser, initialized: true});
+      expect(result).toStrictEqual({
+        ...initialState,
+        currentUser: mockUser,
+        initialized: true
+      });
     });
 
     it('should return the right state if rejected with userNotFound error', () => {
@@ -74,7 +84,10 @@ describe('getCurrentUser', () => {
     });
 
     it('should return the right state if rejected with some other error', () => {
-      const action: PayloadAction<UserError> = {type: getCurrentUser.rejected.type, payload: userError};
+      const action: PayloadAction<UserError> = {
+        type: getCurrentUser.rejected.type,
+        payload: userError
+      };
       const result = userReducer(initialState, action);
       expect(result).toStrictEqual({...initialState, error: userError});
     });

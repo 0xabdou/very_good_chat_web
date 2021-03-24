@@ -3,7 +3,7 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
-import { UserCreation } from "./globalTypes";
+import {UserCreation} from "./globalTypes";
 
 // ====================================================
 // GraphQL mutation operation: RegisterMutation

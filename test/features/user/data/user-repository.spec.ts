@@ -119,7 +119,7 @@ describe('updateUser()', () => {
 
   it('should not check username existence if it was not there', async () => {
     // arrange
-    const update :UserUpdate= {
+    const update: UserUpdate = {
       ...mockUserUpdate,
       username: undefined,
     };

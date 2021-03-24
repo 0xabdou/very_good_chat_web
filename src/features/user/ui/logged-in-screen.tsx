@@ -11,6 +11,8 @@ import {Redirect, Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
 import FriendProfileScreen from "../../friend/ui/friend-profile-screen";
 import FriendRequestsScreen from "../../friend/ui/friend-requests-screen";
+import {useFriendsActions} from "../../friend/friends-actions-context";
+import {useBadgeActions} from "../../badge/badge-actions-context";
 
 
 const LoggedInScreen = () => {
@@ -18,9 +20,13 @@ const LoggedInScreen = () => {
   const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
   const {getCurrentUser} = useUserActions();
+  const {getFriendRequests} = useFriendsActions();
+  const {getBadges} = useBadgeActions();
 
   useEffect(() => {
     dispatch(getCurrentUser());
+    dispatch(getFriendRequests());
+    dispatch(getBadges());
   }, []);
 
   const classes = useStyles();
