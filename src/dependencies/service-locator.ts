@@ -21,6 +21,8 @@ import FriendAPI, {IFriendAPI} from "../features/friend/data/sources/friend-api"
 import BadgeAPI, {IBadgeAPI} from "../features/badge/data/sources/badge-api";
 import BadgeRepository, {IBadgeRepository} from "../features/badge/data/badge-repository";
 import {onError} from "@apollo/client/link/error";
+import NotificationAPI, {INotificationAPI} from "../features/notification/data/sources/notification-api";
+import NotificationRepository, {INotificationRepository} from "../features/notification/data/notification-repository";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -132,6 +134,15 @@ const initDependencies = async () => {
     TYPES.IBadgeRepository,
     new BadgeRepository(sl.get(TYPES.IBadgeAPI))
   );
+  // Notification
+  sl.register<INotificationAPI>(
+    TYPES.INotificationAPI,
+    new NotificationAPI(sl.get(TYPES.ApolloClient))
+  );
+  sl.register<INotificationRepository>(
+    TYPES.INotificationRepository,
+    new NotificationRepository(sl.get(TYPES.INotificationAPI))
+  );
   // Redux
   sl.register<StoreExtraArg>(
     TYPES.StoreExtraArgs,
@@ -140,7 +151,8 @@ const initDependencies = async () => {
       userRepo: sl.get(TYPES.IUserRepository),
       searchRepo: sl.get(TYPES.ISearchRepository),
       friendRepo: sl.get(TYPES.IFriendRepository),
-      badgeRepo: sl.get(TYPES.IBadgeRepository)
+      badgeRepo: sl.get(TYPES.IBadgeRepository),
+      notificationRepo: sl.get(TYPES.INotificationRepository),
     },
   );
   sl.register(

@@ -21,6 +21,11 @@ export enum FriendshipStatus {
   STRANGERS = "STRANGERS",
 }
 
+export enum NotificationType {
+  REQUEST_ACCEPTED = "REQUEST_ACCEPTED",
+  SYSTEM = "SYSTEM",
+}
+
 export interface LoginInput {
   token: string;
 }

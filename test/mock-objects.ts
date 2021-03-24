@@ -17,8 +17,17 @@ import {GraphQLError} from "graphql";
 import {ApolloError} from "@apollo/client";
 import {FriendRequests} from "../src/features/friend/types/friend-request";
 import {UpdateBadge_updateBadge} from "../src/_generated/UpdateBadge";
-import {BadgeName as GQLBadgeName} from "../src/_generated/globalTypes";
+import {
+  BadgeName as GQLBadgeName,
+  NotificationType as GQLNotificationType
+} from "../src/_generated/globalTypes";
 import {Badge, BadgeName} from "../src/features/badge/types/badge";
+import {GetNotifications_getNotifications} from "../src/_generated/GetNotifications";
+import {
+  Notification,
+  RequestAcceptedNotification,
+  SystemNotification
+} from "../src/features/notification/types/notification";
 
 export const MockFile = mock<File>();
 
@@ -115,6 +124,38 @@ export const mockGQLBadge: UpdateBadge_updateBadge = {
 export const mockBadge: Badge = {
   badgeName: BadgeName.FRIEND_REQUESTS,
   lastOpened: new Date()
+};
+
+export const mockGQLRANotification: GetNotifications_getNotifications = {
+  __typename: 'Notification',
+  id: 1,
+  date: new Date(),
+  seen: false,
+  type: GQLNotificationType.REQUEST_ACCEPTED,
+  friend: mockGQLUser
+};
+export const mockRANotification: Notification = {
+  id: mockGQLRANotification.id,
+  date: mockGQLRANotification.date,
+  seen: mockGQLRANotification.seen,
+  content: {
+    type: mockGQLRANotification.type,
+    user: mockUser
+  } as RequestAcceptedNotification
+};
+
+export const mockGQLSystemNotification: GetNotifications_getNotifications = {
+  ...mockGQLRANotification,
+  type: GQLNotificationType.SYSTEM,
+  friend: null
+};
+
+export const mockSystemNotification: Notification = {
+  ...mockRANotification,
+  content: {
+    type: mockGQLSystemNotification.type,
+    message: 'some system message'
+  } as SystemNotification
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);

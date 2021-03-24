@@ -17,6 +17,9 @@ enum TYPES {
   // Badge
   IBadgeAPI = 'IBadgeAPI',
   IBadgeRepository = 'IBadgeRepository',
+  // Notification
+  INotificationAPI = 'INotificationAPI',
+  INotificationRepository = 'INotificationRepository',
   // Other
   StoreExtraArgs = 'StoreExtraArgs',
   AppStore = 'AppStore',

@@ -52,12 +52,21 @@ type Mutation {
     updateUser(input: UserUpdate!): User!
 }
 
+type Notification {
+    date: Timestamp!
+    friend: User
+    id: Int!
+    seen: Boolean!
+    type: NotificationType!
+}
+
 type Query {
     checkUsernameExistence(username: String!): Boolean!
     findUsers(searchQuery: String!): [User!]!
     getBadges: [Badge!]!
     getFriendRequests: FriendRequests!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
+    getNotifications: [Notification!]!
     me: User!
 }
 
@@ -82,6 +91,11 @@ enum FriendshipStatus {
     REQUEST_RECEIVED
     REQUEST_SENT
     STRANGERS
+}
+
+enum NotificationType {
+    REQUEST_ACCEPTED
+    SYSTEM
 }
 
 input LoginInput {
