@@ -75,7 +75,6 @@ test(
     renderComponent(mockStore);
     // assert
     expect(await screen.findByTestId('login-screen')).toBeInTheDocument();
-    screen.debug();
   },
 );
 
@@ -92,6 +91,5 @@ test(
     renderComponent(mockStore);
     // assert
     expect(await screen.findByTestId('logged-in-screen')).toBeInTheDocument();
-    screen.debug();
   },
 );

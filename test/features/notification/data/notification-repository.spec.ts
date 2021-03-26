@@ -1,11 +1,12 @@
-import {instance, mock, when} from "ts-mockito";
+import {anything, instance, mock, verify, when} from "ts-mockito";
 import {INotificationAPI} from "../../../../src/features/notification/data/sources/notification-api";
 import NotificationRepository
   from "../../../../src/features/notification/data/notification-repository";
 import {expect, it} from "@jest/globals";
 import {ApolloError} from "@apollo/client";
 import {left, right} from "fp-ts/Either";
-import {NotificationError} from "../../../../src/features/notification/types/notification-error";
+import NotificationError
+  from "../../../../src/features/notification/types/notification-error";
 import {mockRANotification} from "../../../mock-objects";
 
 const MockNotificationAPI = mock<INotificationAPI>();
@@ -46,5 +47,18 @@ describe('getNotifications', () => {
     const result = await notificationRepo.getNotifications();
     // assert
     expect(result).toStrictEqual(right([mockRANotification]));
+  });
+});
+
+describe('markNotificationAsSeen', () => {
+  it('should mark the notification as seen', async () => {
+    // arrange
+    when(MockNotificationAPI.markNotificationAsSeen(anything())).thenResolve(true);
+    const notificationID = 5466;
+    // act
+    const result = await notificationRepo.markNotificationAsSeen(notificationID);
+    // assert
+    expect(result).toStrictEqual(right(true));
+    verify(MockNotificationAPI.markNotificationAsSeen(notificationID)).once();
   });
 });

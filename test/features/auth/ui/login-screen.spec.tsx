@@ -91,5 +91,4 @@ test('if the state has error, should display an error snackbar', () => {
   renderComponent(mockStore);
   // assert
   expect(screen.getByRole('alert')).toBeInTheDocument();
-  console.log(alert);
 });

@@ -5,5 +5,5 @@ export enum BadgeName {
 
 export type Badge = {
   badgeName: BadgeName,
-  lastOpened: Date
+  lastOpened: number
 }

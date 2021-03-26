@@ -7,7 +7,8 @@ export enum NotificationType {
 
 export type Notification = {
   id: number,
-  date: Date,
+  // date is a number to make it serializable :(
+  date: number,
   seen: boolean,
   content: NotificationContent
 }

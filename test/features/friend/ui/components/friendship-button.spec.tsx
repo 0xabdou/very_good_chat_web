@@ -70,7 +70,7 @@ test('when the users are friends', async () => {
   // arrange
   const state: FriendProfileState = {
     ...initialState,
-    friendship: {status: FriendshipStatus.FRIENDS, date: new Date()},
+    friendship: {status: FriendshipStatus.FRIENDS, date: new Date().getTime()},
   };
   const mockStore = MockStore({friendProfile: state} as AppState);
   when(MockActions.unfriend()).thenReturn(action);
@@ -110,7 +110,10 @@ test('When a request was sent', async () => {
   // arrange
   const state: FriendProfileState = {
     ...initialState,
-    friendship: {status: FriendshipStatus.REQUEST_SENT, date: new Date()},
+    friendship: {
+      status: FriendshipStatus.REQUEST_SENT,
+      date: new Date().getTime()
+    },
   };
   const mockStore = MockStore({friendProfile: state} as AppState);
   when(MockActions.cancelFriendRequest()).thenReturn(action);
@@ -133,7 +136,10 @@ test('When a request was sent', async () => {
 describe('when a request was received', () => {
   const state: FriendProfileState = {
     ...initialState,
-    friendship: {status: FriendshipStatus.REQUEST_RECEIVED, date: new Date()},
+    friendship: {
+      status: FriendshipStatus.REQUEST_RECEIVED,
+      date: new Date().getTime()
+    },
   };
 
   test('accepting', async () => {

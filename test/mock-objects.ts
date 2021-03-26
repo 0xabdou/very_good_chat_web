@@ -86,7 +86,7 @@ export const mockUserUpdate: UserUpdate = {
 
 export const mockFriendship: Friendship = {
   status: FriendshipStatus.FRIENDS,
-  date: new Date()
+  date: new Date().getTime()
 };
 
 export const mockFriendshipInfo: FriendshipInfo = {
@@ -107,11 +107,11 @@ export const mockGQLFriendshipInfo: GetFriendshipInfo_getFriendshipInfo = {
 export const mockFriendRequests: FriendRequests = {
   sent: [{
     user: {...mockUser, id: 'sentID', username: 'sentUsername'},
-    date: new Date(),
+    date: new Date().getTime(),
   }],
   received: [{
     user: {...mockUser, id: 'receivedUsername', username: 'receivedUsername'},
-    date: new Date(),
+    date: new Date().getTime(),
   }]
 };
 
@@ -123,13 +123,13 @@ export const mockGQLBadge: UpdateBadge_updateBadge = {
 
 export const mockBadge: Badge = {
   badgeName: BadgeName.FRIEND_REQUESTS,
-  lastOpened: new Date()
+  lastOpened: new Date().getTime()
 };
 
 export const mockGQLRANotification: GetNotifications_getNotifications = {
   __typename: 'Notification',
   id: 1,
-  date: new Date(),
+  date: new Date().getTime(),
   seen: false,
   type: GQLNotificationType.REQUEST_ACCEPTED,
   friend: mockGQLUser
@@ -207,4 +207,19 @@ export const getApolloError = (code: string) => {
     errorMessage: 'some message',
     graphQLErrors: [getGraphQLError(code)]
   });
+};
+
+export const mockTheDate = (): [jest.SpyInstance, Date] => {
+  const mocked = new Date();
+  const spy = jest
+    .spyOn(global, 'Date')
+    .mockImplementation(() => mocked as unknown as string);
+  return [spy, mocked];
+};
+
+const mockAutoSizer = () => {
+  jest.mock(
+    'react-virtualized-auto-sizer',
+    () => ({children}: any) => children({height: 600, width: 600})
+  );
 };

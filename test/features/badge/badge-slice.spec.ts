@@ -1,7 +1,7 @@
 import StoreExtraArg from "../../../src/store/store-extra-arg";
 import {anything, instance, mock, reset, verify, when} from "ts-mockito";
 import {IBadgeRepository} from "../../../src/features/badge/data/badge-repository";
-import {getMockStore, mockBadge} from "../../mock-objects";
+import {getMockStore, mockBadge, mockTheDate} from "../../mock-objects";
 import reducer, {
   badgeActions,
   initialBadgeState
@@ -13,7 +13,6 @@ import {Badge, BadgeName} from "../../../src/features/badge/types/badge";
 
 const MockBadgeRepo = mock<IBadgeRepository>();
 const mockStore = getMockStore()();
-const date = new Date();
 
 const extra = {
   badgeRepo: instance(MockBadgeRepo)
@@ -22,10 +21,9 @@ const extra = {
 const {getBadges, updateBadge} = badgeActions;
 
 let spy: jest.SpyInstance;
+let mockDate: Date;
 beforeAll(() => {
-  spy = jest
-    .spyOn(global, 'Date')
-    .mockImplementation(() => date as unknown as string);
+  [spy, mockDate] = mockTheDate();
 });
 
 afterAll(() => {
@@ -70,11 +68,11 @@ describe('getBadges', () => {
       // arrange
       const notifBadge: Badge = {
         badgeName: BadgeName.NOTIFICATIONS,
-        lastOpened: {date: 'notif'} as unknown as Date
+        lastOpened: 2234,
       };
       const reqBadge: Badge = {
         badgeName: BadgeName.FRIEND_REQUESTS,
-        lastOpened: {date: 'req'} as unknown as Date
+        lastOpened: 1111
       };
       const action: PayloadAction<Badge[]> = {
         type: getBadges.fulfilled.type,
@@ -137,10 +135,10 @@ describe('updateBadge', () => {
           // assert
           switch (badgeName) {
             case BadgeName.FRIEND_REQUESTS:
-              expect(result.friendRequests).toBe(date);
+              expect(result.friendRequests).toBe(mockDate.getTime());
               break;
             case BadgeName.NOTIFICATIONS:
-              expect(result.notifications).toBe(date);
+              expect(result.notifications).toBe(mockDate.getTime());
               break;
           }
         });

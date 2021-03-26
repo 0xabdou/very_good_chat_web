@@ -17,6 +17,7 @@ import {MemoryRouter} from "react-router-dom";
 import {initialSearchState} from "../../../../src/features/search/search-slice";
 import {initialBadgeState} from "../../../../src/features/badge/badge-slice";
 import {initialFriendsState} from "../../../../src/features/friend/friends-slice";
+import {initialNotificationState} from "../../../../src/features/notification/notification-slice";
 
 const mockUserActions = getMockUserActions();
 const MockStore = getMockStore();
@@ -31,7 +32,8 @@ const initialState = {
   user: initialUserState,
   auth: loggedInAuthState,
   search: initialSearchState,
-  badge: initialBadgeState
+  badge: initialBadgeState,
+  notification: initialNotificationState
 } as AppState;
 
 const renderComponent = (mockStore: AppStore, path: string = '/') => {

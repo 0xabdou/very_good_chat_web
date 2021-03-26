@@ -1,25 +1,30 @@
 import React from "react";
-import {AppState, AppStore} from "../../../../../src/store/store";
-import {fireEvent, render, screen} from "@testing-library/react";
+import {AppState, AppStore} from "../../../../src/store/store";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {MemoryRouter, Route} from "react-router-dom";
-import {FriendsActionsContext} from "../../../../../src/features/friend/friends-actions-context";
+import {FriendsActionsContext} from "../../../../src/features/friend/friends-actions-context";
 import {anything, instance, mock, reset, verify, when} from "ts-mockito";
 import {
   friendsActions,
   FriendsState,
   initialFriendsState
-} from "../../../../../src/features/friend/friends-slice";
+} from "../../../../src/features/friend/friends-slice";
 import FriendRequestsScreen
-  from "../../../../../src/features/friend/ui/friend-requests-screen";
-import {getMockStore, mockFriendRequests} from "../../../../mock-objects";
-import FriendError from "../../../../../src/features/friend/types/friend-error";
+  from "../../../../src/features/friend/ui/friend-requests-screen";
+import {getMockStore, mockFriendRequests} from "../../../mock-objects";
+import FriendError from "../../../../src/features/friend/types/friend-error";
+import {BadgeActionsContext} from "../../../../src/features/badge/badge-actions-context";
+import {badgeActions} from "../../../../src/features/badge/badge-slice";
+import {BadgeName} from "../../../../src/features/badge/types/badge";
 
 const MockStore = getMockStore();
 const MockFriendsActions = mock<typeof friendsActions>();
+const MockBadgeActions = mock<typeof badgeActions>();
 const declineRequestAction = {type: 'decline'} as any;
 const acceptRequestAction = {type: 'accept'} as any;
 const cancelRequestAction = {type: 'cancel'} as any;
+const updateBadgeAction = {type: 'update'} as any;
 const loadedState: FriendsState = {
   ...initialFriendsState,
   friendRequests: mockFriendRequests
@@ -45,7 +50,9 @@ const renderIt = (store: AppStore, path: string = '/requests') => {
       <MemoryRouter initialEntries={[path]} initialIndex={0}>
         <Route path={path}>
           <FriendsActionsContext.Provider value={instance(MockFriendsActions)}>
-            <FriendRequestsScreen received={received}/>
+            <BadgeActionsContext.Provider value={instance(MockBadgeActions)}>
+              <FriendRequestsScreen received={received}/>
+            </BadgeActionsContext.Provider>
           </FriendsActionsContext.Provider>
         </Route>
       </MemoryRouter>
@@ -61,9 +68,21 @@ beforeEach(() => {
     .thenReturn(declineRequestAction);
   when(MockFriendsActions.acceptFriendRequest(anything()))
     .thenReturn(acceptRequestAction);
+  when(MockBadgeActions.updateBadge(anything())).thenReturn(updateBadgeAction);
 });
 
 describe('received', () => {
+  it('should update the "friend requests" badge', async () => {
+    // arrange
+    const mockStore = MockStore({friends: initialFriendsState} as AppState);
+    // render
+    renderIt(mockStore);
+    // assert
+    await waitFor(() => verify(MockBadgeActions.updateBadge(BadgeName.FRIEND_REQUESTS)).once());
+    expect(mockStore.getActions()).toHaveLength(1);
+    expect(mockStore.getActions()[0]).toStrictEqual(updateBadgeAction);
+  });
+
   it('should have "Friend requests" as a header and a "view sent requests" button', () => {
     // arrange
     const mockStore = MockStore({friends: initialFriendsState} as AppState);
@@ -124,9 +143,9 @@ describe('received', () => {
       const cancelButton = screen.getByTestId('cancel-request');
       fireEvent.click(cancelButton);
       // assert
-      console.log(mockStore.getActions());
       verify(MockFriendsActions.declineFriendRequest(reqUser.id)).once();
-      expect(mockStore.getActions()[0]).toBe(declineRequestAction);
+      expect(mockStore.getActions()).toHaveLength(2);
+      expect(mockStore.getActions()[1]).toBe(declineRequestAction);
     });
 
     test('clicking on an accept button should accept the request', () => {
@@ -139,7 +158,8 @@ describe('received', () => {
       fireEvent.click(acceptButton);
       // assert
       verify(MockFriendsActions.acceptFriendRequest(reqUser.id)).once();
-      expect(mockStore.getActions()[0]).toBe(acceptRequestAction);
+      expect(mockStore.getActions()).toHaveLength(2);
+      expect(mockStore.getActions()[1]).toBe(acceptRequestAction);
     });
 
     test('the request list item should display a loader if the request is ' +
@@ -223,7 +243,6 @@ describe('sent', () => {
       const cancelButton = screen.getByTestId('cancel-request');
       fireEvent.click(cancelButton);
       // assert
-      console.log(mockStore.getActions());
       verify(MockFriendsActions.cancelFriendRequest(reqUser.id)).once();
       expect(mockStore.getActions()[0]).toBe(cancelRequestAction);
     });

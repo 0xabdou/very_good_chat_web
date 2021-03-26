@@ -5,8 +5,8 @@ import BadgeError from "./types/badge-error";
 import {isRight} from "fp-ts/Either";
 
 export type BadgeState = {
-  notifications: Date | null,
-  friendRequests: Date | null,
+  notifications: number | null,
+  friendRequests: number | null,
 }
 
 export const initialBadgeState: BadgeState = {
@@ -53,9 +53,9 @@ const badgeSlice = createSlice({
       .addCase(updateBadge.pending, (state, action) => {
         const badgeName = action.meta.arg;
         if (badgeName == BadgeName.NOTIFICATIONS) {
-          state.notifications = new Date();
+          state.notifications = new Date().getTime();
         } else {
-          state.friendRequests = new Date();
+          state.friendRequests = new Date().getTime();
         }
       });
   }

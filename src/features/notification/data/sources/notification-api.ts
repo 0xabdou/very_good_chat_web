@@ -4,12 +4,18 @@ import {
   GetNotifications,
   GetNotifications_getNotifications
 } from "../../../../_generated/GetNotifications";
-import {GET_NOTIFICATIONS_QUERY} from "../graphql";
+import {GET_NOTIFICATIONS_QUERY, MARK_NOTIFICATION_AS_SEEN} from "../graphql";
 import {NotificationType} from "../../../../_generated/globalTypes";
 import {UserAPI} from "../../../user/data/sources/user-api";
+import {
+  MarkNotificationAsSeen,
+  MarkNotificationAsSeenVariables
+} from "../../../../_generated/MarkNotificationAsSeen";
 
 export interface INotificationAPI {
   getNotifications(): Promise<Notification[]>;
+
+  markNotificationAsSeen(notificationID: number): Promise<boolean>;
 }
 
 export default class NotificationAPI implements INotificationAPI {
@@ -33,6 +39,15 @@ export default class NotificationAPI implements INotificationAPI {
         content: NotificationAPI._parseContent(n)
       };
     });
+  }
+
+  async markNotificationAsSeen(notificationID: number): Promise<boolean> {
+    const {data} = await this._client.mutate<MarkNotificationAsSeen, MarkNotificationAsSeenVariables>
+    ({
+      mutation: MARK_NOTIFICATION_AS_SEEN,
+      variables: {notificationID}
+    });
+    return data?.markNotificationAsSeen!;
   }
 
   static _parseContent(notification: GetNotifications_getNotifications): NotificationContent {

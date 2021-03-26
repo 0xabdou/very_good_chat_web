@@ -144,7 +144,6 @@ describe('Logging out', () => {
     const logoutButton = screen.getByTestId('logout-button');
     fireEvent.click(logoutButton);
     expect(await screen.findByTestId('alert-dialog')).toBeInTheDocument();
-    screen.debug();
   });
 
   test('confirming the logout should dispatch a logout action', async () => {

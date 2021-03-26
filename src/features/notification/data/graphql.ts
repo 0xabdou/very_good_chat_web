@@ -18,3 +18,9 @@ export const GET_NOTIFICATIONS_QUERY = gql`
         }
     }
 `;
+
+export const MARK_NOTIFICATION_AS_SEEN = gql`
+    mutation MarkNotificationAsSeen($notificationID: Int!) {
+        markNotificationAsSeen(notificationID: $notificationID)
+    }
+`;

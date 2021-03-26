@@ -11,7 +11,7 @@ export enum FriendshipStatus {
 
 export type Friendship = {
   status: FriendshipStatus,
-  date?: Date,
+  date?: number,
 }
 
 export type FriendshipInfo = {

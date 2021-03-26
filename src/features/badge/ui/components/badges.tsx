@@ -3,16 +3,13 @@ import React, {useCallback, useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import {useTopBarStyles} from "../../../user/ui/components/top-bar";
 import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
-import {useBadgeActions} from "../../badge-actions-context";
-import {BadgeName} from "../../types/badge";
 
 const Badges = () => {
   const badgeState = useAppSelector(state => state.badge);
   const friendRequests = useAppSelector(state => state.friends.friendRequests);
+  const notifications = useAppSelector(state => state.notification.notifications);
   const [requestCount, setRequestCount] = useState(0);
   const [notifCount, setNotifCount] = useState(0);
-  const actions = useBadgeActions();
-  const dispatch = useAppDispatch();
   const history = useHistory();
   const classes = useStyles();
   const topBarClasses = useTopBarStyles();
@@ -32,9 +29,26 @@ const Badges = () => {
     }
   }, [badgeState, friendRequests]);
 
+  useEffect(() => {
+    if (!badgeState.notifications || !notifications) {
+      setNotifCount(0);
+    } else {
+      let count = 0;
+      for (let notif of notifications) {
+        if (notif.date < badgeState.notifications)
+          break;
+        count++;
+      }
+      setNotifCount(count);
+    }
+  }, [badgeState, notifications]);
+
   const goToRequests = useCallback(() => {
-    dispatch(actions.updateBadge(BadgeName.FRIEND_REQUESTS));
     history.push('/requests');
+  }, [history]);
+
+  const goToNotifications = useCallback(() => {
+    history.push('/notifications');
   }, [history]);
 
   return (
@@ -50,6 +64,8 @@ const Badges = () => {
       </IconButton>
       <IconButton
         className={topBarClasses.actionButton}
+        onClick={goToNotifications}
+        data-testid='notifications-button'
       >
         <Badge badgeContent={notifCount} className={classes.badge}>
           <Icon>notifications</Icon>

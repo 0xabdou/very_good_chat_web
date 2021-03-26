@@ -1,16 +1,23 @@
 import React from 'react';
-import {fireEvent, render, screen} from "@testing-library/react";
+import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {AppState, AppStore} from "../../../../../src/store/store";
-import {anything, instance, mock, reset, verify, when} from "ts-mockito";
+import {anything, instance, mock, reset, when} from "ts-mockito";
 import {badgeActions} from "../../../../../src/features/badge/badge-slice";
 import {BadgeActionsContext} from "../../../../../src/features/badge/badge-actions-context";
 import Badges from "../../../../../src/features/badge/ui/components/badges";
-import {FriendsState} from "../../../../../src/features/friend/friends-slice";
+import {
+  FriendsState,
+  initialFriendsState
+} from "../../../../../src/features/friend/friends-slice";
 import {FriendRequest} from "../../../../../src/features/friend/types/friend-request";
 import {getMockStore, mockUser} from "../../../../mock-objects";
-import {BadgeName} from "../../../../../src/features/badge/types/badge";
 import {MemoryRouter} from "react-router-dom";
+import {initialNotificationState} from "../../../../../src/features/notification/notification-slice";
+import {
+  Notification,
+  NotificationType
+} from "../../../../../src/features/notification/types/notification";
 
 const MockBadgeActions = mock<typeof badgeActions>();
 const MockStore = getMockStore();
@@ -28,16 +35,16 @@ const renderIt = (store: AppStore) => {
   );
 };
 
-const present = new Date();
-const past = new Date(present.getTime() - 10000);
-const future = new Date(present.getTime() + 10000);
+const present = new Date().getTime();
+const past = present - 10000;
+const future = present + 10000;
 
 beforeEach(() => {
   reset(MockBadgeActions);
   when(MockBadgeActions.updateBadge(anything())).thenReturn(action);
 });
 
-describe('Requests badge', function () {
+describe('Requests badge', () => {
   const req1: FriendRequest = {
     user: {...mockUser, id: '1', username: '1'},
     date: future
@@ -54,8 +61,7 @@ describe('Requests badge', function () {
     user: {...mockUser, id: '4', username: '4'},
     date: past
   };
-  it('should display the right number in the badge, ' +
-    'and clicking on button should update the badge',
+  it('should display the right number in the badge',
     async () => {
       // arrange
       const state = {
@@ -71,7 +77,8 @@ describe('Requests badge', function () {
           },
           error: null,
           beingTreated: []
-        } as FriendsState
+        } as FriendsState,
+        notification: initialNotificationState
       } as AppState;
       const mockStore = MockStore(state);
       // render
@@ -79,12 +86,67 @@ describe('Requests badge', function () {
       // assert
       // should display the number of requests in the future (2)
       expect(await screen.findByText('2')).toBeInTheDocument();
-      // should dispatch an update action on click
-      const button = screen.getByTestId('friend-requests-button');
-      fireEvent.click(button);
-      verify(MockBadgeActions.updateBadge(BadgeName.FRIEND_REQUESTS)).once();
-      expect(mockStore.getActions()).toHaveLength(1);
-      expect(mockStore.getActions()[0]).toBe(action);
+    },
+  );
+});
+
+describe('Requests badge', () => {
+  const notif1: Notification = {
+    id: 1,
+    seen: false,
+    content: {
+      type: NotificationType.REQUEST_ACCEPTED,
+      user: mockUser
+    },
+    date: future
+  };
+  const notif2: Notification = {
+    id: 2,
+    seen: false,
+    content: {
+      type: NotificationType.SYSTEM,
+      message: 'up'
+    },
+    date: future
+  };
+  const notif3: Notification = {
+    id: 3,
+    seen: false,
+    content: {
+      type: NotificationType.SYSTEM,
+      message: 'up'
+    },
+    date: past
+  };
+  const notif4: Notification = {
+    id: 4,
+    seen: false,
+    content: {
+      type: NotificationType.REQUEST_ACCEPTED,
+      user: mockUser
+    },
+    date: past
+  };
+  it('should display the right number in the badge',
+    async () => {
+      // arrange
+      const state = {
+        badge: {
+          friendRequests: present,
+          notifications: present
+        },
+        friends: initialFriendsState,
+        notification: {
+          ...initialNotificationState,
+          notifications: [notif1, notif2, notif3, notif4]
+        }
+      } as AppState;
+      const mockStore = MockStore(state);
+      // render
+      renderIt(mockStore);
+      // assert
+      // should display the number of requests in the future (2)
+      expect(await screen.findByText('2')).toBeInTheDocument();
     },
   );
 });

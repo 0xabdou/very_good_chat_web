@@ -13,6 +13,8 @@ import FriendProfileScreen from "../../friend/ui/friend-profile-screen";
 import FriendRequestsScreen from "../../friend/ui/friend-requests-screen";
 import {useFriendsActions} from "../../friend/friends-actions-context";
 import {useBadgeActions} from "../../badge/badge-actions-context";
+import NotificationsScreen from "../../notification/ui/notifications-screen";
+import {useNotificationActions} from "../../notification/notification-actions-context";
 
 
 const LoggedInScreen = () => {
@@ -22,10 +24,12 @@ const LoggedInScreen = () => {
   const {getCurrentUser} = useUserActions();
   const {getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
+  const {getNotifications} = useNotificationActions();
 
   useEffect(() => {
     dispatch(getCurrentUser());
     dispatch(getFriendRequests());
+    dispatch(getNotifications());
     dispatch(getBadges());
   }, []);
 
@@ -75,6 +79,7 @@ const LoggedInScreen = () => {
           </Route>
           <Route path='/requests'><FriendRequestsScreen received/></Route>
           <Route path='/sent-requests'><FriendRequestsScreen/></Route>
+          <Route path='/notifications'><NotificationsScreen/></Route>
           <Redirect exact from={`/u/${user.username}`} to='/profile'/>
           <Route path='/u/:username'>
             <FriendProfileScreen/>

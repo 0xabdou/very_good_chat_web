@@ -40,7 +40,7 @@ const useStyles = makeStyles({
     textAlign: 'center',
   },
   name: {
-    fontSize: '1.3rem',
+    fontSize: '0.8rem',
     textAlign: 'center',
   },
 });

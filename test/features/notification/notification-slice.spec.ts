@@ -1,6 +1,6 @@
-import {getMockStore, mockRANotification} from "../../mock-objects";
+import {getMockStore, mockRANotification, mockUser} from "../../mock-objects";
 import StoreExtraArg from "../../../src/store/store-extra-arg";
-import {instance, mock, when} from "ts-mockito";
+import {anything, instance, mock, when} from "ts-mockito";
 import {INotificationRepository} from "../../../src/features/notification/data/notification-repository";
 import reducer, {
   initialNotificationState,
@@ -8,9 +8,13 @@ import reducer, {
   NotificationState
 } from "../../../src/features/notification/notification-slice";
 import {left, right} from "fp-ts/Either";
-import {NotificationError} from "../../../src/features/notification/types/notification-error";
+import NotificationError
+  from "../../../src/features/notification/types/notification-error";
 import {PayloadAction} from "@reduxjs/toolkit";
-import {Notification} from "../../../src/features/notification/types/notification";
+import {
+  Notification,
+  NotificationType
+} from "../../../src/features/notification/types/notification";
 
 const MockNotificationRepository = mock<INotificationRepository>();
 const mockStore = getMockStore()();
@@ -18,7 +22,7 @@ const extra = {
   notificationRepo: instance(MockNotificationRepository)
 } as StoreExtraArg;
 
-const {getNotifications} = notificationActions;
+const {getNotifications, markNotificationAsSeen} = notificationActions;
 
 describe('getNotifications', () => {
   const act = () => getNotifications()(
@@ -95,6 +99,92 @@ describe('getNotifications', () => {
       expect(result).toStrictEqual({
         ...state,
         error: NotificationError.network
+      });
+    });
+  });
+});
+
+describe('markNotificationAsSeen', () => {
+  const notificationID = 4356;
+  const act = () => markNotificationAsSeen(notificationID)(
+    mockStore.dispatch,
+    mockStore.getState,
+    extra
+  );
+
+  it('should return the right action if fulfilled', async () => {
+    // arrange
+    when(MockNotificationRepository.markNotificationAsSeen(anything()))
+      .thenResolve(right(true));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(markNotificationAsSeen.fulfilled.type);
+    expect(result.payload).toBe(true);
+  });
+
+  it('should return the right action if rejected', async () => {
+    // arrange
+    when(MockNotificationRepository.markNotificationAsSeen(anything()))
+      .thenResolve(left(NotificationError.network));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(markNotificationAsSeen.rejected.type);
+    expect(result.payload).toBe(NotificationError.network);
+  });
+
+  describe('reducers', () => {
+    it('should return the right state if pending', () => {
+      // arrange
+      const notificationsBefore: Notification[] = [
+        {
+          id: 1,
+          seen: false,
+          date: new Date().getTime(),
+          content: {
+            type: NotificationType.SYSTEM,
+            message: 'whatever'
+          }
+        },
+        {
+          id: 2,
+          seen: false,
+          date: new Date().getTime(),
+          content: {
+            type: NotificationType.REQUEST_ACCEPTED,
+            user: mockUser
+          }
+        },
+        {
+          id: 3,
+          seen: false,
+          date: new Date().getTime(),
+          content: {
+            type: NotificationType.REQUEST_ACCEPTED,
+            user: mockUser
+          }
+        }
+      ];
+      const notificationID = notificationsBefore[1].id;
+      const notificationsAfter = notificationsBefore.map(n => {
+        if (n.id == notificationID) return {...n, seen: true};
+        return n;
+      });
+      const state: NotificationState = {
+        ...initialNotificationState,
+        notifications: notificationsBefore
+      };
+      const action: PayloadAction<void, string, { arg: number }> = {
+        type: markNotificationAsSeen.pending.type,
+        payload: undefined,
+        meta: {arg: notificationID}
+      };
+      // act
+      const result = reducer(state, action);
+      expect(result).toStrictEqual({
+        ...state,
+        notifications: notificationsAfter
       });
     });
   });

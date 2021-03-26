@@ -52,21 +52,21 @@ describe('reducer logic', () => {
       sent: [
         {
           user: {...mockUser, id: userID},
-          date: new Date(),
+          date: new Date().getTime(),
         },
         {
           user: {...mockUser, id: 'bleh'},
-          date: new Date(),
+          date: new Date().getTime(),
         },
       ],
       received: [
         {
           user: {...mockUser, id: userID},
-          date: new Date(),
+          date: new Date().getTime(),
         },
         {
           user: {...mockUser, id: 'bleh'},
-          date: new Date(),
+          date: new Date().getTime(),
         },
       ]
     },

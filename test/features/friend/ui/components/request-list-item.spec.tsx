@@ -20,7 +20,7 @@ it('should display user info', () => {
       small: 'smaooolllllll'
     }
   };
-  const props: RequestListItemProps = {req: {user, date: new Date()}};
+  const props: RequestListItemProps = {req: {user, date: new Date().getTime()}};
   // render
   renderIt(props);
   // assert

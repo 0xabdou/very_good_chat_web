@@ -1,11 +1,13 @@
 import {Either, left, right} from "fp-ts/Either";
-import {NotificationError} from "../types/notification-error";
+import NotificationError from "../types/notification-error";
 import {Notification} from "../types/notification";
 import {INotificationAPI} from "./sources/notification-api";
 import {isApolloError} from "@apollo/client";
 
 export interface INotificationRepository {
   getNotifications(): Promise<Either<NotificationError, Notification[]>>;
+
+  markNotificationAsSeen(notificationID: number): Promise<Either<NotificationError, boolean>>;
 }
 
 export default class NotificationRepository implements INotificationRepository {
@@ -17,6 +19,12 @@ export default class NotificationRepository implements INotificationRepository {
 
   getNotifications(): Promise<Either<NotificationError, Notification[]>> {
     return this._leftOrRight(() => this._notificationAPI.getNotifications());
+  }
+
+  markNotificationAsSeen(notificationID: number): Promise<Either<NotificationError, boolean>> {
+    return this._leftOrRight(
+      () => this._notificationAPI.markNotificationAsSeen(notificationID)
+    );
   }
 
   async _leftOrRight<R>(work: () => Promise<R>): Promise<Either<NotificationError, R>> {

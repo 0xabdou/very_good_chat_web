@@ -45,6 +45,7 @@ type Mutation {
     cancelFriendRequest(userID: String!): Friendship!
     declineFriendRequest(userID: String!): Friendship!
     loginWithGoogle(input: LoginInput!): LoginResponse!
+    markNotificationAsSeen(notificationID: Int!): Boolean!
     register(input: UserCreation!): User!
     sendFriendRequest(userID: String!): Friendship!
     unfriend(userID: String!): Friendship!

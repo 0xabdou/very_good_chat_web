@@ -1,4 +1,4 @@
-import React, {useCallback} from "react";
+import React, {useCallback, useEffect} from "react";
 import {Button, makeStyles, Typography} from "@material-ui/core";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {PulseLoader} from "react-spinners";
@@ -13,6 +13,8 @@ import {useHistory} from "react-router-dom";
 import {stringifyFriendError} from "../types/friend-error";
 import {ErrorSnackbar} from "../../../components/snackbars";
 import {FriendRequest} from "../types/friend-request";
+import {BadgeName} from "../../badge/types/badge";
+import {useBadgeActions} from "../../badge/badge-actions-context";
 
 type FriendRequestsScreenProps = {
   received?: boolean
@@ -22,9 +24,16 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
   const state = useAppSelector(state => state.friends);
   const dispatch = useAppDispatch();
   const actions = useFriendsActions();
+  const {updateBadge} = useBadgeActions();
   const history = useHistory();
   const classes = useStyles();
   const topBarClasses = useTopBarStyles();
+
+  useEffect(() => {
+    if (props.received) {
+      dispatch(updateBadge(BadgeName.FRIEND_REQUESTS));
+    }
+  }, []);
 
   const goToUserProfile = useCallback((user: User) => {
     history.push(`/u/${user.username}`);

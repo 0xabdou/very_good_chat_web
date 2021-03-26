@@ -9,7 +9,14 @@ import {
   mockRANotification,
   mockSystemNotification
 } from "../../../../mock-objects";
-import {GET_NOTIFICATIONS_QUERY} from "../../../../../src/features/notification/data/graphql";
+import {
+  GET_NOTIFICATIONS_QUERY,
+  MARK_NOTIFICATION_AS_SEEN
+} from "../../../../../src/features/notification/data/graphql";
+import {
+  MarkNotificationAsSeen,
+  MarkNotificationAsSeenVariables
+} from "../../../../../src/_generated/MarkNotificationAsSeen";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 
@@ -43,5 +50,24 @@ describe('getNotifications', () => {
     // assert
     expect(result).toStrictEqual([mockRANotification, mockSystemNotification]);
     verify(MockApolloClient.query(deepEqual({query: GET_NOTIFICATIONS_QUERY})));
+  });
+});
+
+describe('markNotificationAsSeen', () => {
+  it('should mark the notification as seen', async () => {
+    // arrange
+    when(MockApolloClient.mutate<MarkNotificationAsSeen, MarkNotificationAsSeenVariables>(anything()))
+      .thenResolve({
+        data: {markNotificationAsSeen: true}
+      } as ApolloQueryResult<MarkNotificationAsSeen>);
+    const notificationID = 345678;
+    // act
+    const result = await notificationAPI.markNotificationAsSeen(notificationID);
+    // assert
+    expect(result).toBe(true);
+    verify(MockApolloClient.mutate(deepEqual({
+      mutation: MARK_NOTIFICATION_AS_SEEN,
+      variables: {notificationID}
+    }))).once();
   });
 });
