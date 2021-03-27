@@ -10,6 +10,7 @@ import {useFriendProfileActions} from "../friend-profile-actions-context";
 import FriendshipButton from "./components/friendship-button";
 import {ErrorSnackbar} from "../../../components/snackbars";
 import FriendError, {stringifyFriendError} from "../types/friend-error";
+import MoreButton from "./components/more-button";
 
 const FriendProfileScreen = () => {
   const state = useAppSelector(state => state.friendProfile, shallowEqual);
@@ -33,6 +34,7 @@ const FriendProfileScreen = () => {
   const user = state.user ?? cachedUser;
   return (
     <div className={classes.outer}>
+      <MoreButton/>
       <div className={classes.wrapper}>
         {!!user && <CommonProfileInfo user={user}/>}
         <FriendshipButton/>

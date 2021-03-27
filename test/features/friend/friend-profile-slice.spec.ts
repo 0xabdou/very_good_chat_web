@@ -413,7 +413,7 @@ describe('block', () => {
   it('should return the right action if fulfilled', async () => {
     // arrange
     when(MockBlockRepo.block(anything())).thenResolve(right(mockBlock));
-    const expectedPayload: Friendship = {status: FriendshipStatus.BLOCKED};
+    const expectedPayload: Friendship = {status: FriendshipStatus.BLOCKING};
     // act
     const result = await act();
     // assert

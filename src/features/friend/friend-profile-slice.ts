@@ -107,7 +107,7 @@ const block = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
       return thunkAPI.rejectWithValue(FriendError.general);
     }
     const result = await thunkAPI.extra.blockRepo.block(userID);
-    if (isRight(result)) return {status: FriendshipStatus.BLOCKED};
+    if (isRight(result)) return {status: FriendshipStatus.BLOCKING};
     return thunkAPI.rejectWithValue(blockToFriendError(result.left));
   }
 );

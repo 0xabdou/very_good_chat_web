@@ -182,3 +182,35 @@ describe('when a request was received', () => {
     expect(mockStore.getActions()[0]).toBe(action);
   });
 });
+
+describe('when the current user is blocking the other user', () => {
+  it('should ', function () {
+    // arrange
+    const state: FriendProfileState = {
+      ...initialState,
+      friendship: {status: FriendshipStatus.BLOCKING}
+    };
+    const mockStore = MockStore({friendProfile: state} as AppState);
+    // render
+    renderIt(mockStore);
+    // the friendship button should display a "ban" icon
+    expect(screen.getByTestId('fas fa-ban')).toBeInTheDocument();
+    expect(screen.getByText('You blocked this user!')).toBeInTheDocument();
+  });
+});
+
+describe('when the current user is blocked by the other user', () => {
+  it('should ', function () {
+    // arrange
+    const state: FriendProfileState = {
+      ...initialState,
+      friendship: {status: FriendshipStatus.BLOCKED}
+    };
+    const mockStore = MockStore({friendProfile: state} as AppState);
+    // render
+    renderIt(mockStore);
+    // the friendship button should display a "ban" icon
+    expect(screen.getByTestId('fas fa-ban')).toBeInTheDocument();
+    expect(screen.getByText('This user blocked you!')).toBeInTheDocument();
+  });
+});

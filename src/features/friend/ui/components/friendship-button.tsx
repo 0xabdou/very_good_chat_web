@@ -1,18 +1,13 @@
 import React, {useCallback, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
-import {
-  Icon,
-  IconButton,
-  makeStyles,
-  Menu,
-  MenuItem,
-  MenuProps
-} from "@material-ui/core";
+import {Icon, IconButton, makeStyles, MenuItem} from "@material-ui/core";
 import {Friendship, FriendshipStatus} from "../../types/friendship";
 import {PulseLoader} from "react-spinners";
 import {useFriendProfileActions} from "../../friend-profile-actions-context";
 import FriendError from "../../types/friend-error";
 import AlertDialog from "../../../../components/alert-dialog";
+import GenericMenu from "../../../../components/generic-menu";
+import {Theme} from "@material-ui/core/styles/createMuiTheme";
 
 const FriendshipButton = () => {
   const state = useAppSelector(state => state.friendProfile);
@@ -23,7 +18,10 @@ const FriendshipButton = () => {
   const [anchorEl3, setAnchorEl3] = useState<HTMLElement | null>(null);
   const [alerting, setAlerting] = useState(false);
 
-  const classes = useStyles();
+  const classes = useStyles({
+    block: (state.friendship?.status == FriendshipStatus.BLOCKING
+      || state.friendship?.status == FriendshipStatus.BLOCKED)
+  });
 
   const onClose = useCallback(() => {
     setAnchorEl1(null);
@@ -31,13 +29,11 @@ const FriendshipButton = () => {
     setAnchorEl3(null);
   }, []);
 
-  console.log('OUTER STATE IS: ', state);
   const handleError = async (promise: Promise<{
     meta: { requestStatus: 'fulfilled' | 'rejected' }
     payload: Friendship | FriendError | undefined
   }>) => {
     const result = await promise;
-    console.log('STATE IS: ', state);
     if (result.meta.requestStatus == 'rejected') {
       dispatch(actions.getFriendshipInfo(state.user!.username));
     }
@@ -92,9 +88,10 @@ const FriendshipButton = () => {
   if (state.loading || !state.friendship) {
     child = <PulseLoader/>;
   } else {
-    let icon: string | undefined;
+    let icon: string;
     let label: string | undefined;
     let onTap: ((e: React.MouseEvent<HTMLElement>) => void) | undefined;
+    let disabled = false;
     switch (state.friendship.status) {
       case FriendshipStatus.STRANGERS:
         icon = 'fas fa-user-plus';
@@ -116,34 +113,37 @@ const FriendshipButton = () => {
         label = 'Answer request!';
         onTap = onRequestReceivedTapped;
         break;
+      case FriendshipStatus.BLOCKING:
+        icon = 'fas fa-ban';
+        label = 'You blocked this user!';
+        disabled = true;
+        break;
+      case FriendshipStatus.BLOCKED:
+        icon = 'fas fa-ban';
+        label = 'This user blocked you!';
+        disabled = true;
+        break;
     }
-    if (icon) {
-      child = (
-        <>
-          <IconButton
-            className={classes.button}
-            aria-controls="customized-menu"
-            aria-haspopup="true"
-            onClick={onTap}
-            disabled={state.modifyingFriendship}
-            data-testid={icon}
-          >
-            <i className={icon}/>
-          </IconButton>
-          {label}
-        </>
-      );
-    } else {
-      if (state.friendship.status == FriendshipStatus.BLOCKED)
-        child = <span>You blocked this user</span>;
-      else
-        child = <span>This user has blocked you</span>;
-    }
+    child = (
+      <>
+        <IconButton
+          className={classes.button}
+          aria-controls="customized-menu"
+          aria-haspopup="true"
+          onClick={onTap}
+          disabled={disabled || state.modifyingFriendship}
+          data-testid={icon}
+        >
+          <i className={icon}/>
+        </IconButton>
+        <span className={classes.blockText}>{label}</span>
+      </>
+    );
   }
   return (
     <div className={classes.wrapper} data-testid='friendship-button'>
       {child}
-      <FMenu
+      <GenericMenu
         anchorEl={anchorEl1}
         open={Boolean(anchorEl1)}
         onClose={onClose}
@@ -156,8 +156,8 @@ const FriendshipButton = () => {
           <Icon className={classes.clearIcon}>clear</Icon>
           Decline
         </MenuItem>
-      </FMenu>
-      <FMenu
+      </GenericMenu>
+      <GenericMenu
         anchorEl={anchorEl2}
         open={Boolean(anchorEl2)}
         onClose={onClose}
@@ -166,8 +166,8 @@ const FriendshipButton = () => {
           <Icon className={classes.clearIcon}>clear</Icon>
           Cancel
         </MenuItem>
-      </FMenu>
-      <FMenu
+      </GenericMenu>
+      <GenericMenu
         anchorEl={anchorEl3}
         open={Boolean(anchorEl3)}
         onClose={onClose}
@@ -176,7 +176,7 @@ const FriendshipButton = () => {
           <Icon className={classes.clearIcon}>clear</Icon>
           Remove friend
         </MenuItem>
-      </FMenu>
+      </GenericMenu>
       <AlertDialog
         title='Unfriend'
         content='Are you sure you want to remove this friend?'
@@ -188,24 +188,7 @@ const FriendshipButton = () => {
   );
 };
 
-const FMenu = (props: MenuProps) => {
-  return (
-    <Menu
-      getContentAnchorEl={null}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'center',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}
-      {...props}
-    />
-  );
-};
-
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme, { block: boolean }>({
   wrapper: {
     display: 'flex',
     flexDirection: 'column',
@@ -213,10 +196,15 @@ const useStyles = makeStyles({
     alignItems: 'center',
     height: '5rem',
   },
-  button: {
-    color: 'black',
-    fontSize: '1.8rem'
-  },
+  button: props => ({
+    '&&': {
+      color: props.block ? 'red' : 'black',
+      fontSize: '1.8rem'
+    }
+  }),
+  blockText: props => ({
+    color: props.block ? 'red' : 'black',
+  }),
   clearIcon: {
     color: 'red',
     marginRight: '1rem'
