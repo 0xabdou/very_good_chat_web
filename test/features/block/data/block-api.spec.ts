@@ -3,12 +3,9 @@ import {ApolloClient, ApolloQueryResult} from "@apollo/client";
 import BlockAPI from "../../../../src/features/block/data/sources/block-api";
 import {
   BlockMutation,
-  BlockMutation_block,
   BlockMutationVariables
 } from "../../../../src/_generated/BlockMutation";
-import {mockGQLUser} from "../../../mock-objects";
-import {Block} from "../../../../src/features/block/types/block";
-import {UserAPI} from "../../../../src/features/user/data/sources/user-api";
+import {mockBlock, mockGQLBlock} from "../../../mock-objects";
 import {
   BLOCK,
   GET_BLOCKED_USERS,
@@ -21,16 +18,6 @@ const MockApolloClient = mock<ApolloClient<any>>();
 const blockedID = 'blockeddddddddd';
 
 const blockAPI = new BlockAPI(instance(MockApolloClient));
-
-const mockGQLBlock: BlockMutation_block = {
-  __typename: 'Block',
-  user: {...mockGQLUser},
-  date: new Date().getTime()
-};
-const mockBlock: Block = {
-  user: UserAPI.parseUser(mockGQLBlock.user),
-  date: mockGQLBlock.date,
-};
 
 describe('block', () => {
   it('should block the user and return a block object', async () => {

@@ -28,6 +28,9 @@ import {
   RequestAcceptedNotification,
   SystemNotification
 } from "../src/features/notification/types/notification";
+import {BlockMutation_block} from "../src/_generated/BlockMutation";
+import {Block} from "../src/features/block/types/block";
+import {UserAPI} from "../src/features/user/data/sources/user-api";
 
 export const MockFile = mock<File>();
 
@@ -158,6 +161,16 @@ export const mockSystemNotification: Notification = {
   } as SystemNotification
 };
 
+export const mockGQLBlock: BlockMutation_block = {
+  __typename: 'Block',
+  user: {...mockGQLUser},
+  date: new Date().getTime()
+};
+export const mockBlock: Block = {
+  user: UserAPI.parseUser(mockGQLBlock.user),
+  date: mockGQLBlock.date,
+};
+
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);
 
 export const mockAuthActionObjects = {
@@ -217,9 +230,8 @@ export const mockTheDate = (): [jest.SpyInstance, Date] => {
   return [spy, mocked];
 };
 
-const mockAutoSizer = () => {
-  jest.mock(
-    'react-virtualized-auto-sizer',
-    () => ({children}: any) => children({height: 600, width: 600})
-  );
-};
+// How to mock Date
+//jest.mock(
+//  'react-virtualized-auto-sizer',
+//  () => ({children}: any) => children({height: 600, width: 600})
+//);
