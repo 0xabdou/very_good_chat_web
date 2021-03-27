@@ -15,6 +15,11 @@ type Badge {
     lastOpened: Timestamp!
 }
 
+type Block {
+    date: Timestamp!
+    user: User!
+}
+
 type FriendRequest {
     date: Timestamp!
     user: User!
@@ -42,12 +47,14 @@ type LoginResponse {
 
 type Mutation {
     acceptFriendRequest(userID: String!): Friendship!
+    block(blocked_id: String!): Block!
     cancelFriendRequest(userID: String!): Friendship!
     declineFriendRequest(userID: String!): Friendship!
     loginWithGoogle(input: LoginInput!): LoginResponse!
     markNotificationAsSeen(notificationID: Int!): Boolean!
     register(input: UserCreation!): User!
     sendFriendRequest(userID: String!): Friendship!
+    unblock(blocked_id: String!): String!
     unfriend(userID: String!): Friendship!
     updateBadge(badgeName: BadgeName!): Badge!
     updateUser(input: UserUpdate!): User!
@@ -65,6 +72,7 @@ type Query {
     checkUsernameExistence(username: String!): Boolean!
     findUsers(searchQuery: String!): [User!]!
     getBadges: [Badge!]!
+    getBlockedUsers: [Block!]!
     getFriendRequests: FriendRequests!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
     getNotifications: [Notification!]!
