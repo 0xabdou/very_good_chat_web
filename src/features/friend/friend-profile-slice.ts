@@ -1,9 +1,10 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import User from "../user/types/user";
-import {Friendship, FriendshipInfo} from "./types/friendship";
+import {Friendship, FriendshipInfo, FriendshipStatus} from "./types/friendship";
 import {ThunkAPI} from "../../store/store";
 import FriendError from "./types/friend-error";
 import {isRight} from "fp-ts/Either";
+import {blockToFriendError} from "../block/types/block-error";
 
 export type FriendProfileState = {
   user: User | null,
@@ -97,6 +98,34 @@ const unfriend = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
   }
 );
 
+const block = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
+  'friendProfile/block',
+  async (_, thunkAPI) => {
+    const userID = thunkAPI.getState().friendProfile.user?.id;
+    if (!userID) {
+      console.log('Cannot block a user if no user exists in state');
+      return thunkAPI.rejectWithValue(FriendError.general);
+    }
+    const result = await thunkAPI.extra.blockRepo.block(userID);
+    if (isRight(result)) return {status: FriendshipStatus.BLOCKED};
+    return thunkAPI.rejectWithValue(blockToFriendError(result.left));
+  }
+);
+
+const unblock = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
+  'friendProfile/unblock',
+  async (_, thunkAPI) => {
+    const userID = thunkAPI.getState().friendProfile.user?.id;
+    if (!userID) {
+      console.log('Cannot unblock a user if no user exists in state');
+      return thunkAPI.rejectWithValue(FriendError.general);
+    }
+    const result = await thunkAPI.extra.blockRepo.unblock(userID);
+    if (isRight(result)) return {status: FriendshipStatus.STRANGERS};
+    return thunkAPI.rejectWithValue(blockToFriendError(result.left));
+  }
+);
+
 export const initialFriendProfileState: FriendProfileState = {
   user: null,
   friendship: null,
@@ -129,6 +158,7 @@ const friendProfileSlice = createSlice({
     reset: () => initialFriendProfileState
   },
   extraReducers: builder => {
+    // getFriendshipInfo
     builder
       .addCase(getFriendshipInfo.pending, () => {
         return {
@@ -142,26 +172,41 @@ const friendProfileSlice = createSlice({
         state.friendship = action.payload.friendship;
       })
       .addCase(getFriendshipInfo.rejected, _handleRejected);
+    // sendFriendRequest
     builder
       .addCase(sendFriendRequest.pending, _handleFSChanging)
       .addCase(sendFriendRequest.fulfilled, _handleFSChanged)
       .addCase(sendFriendRequest.rejected, _handleRejected);
+    // cancelFriendRequest
     builder
       .addCase(cancelFriendRequest.pending, _handleFSChanging)
       .addCase(cancelFriendRequest.fulfilled, _handleFSChanged)
       .addCase(cancelFriendRequest.rejected, _handleRejected);
+    // acceptFriendRequest
     builder
       .addCase(acceptFriendRequest.pending, _handleFSChanging)
       .addCase(acceptFriendRequest.fulfilled, _handleFSChanged)
       .addCase(acceptFriendRequest.rejected, _handleRejected);
+    // declineFriendRequest
     builder
       .addCase(declineFriendRequest.pending, _handleFSChanging)
       .addCase(declineFriendRequest.fulfilled, _handleFSChanged)
       .addCase(declineFriendRequest.rejected, _handleRejected);
+    // unfriend
     builder
       .addCase(unfriend.pending, _handleFSChanging)
       .addCase(unfriend.fulfilled, _handleFSChanged)
       .addCase(unfriend.rejected, _handleRejected);
+    // block
+    builder
+      .addCase(block.pending, _handleFSChanging)
+      .addCase(block.fulfilled, _handleFSChanged)
+      .addCase(block.rejected, _handleRejected);
+    // unblock
+    builder
+      .addCase(unblock.pending, _handleFSChanging)
+      .addCase(unblock.fulfilled, _handleFSChanged)
+      .addCase(unblock.rejected, _handleRejected);
   }
 });
 
@@ -174,5 +219,7 @@ export const friendProfileActions = {
   acceptFriendRequest,
   declineFriendRequest,
   unfriend,
+  block,
+  unblock,
   ...friendProfileSlice.actions,
 };

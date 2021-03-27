@@ -19,6 +19,7 @@ import reducer, {
 } from "../../../src/features/friend/friend-profile-slice";
 import {
   getMockStore,
+  mockBlock,
   mockFriendship,
   mockFriendshipInfo,
   mockUser
@@ -27,13 +28,21 @@ import {AppState, AppStore} from "../../../src/store/store";
 import {left, right} from "fp-ts/Either";
 import FriendError from "../../../src/features/friend/types/friend-error";
 import {PayloadAction} from "@reduxjs/toolkit";
-import {FriendshipInfo} from "../../../src/features/friend/types/friendship";
+import {
+  Friendship,
+  FriendshipInfo,
+  FriendshipStatus
+} from "../../../src/features/friend/types/friendship";
+import {IBlockRepository} from "../../../src/features/block/data/block-respository";
+import BlockError, {blockToFriendError} from "../../../src/features/block/types/block-error";
 
 const MockFriendRepo = mock<IFriendRepository>();
+const MockBlockRepo = mock<IBlockRepository>();
 const MockStore = getMockStore();
 let mockStore: AppStore;
 const extraArg = {
-  friendRepo: instance(MockFriendRepo)
+  friendRepo: instance(MockFriendRepo),
+  blockRepo: instance(MockBlockRepo)
 } as StoreExtraArg;
 const username = 'usernameeeeeeee';
 const friendError = FriendError.network;
@@ -50,7 +59,9 @@ const {
   cancelFriendRequest,
   acceptFriendRequest,
   declineFriendRequest,
-  unfriend
+  unfriend,
+  block,
+  unblock
 } = friendProfileActions;
 
 
@@ -59,6 +70,7 @@ beforeEach(() => {
     friendProfile: loadedState
   } as AppState);
   resetCalls(MockFriendRepo);
+  resetCalls(MockBlockRepo);
 });
 
 describe('reset', () => {
@@ -393,4 +405,64 @@ describe('unfriend', () => {
   });
 
   whenNoUserExists((s) => friendshipAct(unfriend, s));
+});
+
+describe('block', () => {
+  const act = () => friendshipAct(block);
+
+  it('should return the right action if fulfilled', async () => {
+    // arrange
+    when(MockBlockRepo.block(anything())).thenResolve(right(mockBlock));
+    const expectedPayload: Friendship = {status: FriendshipStatus.BLOCKED};
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(block.fulfilled.type);
+    expect(result.payload).toStrictEqual(expectedPayload);
+    verify(MockBlockRepo.block(mockUser.id)).once();
+  });
+
+  it('should return the right action if rejected', async () => {
+    // arrange
+    const error = BlockError.network;
+    when(MockBlockRepo.block(anything())).thenResolve(left(error));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(block.rejected.type);
+    expect(result.payload).toStrictEqual(blockToFriendError(error));
+    verify(MockBlockRepo.block(mockUser.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(block, s));
+});
+
+describe('unblock', () => {
+  const act = () => friendshipAct(unblock);
+
+  it('should return the right action if fulfilled', async () => {
+    // arrange
+    when(MockBlockRepo.unblock(anything())).thenResolve(right(mockUser.id));
+    const expectedPayload: Friendship = {status: FriendshipStatus.STRANGERS};
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(unblock.fulfilled.type);
+    expect(result.payload).toStrictEqual(expectedPayload);
+    verify(MockBlockRepo.unblock(mockUser.id)).once();
+  });
+
+  it('should return the right action if rejected', async () => {
+    // arrange
+    const error = BlockError.network;
+    when(MockBlockRepo.unblock(anything())).thenResolve(left(error));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(unblock.rejected.type);
+    expect(result.payload).toStrictEqual(blockToFriendError(error));
+    verify(MockBlockRepo.unblock(mockUser.id)).once();
+  });
+
+  whenNoUserExists((s) => friendshipAct(unblock, s));
 });

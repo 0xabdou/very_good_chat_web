@@ -17,6 +17,9 @@ enum TYPES {
   // Badge
   IBadgeAPI = 'IBadgeAPI',
   IBadgeRepository = 'IBadgeRepository',
+  // Block
+  IBlockAPI = 'IBlockAPI',
+  IBlockRepository = 'IBlockRepository',
   // Notification
   INotificationAPI = 'INotificationAPI',
   INotificationRepository = 'INotificationRepository',

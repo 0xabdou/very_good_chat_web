@@ -23,6 +23,8 @@ import BadgeRepository, {IBadgeRepository} from "../features/badge/data/badge-re
 import {onError} from "@apollo/client/link/error";
 import NotificationAPI, {INotificationAPI} from "../features/notification/data/sources/notification-api";
 import NotificationRepository, {INotificationRepository} from "../features/notification/data/notification-repository";
+import BlockAPI, {IBlockAPI} from "../features/block/data/sources/block-api";
+import BlockRepository, {IBlockRepository} from "../features/block/data/block-respository";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -134,6 +136,15 @@ const initDependencies = async () => {
     TYPES.IBadgeRepository,
     new BadgeRepository(sl.get(TYPES.IBadgeAPI))
   );
+  // Block
+  sl.register<IBlockAPI>(
+    TYPES.IBlockAPI,
+    new BlockAPI(sl.get(TYPES.ApolloClient))
+  );
+  sl.register<IBlockRepository>(
+    TYPES.IBlockRepository,
+    new BlockRepository(sl.get(TYPES.IBlockAPI))
+  );
   // Notification
   sl.register<INotificationAPI>(
     TYPES.INotificationAPI,
@@ -152,6 +163,7 @@ const initDependencies = async () => {
       searchRepo: sl.get(TYPES.ISearchRepository),
       friendRepo: sl.get(TYPES.IFriendRepository),
       badgeRepo: sl.get(TYPES.IBadgeRepository),
+      blockRepo: sl.get(TYPES.IBlockRepository),
       notificationRepo: sl.get(TYPES.INotificationRepository),
     },
   );
