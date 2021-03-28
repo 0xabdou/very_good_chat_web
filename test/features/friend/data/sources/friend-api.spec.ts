@@ -63,7 +63,9 @@ describe('getFriends', () => {
     const result = await friendAPI.getFriends();
     // assert
     expect(result).toStrictEqual([mockFriend]);
-    verify(MockApolloClient.query(deepEqual({query: GET_FRIENDS}))).once();
+    verify(MockApolloClient.query(deepEqual({
+      query: GET_FRIENDS, fetchPolicy: 'no-cache'
+    }))).once();
   });
 });
 

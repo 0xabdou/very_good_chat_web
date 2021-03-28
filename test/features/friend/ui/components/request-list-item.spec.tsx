@@ -1,7 +1,7 @@
 import React from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import RequestListItem, {RequestListItemProps} from "../../../../../src/features/friend/ui/components/request-list-item";
-import {mockFriendRequests} from "../../../../mock-objects";
+import {mockFriend, mockFriendRequests} from "../../../../mock-objects";
 import User from "../../../../../src/features/user/types/user";
 
 const renderIt = (props: RequestListItemProps) => {
@@ -28,6 +28,20 @@ it('should display user info', () => {
   expect(screen.getByText(user.name!)).toBeInTheDocument();
   const avatar = screen.getByAltText('request-avatar') as HTMLImageElement;
   expect(avatar.src).toMatch(user.photo!.small);
+});
+
+describe('request confirmed (Friends)', () => {
+  it('should not display actions', () => {
+    // arrange
+    const props: RequestListItemProps = {
+      req: mockFriend,
+      confirmed: true
+    };
+    // render
+    renderIt(props);
+    // assert
+    expect(screen.queryByTestId('request-actions')).not.toBeInTheDocument();
+  });
 });
 
 describe('received request', () => {

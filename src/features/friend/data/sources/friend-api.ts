@@ -65,7 +65,10 @@ export default class FriendAPI implements IFriendAPI {
   }
 
   async getFriends(): Promise<Friend[]> {
-    const {data} = await this._client.query<GetFriends>({query: GET_FRIENDS});
+    const {data} = await this._client.query<GetFriends>({
+      query: GET_FRIENDS,
+      fetchPolicy: 'no-cache'
+    });
     return data.getFriends.map(friend => {
       return {
         user: UserAPI.parseUser(friend.user),

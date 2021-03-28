@@ -15,6 +15,7 @@ import {useFriendsActions} from "../../friend/friends-actions-context";
 import {useBadgeActions} from "../../badge/badge-actions-context";
 import NotificationsScreen from "../../notification/ui/notifications-screen";
 import {useNotificationActions} from "../../notification/notification-actions-context";
+import FriendsScreen from "../../friend/ui/friends-screen";
 
 
 const LoggedInScreen = () => {
@@ -77,6 +78,7 @@ const LoggedInScreen = () => {
               initialPhotoURL={user.photo?.source}
             />
           </Route>
+          <Route path='/friends'><FriendsScreen/></Route>
           <Route path='/requests'><FriendRequestsScreen received/></Route>
           <Route path='/sent-requests'><FriendRequestsScreen/></Route>
           <Route path='/notifications'><NotificationsScreen/></Route>

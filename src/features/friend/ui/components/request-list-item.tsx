@@ -15,6 +15,7 @@ import {PulseLoader} from "react-spinners";
 export type RequestListItemProps = {
   req: FriendRequest,
   style?: React.CSSProperties
+  confirmed?: Boolean,
   received?: Boolean,
   loading?: Boolean
   onClick?: (user: User) => void,
@@ -56,22 +57,25 @@ const RequestListItem = (props: RequestListItemProps) => {
         </ListItemAvatar>
         <ListItemText primary={primary} secondary={secondary}/>
       </ListItem>
-      <div className={classes.actions}>
-        {props.loading &&
-        <span data-testid='request-loading'>
+      {!props.confirmed &&
+        <div className={classes.actions} data-testid='request-actions'>
+          {props.loading &&
+          <span data-testid='request-loading'>
             <PulseLoader size={10} color='grey'/>
           </span>}
-        {!props.loading &&
-        <IconButton aria-label="cancel" onClick={onCancel}
-                    data-testid='cancel-request'>
-          <Icon className={classes.clear}>clear</Icon>
-        </IconButton>}
-        {!props.loading && props.received &&
-        <IconButton aria-label="accept" onClick={onAccept}
-                    data-testid='accept-request'>
-          <Icon className={classes.check}>check</Icon>
-        </IconButton>}
-      </div>
+          {!props.loading &&
+          <IconButton aria-label="cancel" onClick={onCancel}
+                      data-testid='cancel-request'>
+            <Icon className={classes.clear}>clear</Icon>
+          </IconButton>}
+          {!props.loading && props.received &&
+          <IconButton aria-label="accept" onClick={onAccept}
+                      data-testid='accept-request'>
+            <Icon className={classes.check}>check</Icon>
+          </IconButton>}
+        </div>
+      }
+
     </div>
   );
 };
