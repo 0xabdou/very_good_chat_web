@@ -35,7 +35,7 @@ const emptyState: FriendsState = {
 };
 const errorState: FriendsState = {
   ...initialFriendsState,
-  error: FriendError.network
+  requestsError: FriendError.network
 };
 
 jest.mock(

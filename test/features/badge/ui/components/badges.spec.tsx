@@ -75,7 +75,7 @@ describe('Requests badge', () => {
             // 2 requests in the past, 2 in the future
             received: [req1, req2, req3, req4],
           },
-          error: null,
+          requestsError: null,
           beingTreated: []
         } as FriendsState,
         notification: initialNotificationState

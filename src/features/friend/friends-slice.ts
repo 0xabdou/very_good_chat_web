@@ -3,28 +3,48 @@ import FriendError from "./types/friend-error";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ThunkAPI} from "../../store/store";
 import {isRight} from "fp-ts/Either";
+import Friend from "./types/friend";
 
 export type FriendsState = {
+  friends: Friend[] | null,
   friendRequests: FriendRequests | null,
   beingTreated: string[],
-  error: FriendError | null
+  requestsError: FriendError | null
+  friendsError: FriendError | null
 }
 
 export const initialFriendsState: FriendsState = {
+  friends: null,
   friendRequests: null,
   beingTreated: [],
-  error: null
+  requestsError: null,
+  friendsError: null
 };
 
-let _pollingTimer: NodeJS.Timeout;
+let _requestsPolling: NodeJS.Timeout;
+let _friendsPolling: NodeJS.Timeout;
+
+const getFriends = createAsyncThunk<Friend[], void, ThunkAPI<FriendError>>(
+  'friend/getFriends',
+  async (_, thunkAPI) => {
+    if (!_friendsPolling) {
+      _friendsPolling = setInterval(() => {
+        thunkAPI.dispatch(getFriends());
+      }, 5000);
+    }
+    const result = await thunkAPI.extra.friendRepo.getFriends();
+    if (isRight(result)) return result.right;
+    return thunkAPI.rejectWithValue(result.left);
+  }
+);
 
 const getFriendRequests = createAsyncThunk<FriendRequests, void, ThunkAPI<FriendError>>(
   'friends/getFriendRequests',
   async (_, thunkAPI) => {
     const result = await thunkAPI.extra.friendRepo.getFriendRequests();
     if (isRight(result)) {
-      if (!_pollingTimer)
-        _pollingTimer = setInterval(() => {
+      if (!_requestsPolling)
+        _requestsPolling = setInterval(() => {
           thunkAPI.dispatch(getFriendRequests());
         }, 5000);
       return result.right;
@@ -64,8 +84,8 @@ export const _handleRejected = (
   state: FriendsState,
   action: PayloadAction<FriendError | undefined>
 ) => {
-  if (action.payload == undefined) state.error = FriendError.general;
-  else state.error = action.payload;
+  if (action.payload == undefined) state.requestsError = FriendError.general;
+  else state.requestsError = action.payload;
 };
 
 export const _handleRequestPending = (
@@ -73,7 +93,7 @@ export const _handleRequestPending = (
   action: PayloadAction<void, string, { arg: string }>
 ) => {
   state.beingTreated = [...state.beingTreated, action.meta.arg];
-  state.error = null;
+  state.requestsError = null;
 };
 
 export const _handleRequestFulfilled = (
@@ -93,7 +113,7 @@ export const _handleRequestRejected = (
     ? FriendError.general
     : action.payload;
   const userID = action.meta.arg;
-  state.error = error;
+  state.requestsError = error;
   state.beingTreated = state.beingTreated.filter(id => id != userID);
   if (error == FriendError.requestRemoved || error == FriendError.alreadyFriends) {
     removeRequest(state, userID);
@@ -113,10 +133,23 @@ const friendsSlice = createSlice({
   initialState: initialFriendsState,
   reducers: {},
   extraReducers: builder => {
+    // getFriends
+    builder
+      .addCase(getFriends.pending, (state) => {
+        state.friendsError = null;
+      })
+      .addCase(getFriends.fulfilled, (state, action) => {
+        state.friends = action.payload;
+      })
+      .addCase(getFriends.rejected, (state, action) => {
+        state.friendsError = action.payload == undefined
+          ? FriendError.general
+          : action.payload;
+      });
     // getFriendRequests
     builder
       .addCase(getFriendRequests.pending, (state) => {
-        state.error = null;
+        state.requestsError = null;
       })
       .addCase(getFriendRequests.fulfilled, (state, action) => {
         state.friendRequests = action.payload;
@@ -143,6 +176,7 @@ const friendsSlice = createSlice({
 export default friendsSlice.reducer;
 
 export const friendsActions = {
+  getFriends,
   getFriendRequests,
   acceptFriendRequest,
   declineFriendRequest,

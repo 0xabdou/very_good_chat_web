@@ -1,7 +1,8 @@
-import {anything, instance, mock, resetCalls, when} from "ts-mockito";
+import {anything, instance, mock, resetCalls, verify, when} from "ts-mockito";
 import {IFriendRepository} from "../../../src/features/friend/data/friend-repository";
 import {
   getMockStore,
+  mockFriend,
   mockFriendRequests,
   mockFriendship,
   mockUser,
@@ -21,6 +22,7 @@ import reducer, {
 import {left, right} from "fp-ts/Either";
 import {PayloadAction} from "@reduxjs/toolkit";
 import {FriendRequests} from "../../../src/features/friend/types/friend-request";
+import Friend from "../../../src/features/friend/types/friend";
 
 const MockFriendRepo = mock<IFriendRepository>();
 const MockStore = getMockStore();
@@ -32,6 +34,7 @@ const friendError = FriendError.network;
 const userID = 'userIDDDDDDD';
 
 const {
+  getFriends,
   getFriendRequests,
   acceptFriendRequest,
   declineFriendRequest,
@@ -80,7 +83,10 @@ describe('reducer logic', () => {
       // act
       _handleRejected(state, action);
       // assert
-      expect(state).toStrictEqual({...initialFriendsState, error: friendError});
+      expect(state).toStrictEqual({
+        ...initialFriendsState,
+        requestsError: friendError
+      });
     });
     test('undefined payload', () => {
       // arrange
@@ -90,14 +96,20 @@ describe('reducer logic', () => {
       _handleRejected(state, action);
       // assert
       expect(state)
-        .toStrictEqual({...initialFriendsState, error: FriendError.general});
+        .toStrictEqual({
+          ...initialFriendsState,
+          requestsError: FriendError.general
+        });
     });
   });
 
   describe('_handleRequestPending', () => {
     it('should add the user ID to the list of reqs being treated', () => {
       // arrange
-      const state = {...initialFriendsState, error: FriendError.general};
+      const state = {
+        ...initialFriendsState,
+        requestsError: FriendError.general
+      };
       const action: PayloadAction<void, string, { arg: string }> = {
         type: 'any',
         payload: undefined,
@@ -107,7 +119,7 @@ describe('reducer logic', () => {
       _handleRequestPending(state, action);
       // assert
       expect(state.beingTreated[0]).toBe(userID);
-      expect(state.error).toBeNull();
+      expect(state.requestsError).toBeNull();
     });
   });
 
@@ -133,14 +145,14 @@ describe('reducer logic', () => {
   });
 
   describe('_handleRequestRejected', () => {
-    const shouldRemove = (error: FriendError | undefined) => {
+    const shouldRemove = (requestsError: FriendError | undefined) => {
       it('should remove the user ID from the list of reqs being treated ' +
         'and remove the request from the lists', () => {
         // arrange
         const state = {...stateWithReqs};
         const action: PayloadAction<FriendError | undefined, string, { arg: string }> = {
           type: 'any',
-          payload: error,
+          payload: requestsError,
           meta: {arg: userID}
         };
         // act
@@ -151,18 +163,18 @@ describe('reducer logic', () => {
         expect(state.friendRequests!.received[0].user.id).toBe('bleh');
         expect(state.friendRequests!.sent).toHaveLength(1);
         expect(state.friendRequests!.sent[0].user.id).toBe('bleh');
-        expect(state.error).toBe(error);
+        expect(state.requestsError).toBe(requestsError);
       });
     };
 
-    const shouldKeep = (error: FriendError | undefined) => {
+    const shouldKeep = (requestsError: FriendError | undefined) => {
       it('should not remove the user ID from the list of reqs being treated ' +
         'and keep the req in the lists', () => {
         // arrange
         const state = {...stateWithReqs};
         const action: PayloadAction<FriendError | undefined, string, { arg: string }> = {
           type: 'any',
-          payload: error,
+          payload: requestsError,
           meta: {arg: userID}
         };
         // act
@@ -171,7 +183,7 @@ describe('reducer logic', () => {
         expect(state.beingTreated).toHaveLength(0);
         expect(state.friendRequests!.received).toHaveLength(2);
         expect(state.friendRequests!.sent).toHaveLength(2);
-        expect(state.error).toBe(error == undefined ? FriendError.general : error);
+        expect(state.requestsError).toBe(requestsError == undefined ? FriendError.general : requestsError);
       });
     };
 
@@ -181,6 +193,97 @@ describe('reducer logic', () => {
     shouldKeep(FriendError.network);
     shouldKeep(FriendError.requestAlreadyReceived);
     shouldKeep(undefined);
+  });
+});
+
+describe('getFriends', () => {
+  const act = () => getFriends()(
+    mockStore.dispatch,
+    mockStore.getState,
+    extraArg
+  );
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.getFriends()).thenResolve(right([mockFriend]));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(getFriends.fulfilled.type);
+    expect(result.payload).toStrictEqual([mockFriend]);
+    verify(MockFriendRepo.getFriends()).once();
+  });
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    when(MockFriendRepo.getFriends()).thenResolve(right([mockFriend]));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(getFriends.fulfilled.type);
+    expect(result.payload).toStrictEqual([mockFriend]);
+    verify(MockFriendRepo.getFriends()).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    when(MockFriendRepo.getFriends()).thenResolve(left(friendError));
+    // act
+    const result = await act();
+    // assert
+    expect(result.type).toBe(getFriends.rejected.type);
+    expect(result.payload).toStrictEqual(friendError);
+    verify(MockFriendRepo.getFriends()).once();
+  });
+
+  describe('reducers', () => {
+    it('should return the right state if pending', () => {
+      // arrange
+      const inputState: FriendsState = {
+        ...initialFriendsState, friendsError: friendError
+      };
+      const outputState: FriendsState = {...initialFriendsState};
+      const action: PayloadAction = {
+        type: getFriends.pending.type,
+        payload: undefined
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
+    it('should return the right state if fulfilled', () => {
+      // arrange
+      const inputState: FriendsState = {...initialFriendsState};
+      const outputState: FriendsState = {
+        ...initialFriendsState, friends: [mockFriend]
+      };
+      const action: PayloadAction<Friend[]> = {
+        type: getFriends.fulfilled.type,
+        payload: [mockFriend]
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
+    it('should return the right state if rejected', () => {
+      // arrange
+      const inputState: FriendsState = {...initialFriendsState};
+      const outputState: FriendsState = {
+        ...initialFriendsState, friendsError: friendError
+      };
+      const action: PayloadAction<FriendError> = {
+        type: getFriends.rejected.type,
+        payload: friendError
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
   });
 });
 
@@ -217,7 +320,7 @@ describe('getFriendRequests', () => {
       const state = {
         ...initialFriendsState,
         friendRequest: mockFriendRequests,
-        error: FriendError.general
+        requestsError: FriendError.general
       };
       const action: PayloadAction = {
         type: getFriendRequests.pending.type,
@@ -226,7 +329,7 @@ describe('getFriendRequests', () => {
       // act
       const result = reducer(state, action);
       // assert
-      expect(result).toStrictEqual({...state, error: null});
+      expect(result).toStrictEqual({...state, requestsError: null});
     });
 
     it('should return the right state if fulfilled', () => {
@@ -248,15 +351,15 @@ describe('getFriendRequests', () => {
     it('should return the right state if rejected', () => {
       // arrange
       const state = {...initialFriendsState};
-      const error = FriendError.network;
+      const requestsError = FriendError.network;
       const action: PayloadAction<FriendError> = {
         type: getFriendRequests.rejected.type,
-        payload: error
+        payload: requestsError
       };
       // act
       const result = reducer(state, action);
       // assert
-      expect(result).toStrictEqual({...state, error});
+      expect(result).toStrictEqual({...state, requestsError});
     });
   });
 });
