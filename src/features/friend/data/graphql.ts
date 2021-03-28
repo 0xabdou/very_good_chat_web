@@ -92,3 +92,19 @@ export const GET_FRIEND_REQUESTS = gql`
         }
     }
 `;
+
+export const GET_FRIENDS = gql`
+    query GetFriends {
+        getFriends {
+            user {
+                id
+                name
+                photoURLMedium
+                photoURLSmall
+                photoURLSource
+                username
+            }
+            date
+        }
+    }
+`;

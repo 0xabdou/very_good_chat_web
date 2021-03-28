@@ -20,6 +20,11 @@ type Block {
     user: User!
 }
 
+type Friend {
+    date: Timestamp!
+    user: User!
+}
+
 type FriendRequest {
     date: Timestamp!
     user: User!
@@ -74,6 +79,7 @@ type Query {
     getBadges: [Badge!]!
     getBlockedUsers: [Block!]!
     getFriendRequests: FriendRequests!
+    getFriends: [Friend!]!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
     getNotifications: [Notification!]!
     me: User!

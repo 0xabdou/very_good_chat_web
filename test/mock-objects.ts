@@ -31,6 +31,7 @@ import {
 import {BlockMutation_block} from "../src/_generated/BlockMutation";
 import {Block} from "../src/features/block/types/block";
 import {UserAPI} from "../src/features/user/data/sources/user-api";
+import Friend from "../src/features/friend/types/friend";
 
 export const MockFile = mock<File>();
 
@@ -116,6 +117,11 @@ export const mockFriendRequests: FriendRequests = {
     user: {...mockUser, id: 'receivedUsername', username: 'receivedUsername'},
     date: new Date().getTime(),
   }]
+};
+
+export const mockFriend: Friend = {
+  user: mockUser,
+  date: new Date().getTime(),
 };
 
 export const mockGQLBadge: UpdateBadge_updateBadge = {

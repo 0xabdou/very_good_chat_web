@@ -9,6 +9,7 @@ import {
   CANCEL_FRIEND_REQUEST_MUTATION,
   DECLINE_FRIEND_REQUEST_MUTATION,
   GET_FRIEND_REQUESTS,
+  GET_FRIENDS,
   GET_FRIENDSHIP_INFO_QUERY,
   SEND_FRIEND_REQUEST_MUTATION,
   UNFRIEND_MUTATION
@@ -34,8 +35,12 @@ import {GetUserArgs} from "../../../user/types/user";
 import {UserAPI} from "../../../user/data/sources/user-api";
 import {FriendRequests} from "../../types/friend-request";
 import {GetFriendRequests} from "../../../../_generated/GetFriendRequests";
+import Friend from "../../types/friend";
+import {GetFriends} from "../../../../_generated/GetFriends";
 
 export interface IFriendAPI {
+
+  getFriends(): Promise<Friend[]>
 
   getFriendRequests(): Promise<FriendRequests>;
 
@@ -57,6 +62,16 @@ export default class FriendAPI implements IFriendAPI {
 
   constructor(client: ApolloClient<any>) {
     this._client = client;
+  }
+
+  async getFriends(): Promise<Friend[]> {
+    const {data} = await this._client.query<GetFriends>({query: GET_FRIENDS});
+    return data.getFriends.map(friend => {
+      return {
+        user: UserAPI.parseUser(friend.user),
+        date: friend.date
+      };
+    });
   }
 
   async getFriendRequests(): Promise<FriendRequests> {

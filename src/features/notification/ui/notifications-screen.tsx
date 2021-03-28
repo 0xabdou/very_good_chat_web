@@ -44,7 +44,6 @@ const NotificationsScreen = () => {
     if (state.notifications.length) {
       child = <AutoSizer>
         {({height, width}) => {
-          console.log(width, height);
           return <FixedSizeList
             itemCount={state.notifications!.length}
             itemData={state.notifications}
