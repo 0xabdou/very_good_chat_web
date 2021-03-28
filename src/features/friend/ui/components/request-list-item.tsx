@@ -11,6 +11,7 @@ import {
   makeStyles
 } from "@material-ui/core";
 import {PulseLoader} from "react-spinners";
+import {formatDate} from "../../../../utils/date-utils";
 
 export type RequestListItemProps = {
   req: FriendRequest,
@@ -24,14 +25,6 @@ export type RequestListItemProps = {
 }
 const RequestListItem = (props: RequestListItemProps) => {
   const user = props.req.user;
-  let primary: string;
-  let secondary: string | undefined;
-  if (user.name) {
-    primary = user.name;
-    secondary = user.username;
-  } else {
-    primary = user.username;
-  }
 
   const onClick = useCallback(() => {
     if (props.onClick) props.onClick(user);
@@ -55,25 +48,28 @@ const RequestListItem = (props: RequestListItemProps) => {
         <ListItemAvatar>
           <Avatar src={user.photo?.small} alt='request-avatar'/>
         </ListItemAvatar>
-        <ListItemText primary={primary} secondary={secondary}/>
+        <ListItemText
+          primary={user.username}
+          secondary={formatDate(props.req.date)}
+        />
       </ListItem>
       {!props.confirmed &&
-        <div className={classes.actions} data-testid='request-actions'>
-          {props.loading &&
-          <span data-testid='request-loading'>
+      <div className={classes.actions} data-testid='request-actions'>
+        {props.loading &&
+        <span data-testid='request-loading'>
             <PulseLoader size={10} color='grey'/>
           </span>}
-          {!props.loading &&
-          <IconButton aria-label="cancel" onClick={onCancel}
-                      data-testid='cancel-request'>
-            <Icon className={classes.clear}>clear</Icon>
-          </IconButton>}
-          {!props.loading && props.received &&
-          <IconButton aria-label="accept" onClick={onAccept}
-                      data-testid='accept-request'>
-            <Icon className={classes.check}>check</Icon>
-          </IconButton>}
-        </div>
+        {!props.loading &&
+        <IconButton aria-label="cancel" onClick={onCancel}
+                    data-testid='cancel-request'>
+          <Icon className={classes.clear}>clear</Icon>
+        </IconButton>}
+        {!props.loading && props.received &&
+        <IconButton aria-label="accept" onClick={onAccept}
+                    data-testid='accept-request'>
+          <Icon className={classes.check}>check</Icon>
+        </IconButton>}
+      </div>
       }
 
     </div>

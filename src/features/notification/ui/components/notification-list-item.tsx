@@ -4,7 +4,6 @@ import {
   isSystemNotification,
   Notification
 } from "../../types/notification";
-import TimeAgo from "javascript-time-ago";
 import {
   Avatar,
   createStyles,
@@ -14,6 +13,7 @@ import {
   makeStyles
 } from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import {formatDate} from "../../../../utils/date-utils";
 
 export type NotificationListItemProps = {
   notification: Notification,
@@ -99,12 +99,10 @@ type ViewModel = {
   seen: boolean
 }
 
-let timeAgo: TimeAgo;
 const getViewModel = (
   notification: Notification,
   classes: ReturnType<typeof useStyles>
 ): ViewModel => {
-  if (!timeAgo) timeAgo = new TimeAgo('en-US');
   const content = notification.content;
   if (isRequestAcceptedNotification(content)) {
     const user = content.user;
@@ -117,7 +115,7 @@ const getViewModel = (
     );
     const secondary = (
       <span className={classes.secondary}>
-        {timeAgo.format(notification.date)}
+        {formatDate(notification.date)}
       </span>
     );
     return {
@@ -130,7 +128,7 @@ const getViewModel = (
   if (isSystemNotification(content)) {
     return {
       primary: content.message,
-      secondary: timeAgo.format(notification.date),
+      secondary: formatDate(notification.date),
       seen: notification.seen,
     };
   }
