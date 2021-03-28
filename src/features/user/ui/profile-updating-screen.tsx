@@ -22,7 +22,6 @@ import {usePhotoUtils} from "../../../utils/photo-utils";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {UserUpdate} from "../types/user";
 
-
 const validators = {
   validateUsername(username: string) {
     if (username.length == 0) return 'A username is required';
@@ -34,7 +33,7 @@ const validators = {
     if (!/^[a-z0-9._]+$/.test(username)) return 'Username can only contain letter, numbers, . and _';
   },
   validateName(name: string) {
-    if (name.length > 50) return 'Name must be 50 characters at most';
+    if (name.length > 20) return 'Name must be 20 characters at most';
   }
 };
 
