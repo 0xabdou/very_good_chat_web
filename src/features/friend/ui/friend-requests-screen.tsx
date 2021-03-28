@@ -105,12 +105,12 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
         </div>
       );
     }
-  } else if (state.error != null) {
+  } else if (state.requestsError != null) {
     child = (
       <div className={classes.centered}>
         <RetryButton
           onClick={retry}
-          message={stringifyFriendError(state.error)}
+          message={stringifyFriendError(state.requestsError)}
         />
       </div>
     );
@@ -134,7 +134,7 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
       </div>}
       {child}
       <ErrorSnackbar
-        currentError={state.error}
+        currentError={state.requestsError}
         stringify={stringifyFriendError}
         exclude={[]}
       />

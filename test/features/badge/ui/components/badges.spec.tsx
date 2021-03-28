@@ -70,6 +70,8 @@ describe('Requests badge', () => {
           notifications: present
         },
         friends: {
+          friends: null,
+          friendsError: null,
           friendRequests: {
             sent: [],
             // 2 requests in the past, 2 in the future
