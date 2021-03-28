@@ -1,4 +1,4 @@
-import {anything, instance, mock, verify, when} from "ts-mockito";
+import {anything, instance, mock, resetCalls, verify, when} from "ts-mockito";
 import {IFriendAPI} from "../../../../src/features/friend/data/sources/friend-api";
 import FriendRepository, {friendErrors} from "../../../../src/features/friend/data/friend-repository";
 import {ApolloError} from "@apollo/client";
@@ -6,6 +6,7 @@ import {left, right} from "fp-ts/Either";
 import FriendError from "../../../../src/features/friend/types/friend-error";
 import {
   getApolloError,
+  mockFriend,
   mockFriendRequests,
   mockFriendship,
   mockFriendshipInfo
@@ -15,6 +16,10 @@ import {GetUserArgs} from "../../../../src/features/user/types/user";
 const MockFriendAPI = mock<IFriendAPI>();
 const friendRepo = new FriendRepository(instance(MockFriendAPI));
 const userID = 'SJOSADLK';
+
+beforeEach(() => {
+  resetCalls(MockFriendAPI);
+});
 
 describe('error catching', () => {
   it('should return general errors', async () => {
@@ -63,6 +68,18 @@ describe('error catching', () => {
   });
 });
 
+describe('getFriends', () => {
+  it('should return the friends', async () => {
+    // arrange
+    when(MockFriendAPI.getFriends()).thenResolve([mockFriend]);
+    // act
+    const result = await friendRepo.getFriends();
+    // assert
+    expect(result).toStrictEqual(right([mockFriend]));
+    verify(MockFriendAPI.getFriends()).once();
+  });
+});
+
 describe('getFriendRequests', () => {
   it('should return the friend requests', async () => {
     // arrange
@@ -71,6 +88,7 @@ describe('getFriendRequests', () => {
     const result = await friendRepo.getFriendRequests();
     // assert
     expect(result).toStrictEqual(right(mockFriendRequests));
+    verify(MockFriendAPI.getFriendRequests()).once();
   });
 });
 
