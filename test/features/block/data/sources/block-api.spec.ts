@@ -1,18 +1,18 @@
 import {anything, deepEqual, instance, mock, verify, when} from "ts-mockito";
 import {ApolloClient, ApolloQueryResult} from "@apollo/client";
-import BlockAPI from "../../../../src/features/block/data/sources/block-api";
+import BlockAPI from "../../../../../src/features/block/data/sources/block-api";
 import {
   BlockMutation,
   BlockMutationVariables
-} from "../../../../src/_generated/BlockMutation";
-import {mockBlock, mockGQLBlock} from "../../../mock-objects";
+} from "../../../../../src/_generated/BlockMutation";
+import {mockBlock, mockGQLBlock} from "../../../../mock-objects";
 import {
   BLOCK,
   GET_BLOCKED_USERS,
   UNBLOCK
-} from "../../../../src/features/block/data/graphql";
-import {Unblock, UnblockVariables} from "../../../../src/_generated/Unblock";
-import {GetBlockedUsers} from "../../../../src/_generated/GetBlockedUsers";
+} from "../../../../../src/features/block/data/graphql";
+import {Unblock, UnblockVariables} from "../../../../../src/_generated/Unblock";
+import {GetBlockedUsers} from "../../../../../src/_generated/GetBlockedUsers";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const blockedID = 'blockeddddddddd';

@@ -1,11 +1,11 @@
 import {anything, instance, mock, verify, when} from "ts-mockito";
-import BlockAPI from "../../../src/features/block/data/sources/block-api";
+import BlockAPI from "../../../../src/features/block/data/sources/block-api";
 import BlockRepository
-  from "../../../src/features/block/data/block-respository";
-import BlockError from "../../../src/features/block/types/block-error";
+  from "../../../../src/features/block/data/block-respository";
+import BlockError from "../../../../src/features/block/types/block-error";
 import {ApolloError} from "@apollo/client";
 import {left, right} from "fp-ts/Either";
-import {getApolloError, mockBlock} from "../../mock-objects";
+import {getApolloError, mockBlock} from "../../../mock-objects";
 
 const MockBlockAPI = mock<BlockAPI>();
 const blockedID = 'blockeeeeeeddddd';
