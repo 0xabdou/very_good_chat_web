@@ -2,7 +2,7 @@ import React, {useCallback, useEffect} from "react";
 import {Button, makeStyles, Typography} from "@material-ui/core";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {PulseLoader} from "react-spinners";
-import RetryButton from "../../user/ui/components/retry-button";
+import RetryButton from "../../../components/retry-button";
 import {useFriendsActions} from "../friends-actions-context";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
 import AutoSizer from "react-virtualized-auto-sizer";

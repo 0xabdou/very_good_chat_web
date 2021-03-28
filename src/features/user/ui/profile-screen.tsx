@@ -8,12 +8,15 @@ import {useHistory} from "react-router-dom";
 import CommonProfileInfo from "./components/common-profile-info";
 import {AuthActionsContext} from "../../auth/auth-actions-context";
 import {UserActionsContext} from "../user-actions-context";
+import FriendsButton from "./components/friends-button";
+import RetryPage from "../../../components/retry-page";
+import {stringifyUserError} from "../types/user-error";
 
 const ProfileScreen: React.FC = () => {
   const userState = useAppSelector(state => state.user);
   const history = useHistory();
   const {signOut} = useContext(AuthActionsContext);
-  const {resetUser} = useContext(UserActionsContext);
+  const {getCurrentUser, resetUser} = useContext(UserActionsContext);
   const dispatch = useAppDispatch();
 
   const classes = useStyles();
@@ -21,7 +24,7 @@ const ProfileScreen: React.FC = () => {
 
   const editProfile = useCallback(() => {
     history.push('/edit-profile');
-  }, []);
+  }, [history]);
 
   const logout = useCallback(async () => {
     const result = await dispatch(signOut());
@@ -29,8 +32,16 @@ const ProfileScreen: React.FC = () => {
       dispatch(resetUser());
   }, []);
 
+  const retry = useCallback(async () => {
+    dispatch(getCurrentUser());
+  }, []);
+
   if (!userState.initialized) {
     return <FullscreenLoader/>;
+  }
+  if (!userState.currentUser && userState.error != null) {
+    return <RetryPage onRetry={retry}
+                      errorMessage={stringifyUserError(userState.error)}/>;
   }
   if (!userState.currentUser) {
     console.log('Displaying profile screen without a user');
@@ -58,6 +69,7 @@ const ProfileScreen: React.FC = () => {
       </TopBar>
       <div className={classes.wrapper}>
         <CommonProfileInfo user={user}/>
+        <FriendsButton/>
       </div>
     </div>
   );
@@ -70,7 +82,10 @@ const useStyles = makeStyles({
     width: '100%',
   },
   wrapper: {
-    margin: 'auto'
+    margin: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center'
   },
   layout: centeredLayout,
 });

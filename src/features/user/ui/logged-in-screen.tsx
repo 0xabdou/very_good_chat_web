@@ -23,13 +23,14 @@ const LoggedInScreen = () => {
   const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
   const {getCurrentUser} = useUserActions();
-  const {getFriendRequests} = useFriendsActions();
+  const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();
 
   useEffect(() => {
     dispatch(getCurrentUser());
     dispatch(getFriendRequests());
+    dispatch(getFriends());
     dispatch(getNotifications());
     dispatch(getBadges());
   }, []);

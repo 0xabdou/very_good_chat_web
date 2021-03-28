@@ -1,4 +1,4 @@
-import RetryButton from "../features/user/ui/components/retry-button";
+import RetryButton from "./retry-button";
 import React from "react";
 import {makeStyles} from "@material-ui/styles";
 
