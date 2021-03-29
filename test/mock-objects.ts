@@ -121,7 +121,7 @@ export const mockFriendRequests: FriendRequests = {
 
 export const mockFriend: Friend = {
   user: mockUser,
-  friendshipDate: new Date().getTime(),
+  date: new Date().getTime(),
   lastSeen: new Date().getTime()
 };
 

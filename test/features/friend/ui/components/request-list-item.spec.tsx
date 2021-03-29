@@ -1,7 +1,7 @@
 import React from "react";
 import {fireEvent, render, screen} from "@testing-library/react";
 import RequestListItem, {RequestListItemProps} from "../../../../../src/features/friend/ui/components/request-list-item";
-import {mockFriend, mockFriendRequests} from "../../../../mock-objects";
+import {mockFriend, mockFriendRequests,} from "../../../../mock-objects";
 import User from "../../../../../src/features/user/types/user";
 import {formatDate} from "../../../../../src/utils/date-utils";
 

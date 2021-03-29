@@ -2,7 +2,7 @@ import User from "../../user/types/user";
 
 type Friend = {
   user: User,
-  friendshipDate: number,
+  date: number,
   lastSeen?: number
 }
 
