@@ -104,7 +104,8 @@ export const GET_FRIENDS = gql`
                 photoURLSource
                 username
             }
-            date
+            friendshipDate
+            lastSeen
         }
     }
 `;

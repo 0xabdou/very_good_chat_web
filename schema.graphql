@@ -21,7 +21,8 @@ type Block {
 }
 
 type Friend {
-    date: Timestamp!
+    friendshipDate: Timestamp!
+    lastSeen: Timestamp
     user: User!
 }
 
@@ -61,7 +62,9 @@ type Mutation {
     sendFriendRequest(userID: String!): Friendship!
     unblock(blocked_id: String!): String!
     unfriend(userID: String!): Friendship!
+    updateActiveStatus(activeStatus: Boolean!): Boolean!
     updateBadge(badgeName: BadgeName!): Badge!
+    updateLastSeen: Timestamp!
     updateUser(input: UserUpdate!): User!
 }
 

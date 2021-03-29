@@ -20,7 +20,8 @@ export interface GetFriends_getFriends_user {
 export interface GetFriends_getFriends {
   __typename: "Friend";
   user: GetFriends_getFriends_user;
-  date: any;
+  friendshipDate: any;
+  lastSeen: any | null;
 }
 
 export interface GetFriends {

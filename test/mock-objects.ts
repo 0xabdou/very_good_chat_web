@@ -121,7 +121,8 @@ export const mockFriendRequests: FriendRequests = {
 
 export const mockFriend: Friend = {
   user: mockUser,
-  date: new Date().getTime(),
+  friendshipDate: new Date().getTime(),
+  lastSeen: new Date().getTime()
 };
 
 export const mockGQLBadge: UpdateBadge_updateBadge = {

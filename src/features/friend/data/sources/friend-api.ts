@@ -72,7 +72,8 @@ export default class FriendAPI implements IFriendAPI {
     return data.getFriends.map(friend => {
       return {
         user: UserAPI.parseUser(friend.user),
-        date: friend.date
+        friendshipDate: friend.friendshipDate,
+        lastSeen: friend.lastSeen ?? undefined
       };
     });
   }

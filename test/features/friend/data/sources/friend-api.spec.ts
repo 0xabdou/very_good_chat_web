@@ -54,7 +54,8 @@ describe('getFriends', () => {
         photoURLMedium: mockFriend.user.photo?.medium ?? null,
         photoURLSmall: mockFriend.user.photo?.small ?? null,
       },
-      date: mockFriend.date
+      friendshipDate: mockFriend.friendshipDate,
+      lastSeen: mockFriend.lastSeen ?? null
     };
     when(MockApolloClient.query(anything())).thenResolve({
       data: {getFriends: [friend]}
