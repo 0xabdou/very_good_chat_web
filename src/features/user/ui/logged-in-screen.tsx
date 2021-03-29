@@ -17,6 +17,7 @@ import NotificationsScreen from "../../notification/ui/notifications-screen";
 import {useNotificationActions} from "../../notification/notification-actions-context";
 import FriendsScreen from "../../friend/ui/friends-screen";
 import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
+import SettingsScreen from "../../settings/ui/settings-screen";
 
 
 const LoggedInScreen = () => {
@@ -85,6 +86,7 @@ const LoggedInScreen = () => {
           <Route path='/requests'><FriendRequestsScreen received/></Route>
           <Route path='/sent-requests'><FriendRequestsScreen/></Route>
           <Route path='/notifications'><NotificationsScreen/></Route>
+          <Route path='/settings'><SettingsScreen/></Route>
           <Redirect exact from={`/u/${user.username}`} to='/profile'/>
           <Route path='/u/:username'>
             <FriendProfileScreen/>

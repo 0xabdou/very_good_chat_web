@@ -6,7 +6,6 @@ import FullscreenLoader from "../../../components/fullscreen-loader";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
 import {useHistory} from "react-router-dom";
 import CommonProfileInfo from "./components/common-profile-info";
-import {AuthActionsContext} from "../../auth/auth-actions-context";
 import {UserActionsContext} from "../user-actions-context";
 import FriendsButton from "./components/friends-button";
 import RetryPage from "../../../components/retry-page";
@@ -15,8 +14,7 @@ import {stringifyUserError} from "../types/user-error";
 const ProfileScreen: React.FC = () => {
   const userState = useAppSelector(state => state.user);
   const history = useHistory();
-  const {signOut} = useContext(AuthActionsContext);
-  const {getCurrentUser, resetUser} = useContext(UserActionsContext);
+  const {getCurrentUser} = useContext(UserActionsContext);
   const dispatch = useAppDispatch();
 
   const classes = useStyles();
@@ -26,11 +24,9 @@ const ProfileScreen: React.FC = () => {
     history.push('/edit-profile');
   }, [history]);
 
-  const logout = useCallback(async () => {
-    const result = await dispatch(signOut());
-    if (result.meta.requestStatus == 'fulfilled')
-      dispatch(resetUser());
-  }, []);
+  const goToSettings = useCallback(async () => {
+    history.push('/settings');
+  }, [history]);
 
   const retry = useCallback(async () => {
     dispatch(getCurrentUser());
@@ -40,8 +36,11 @@ const ProfileScreen: React.FC = () => {
     return <FullscreenLoader/>;
   }
   if (!userState.currentUser && userState.error != null) {
-    return <RetryPage onRetry={retry}
-                      errorMessage={stringifyUserError(userState.error)}/>;
+    return (
+      <RetryPage
+        onRetry={retry}
+        errorMessage={stringifyUserError(userState.error)}/>
+    );
   }
   if (!userState.currentUser) {
     console.log('Displaying profile screen without a user');
@@ -63,7 +62,7 @@ const ProfileScreen: React.FC = () => {
         <IconButton
           className={topBarClasses.actionButton}
           data-testid='settings-button'
-          onClick={logout}>
+          onClick={goToSettings}>
           <Icon>settings</Icon>
         </IconButton>
       </TopBar>
