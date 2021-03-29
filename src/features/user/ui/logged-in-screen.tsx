@@ -16,6 +16,7 @@ import {useBadgeActions} from "../../badge/badge-actions-context";
 import NotificationsScreen from "../../notification/ui/notifications-screen";
 import {useNotificationActions} from "../../notification/notification-actions-context";
 import FriendsScreen from "../../friend/ui/friends-screen";
+import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
 
 
 const LoggedInScreen = () => {
@@ -79,6 +80,7 @@ const LoggedInScreen = () => {
               initialPhotoURL={user.photo?.source}
             />
           </Route>
+          <Route path='/blocked-users'><BlockedUsersScreen/></Route>
           <Route path='/friends'><FriendsScreen/></Route>
           <Route path='/requests'><FriendRequestsScreen received/></Route>
           <Route path='/sent-requests'><FriendRequestsScreen/></Route>

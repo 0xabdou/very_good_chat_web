@@ -10,8 +10,8 @@ const RetryButton = (props: RetryButtonProps) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.root} data-testid='retry-button'>
-      <IconButton onClick={props.onClick}>
+    <div className={classes.root}>
+      <IconButton onClick={props.onClick} data-testid='retry-button'>
         <Icon className={classes.icon}>refresh</Icon>
       </IconButton>
       <p className={classes.message}>{props.message}</p>

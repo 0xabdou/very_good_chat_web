@@ -20,8 +20,6 @@ import {NotificationActionsContext} from "../../../../src/features/notification/
 import {MemoryRouter} from "react-router-dom";
 import NotificationsScreen
   from "../../../../src/features/notification/ui/notifications-screen";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 import {getMockStore, mockRANotification} from "../../../mock-objects";
 import NotificationError
   from "../../../../src/features/notification/types/notification-error";
@@ -53,10 +51,6 @@ jest.mock(
   'react-virtualized-auto-sizer',
   () => ({children}: any) => children({height: 600, width: 600})
 );
-
-beforeAll(() => {
-  TimeAgo.addDefaultLocale(en);
-});
 
 beforeEach(() => {
   resetCalls(MockNotificationActions);

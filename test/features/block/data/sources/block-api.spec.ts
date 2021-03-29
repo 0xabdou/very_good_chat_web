@@ -61,6 +61,9 @@ describe('getBlockedUser', () => {
     const result = await blockAPI.getBlockedUsers();
     // assert
     expect(result).toStrictEqual([mockBlock]);
-    verify(MockApolloClient.query(deepEqual({query: GET_BLOCKED_USERS}))).once();
+    verify(MockApolloClient.query(deepEqual({
+      query: GET_BLOCKED_USERS,
+      fetchPolicy: 'no-cache'
+    }))).once();
   });
 });

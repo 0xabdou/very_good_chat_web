@@ -27,7 +27,7 @@ export default class BlockAPI implements IBlockAPI {
   async block(blockedID: string): Promise<Block> {
     const {data} = await this._client.mutate<BlockMutation, BlockMutationVariables>({
       mutation: BLOCK,
-      variables: {blockedID}
+      variables: {blockedID},
     });
     const block = data?.block!;
     return {
@@ -46,7 +46,8 @@ export default class BlockAPI implements IBlockAPI {
 
   async getBlockedUsers(): Promise<Block[]> {
     const {data} = await this._client.query<GetBlockedUsers>({
-      query: GET_BLOCKED_USERS
+      query: GET_BLOCKED_USERS,
+      fetchPolicy: 'no-cache',
     });
     return data.getBlockedUsers.map(block => {
       return {

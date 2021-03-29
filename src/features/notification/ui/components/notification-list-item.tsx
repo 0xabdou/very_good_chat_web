@@ -31,8 +31,11 @@ const NotificationListItem = (props: NotificationListItemProps) => {
 
   const vm = getViewModel(props.notification, classes);
   return (
-    <ListItem style={props.style} onClick={onClick} button
-              data-testid='notification-list-item'>
+    <ListItem
+      style={props.style}
+      onClick={onClick}
+      button
+      data-testid='notification-list-item'>
       <ListItemAvatar>
         <Avatar src={vm.avatar} alt='notification-avatar'/>
       </ListItemAvatar>

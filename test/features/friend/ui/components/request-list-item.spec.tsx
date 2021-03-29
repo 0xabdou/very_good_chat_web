@@ -3,6 +3,7 @@ import {fireEvent, render, screen} from "@testing-library/react";
 import RequestListItem, {RequestListItemProps} from "../../../../../src/features/friend/ui/components/request-list-item";
 import {mockFriend, mockFriendRequests} from "../../../../mock-objects";
 import User from "../../../../../src/features/user/types/user";
+import {formatDate} from "../../../../../src/utils/date-utils";
 
 const renderIt = (props: RequestListItemProps) => {
   render(<RequestListItem {...props}/>);
@@ -25,7 +26,7 @@ it('should display user info', () => {
   renderIt(props);
   // assert
   expect(screen.getByText(user.username)).toBeInTheDocument();
-  expect(screen.getByText(user.name!)).toBeInTheDocument();
+  expect(screen.getByText(formatDate(props.req.date))).toBeInTheDocument();
   const avatar = screen.getByAltText('request-avatar') as HTMLImageElement;
   expect(avatar.src).toMatch(user.photo!.small);
 });

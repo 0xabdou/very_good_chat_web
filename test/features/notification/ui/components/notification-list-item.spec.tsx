@@ -4,17 +4,12 @@ import NotificationListItem, {NotificationListItemProps} from "../../../../../sr
 import {mockRANotification} from "../../../../mock-objects";
 import {RequestAcceptedNotification} from "../../../../../src/features/notification/types/notification";
 import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 
 const renderIt = (props: NotificationListItemProps) => {
   render(
     <NotificationListItem {...props} />
   );
 };
-
-beforeAll(() => {
-  TimeAgo.addDefaultLocale(en);
-});
 
 it('should display all required components', () => {
   // arrange

@@ -7,7 +7,7 @@ enum BlockError {
 
 export default BlockError;
 
-export const stringifyBlockError = (error: BlockError) => {
+export const stringifyBlockError = (error: BlockError | null | undefined) => {
   switch (error) {
     case BlockError.network:
       return 'Check your internet';

@@ -71,7 +71,6 @@ const RequestListItem = (props: RequestListItemProps) => {
         </IconButton>}
       </div>
       }
-
     </div>
   );
 };
