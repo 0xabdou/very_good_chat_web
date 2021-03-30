@@ -51,6 +51,11 @@ type LoginResponse {
     authUser: AuthUser!
 }
 
+type Me {
+    activeStatus: Boolean!
+    user: User!
+}
+
 type Mutation {
     acceptFriendRequest(userID: String!): Friendship!
     block(blocked_id: String!): Block!
@@ -85,7 +90,7 @@ type Query {
     getFriends: [Friend!]!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
     getNotifications: [Notification!]!
-    me: User!
+    me: Me!
 }
 
 type User {

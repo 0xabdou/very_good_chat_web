@@ -3,12 +3,15 @@ import {gql} from "@apollo/client";
 export const ME_QUERY = gql`
     query MeQuery {
         me {
-            id
-            name
-            username
-            photoURLSource
-            photoURLMedium
-            photoURLSmall
+            user {
+                id
+                name
+                username
+                photoURLSource
+                photoURLMedium
+                photoURLSmall
+            }
+            activeStatus
         }
     }
 `;

@@ -5,6 +5,10 @@ export type User = {
   photo: Photo | null,
 }
 
+export type Me = User & {
+  activeStatus: boolean,
+}
+
 export type Photo = {
   source: string,
   medium: string,

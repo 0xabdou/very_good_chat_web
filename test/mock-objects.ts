@@ -1,4 +1,8 @@
-import User, {UserCreation, UserUpdate} from "../src/features/user/types/user";
+import User, {
+  Me,
+  UserCreation,
+  UserUpdate
+} from "../src/features/user/types/user";
 import {instance, mock} from "ts-mockito";
 import {AppDispatch, AppState} from "../src/store/store";
 import createMockStore from "redux-mock-store";
@@ -11,7 +15,7 @@ import {
   FriendshipInfo,
   FriendshipStatus
 } from "../src/features/friend/types/friendship";
-import {MeQuery_me} from "../src/_generated/MeQuery";
+import {MeQuery_me, MeQuery_me_user} from "../src/_generated/MeQuery";
 import {GetFriendshipInfo_getFriendshipInfo} from "../src/_generated/GetFriendshipInfo";
 import {GraphQLError} from "graphql";
 import {ApolloError} from "@apollo/client";
@@ -67,7 +71,7 @@ export const mockUser: User = {
   }
 };
 
-export const mockGQLUser: MeQuery_me = {
+export const mockGQLUser: MeQuery_me_user = {
   __typename: "User",
   id: mockUser.id,
   username: mockUser.username,
@@ -75,6 +79,17 @@ export const mockGQLUser: MeQuery_me = {
   photoURLSource: mockUser.photo?.source || null,
   photoURLMedium: mockUser.photo?.medium || null,
   photoURLSmall: mockUser.photo?.small || null,
+};
+
+export const mockGQLMe: MeQuery_me = {
+  __typename: 'Me',
+  user: mockGQLUser,
+  activeStatus: true,
+};
+
+export const mockMe: Me = {
+  ...mockUser,
+  activeStatus: mockGQLMe.activeStatus
 };
 
 export const mockUserCreation: UserCreation = {

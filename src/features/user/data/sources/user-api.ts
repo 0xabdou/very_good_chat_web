@@ -1,6 +1,6 @@
-import User, {UserCreation, UserUpdate} from "../../types/user";
+import User, {Me, UserCreation, UserUpdate} from "../../types/user";
 import {ApolloClient} from "@apollo/client";
-import {MeQuery, MeQuery_me} from "../../../../_generated/MeQuery";
+import {MeQuery, MeQuery_me_user} from "../../../../_generated/MeQuery";
 import {
   FIND_USERS_QUERY,
   ME_QUERY,
@@ -26,7 +26,7 @@ import {
 } from "../../../../_generated/FindUsersQuery";
 
 export interface IUserAPI {
-  getCurrentUser(): Promise<User>;
+  getCurrentUser(): Promise<Me>;
 
   createUser(creation: UserCreation): Promise<User>;
 
@@ -70,11 +70,14 @@ export class UserAPI implements IUserAPI {
     return UserAPI.parseUser(data?.updateUser!);
   }
 
-  async getCurrentUser(): Promise<User> {
+  async getCurrentUser(): Promise<Me> {
     const {data: {me}} = await this._client.query<MeQuery>({
       query: ME_QUERY
     });
-    return UserAPI.parseUser(me);
+    return {
+      ...UserAPI.parseUser(me.user),
+      activeStatus: me.activeStatus
+    };
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {
@@ -95,7 +98,7 @@ export class UserAPI implements IUserAPI {
     return data.findUsers.map(user => UserAPI.parseUser(user));
   }
 
-  static parseUser(user: MeQuery_me) {
+  static parseUser(user: MeQuery_me_user) {
     return {
       id: user.id,
       username: user.username,

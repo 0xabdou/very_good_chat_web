@@ -7,7 +7,7 @@
 // GraphQL query operation: MeQuery
 // ====================================================
 
-export interface MeQuery_me {
+export interface MeQuery_me_user {
   __typename: "User";
   id: string;
   name: string | null;
@@ -15,6 +15,12 @@ export interface MeQuery_me {
   photoURLSource: string | null;
   photoURLMedium: string | null;
   photoURLSmall: string | null;
+}
+
+export interface MeQuery_me {
+  __typename: "Me";
+  user: MeQuery_me_user;
+  activeStatus: boolean;
 }
 
 export interface MeQuery {

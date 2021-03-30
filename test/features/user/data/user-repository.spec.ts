@@ -7,6 +7,7 @@ import {
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {left, right} from "fp-ts/Either";
 import {
+  mockMe,
   mockUser,
   mockUserCreation,
   mockUserUpdate
@@ -70,9 +71,9 @@ describe('error catching', () => {
 
 describe('getCurrentUser()', () => {
   it('should return a user on success', async () => {
-    when(MockUserApi.getCurrentUser()).thenResolve(mockUser);
+    when(MockUserApi.getCurrentUser()).thenResolve(mockMe);
     const result = await userRepo.getCurrentUser();
-    expect(result).toStrictEqual(right(mockUser));
+    expect(result).toStrictEqual(right(mockMe));
     verify(MockUserApi.getCurrentUser()).once();
   });
 });

@@ -1,11 +1,11 @@
 import {Either, left, right} from "fp-ts/Either";
 import UserError from "../types/user-error";
-import User, {UserCreation, UserUpdate} from "../types/user";
+import User, {Me, UserCreation, UserUpdate} from "../types/user";
 import {IUserAPI} from "./sources/user-api";
 import {isApolloError} from "@apollo/client";
 
 export interface IUserRepository {
-  getCurrentUser(): Promise<Either<UserError, User>>;
+  getCurrentUser(): Promise<Either<UserError, Me>>;
 
   createUser(creation: UserCreation): Promise<Either<UserError, User>>;
 
@@ -22,7 +22,7 @@ export class UserRepository implements IUserRepository {
     this._userApi = userApi;
   }
 
-  async getCurrentUser(): Promise<Either<UserError, User>> {
+  async getCurrentUser(): Promise<Either<UserError, Me>> {
     return this.leftOrRight(() => this._userApi.getCurrentUser());
   }
 

@@ -17,7 +17,9 @@ import {
   USERNAME_EXISTENCE_QUERY
 } from "../../../../../src/features/user/data/graphql";
 import {
+  mockGQLMe,
   mockGQLUser,
+  mockMe,
   mockUser,
   mockUserCreation,
   mockUserUpdate
@@ -86,13 +88,11 @@ describe('getCurrentUser', () => {
   it('should return the current user', async () => {
     // arrange
     when(MockApolloClient.query<MeQuery>(deepEqual({query: ME_QUERY})))
-      .thenResolve({
-        data: {me: mockGQLUser}
-      } as ApolloQueryResult<MeQuery>);
+      .thenResolve({data: {me: mockGQLMe}} as ApolloQueryResult<MeQuery>);
     // act
     const result = await userAPI.getCurrentUser();
     // assert
-    expect(result).toMatchObject(mockUser);
+    expect(result).toMatchObject(mockMe);
     verify(MockApolloClient.query(deepEqual({query: ME_QUERY}))).once();
   });
 });
