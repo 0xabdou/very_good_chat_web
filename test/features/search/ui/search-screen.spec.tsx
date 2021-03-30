@@ -1,5 +1,8 @@
-import {getMockSearchActions, getMockStore} from "../../../mock-objects";
-import {initialSearchState} from "../../../../src/features/search/search-slice";
+import {getMockStore} from "../../../mock-objects";
+import {
+  initialSearchState,
+  searchActions
+} from "../../../../src/features/search/search-slice";
 import {AppState, AppStore} from "../../../../src/store/store";
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
@@ -8,15 +11,15 @@ import React from "react";
 import SearchScreen from "../../../../src/features/search/ui/search-screen";
 import {SearchError} from "../../../../src/features/search/types/search-error";
 import User from "../../../../src/features/user/types/user";
+import {instance, mock, resetCalls} from "ts-mockito";
 
 const MockStore = getMockStore();
-let mockSearchActions = getMockSearchActions();
-let {searchForUsers} = mockSearchActions;
+const MockSearchActions = mock<typeof searchActions>();
 
 const renderComponent = (mockStore: AppStore) => {
   render(
     <Provider store={mockStore}>
-      <SearchActionsContext.Provider value={mockSearchActions}>
+      <SearchActionsContext.Provider value={instance(MockSearchActions)}>
         <SearchScreen/>
       </SearchActionsContext.Provider>
     </Provider>
@@ -29,8 +32,7 @@ jest.mock(
 );
 
 beforeEach(() => {
-  mockSearchActions = getMockSearchActions();
-  ({searchForUsers} = mockSearchActions);
+  resetCalls(MockSearchActions);
 });
 
 it('should display an error if there was one', () => {

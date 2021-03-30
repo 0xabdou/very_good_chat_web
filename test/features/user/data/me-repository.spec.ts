@@ -1,24 +1,19 @@
 import {IUserAPI} from "../../../../src/features/user/data/sources/user-api";
 import {anything, instance, mock, reset, verify, when} from "ts-mockito";
 import {
-  IUserRepository,
-  UserRepository
-} from "../../../../src/features/user/data/user-repository";
+  IMeRepository,
+  MeRepository
+} from "../../../../src/features/user/data/me-repository";
 import {beforeAll, beforeEach, describe, expect, it} from "@jest/globals";
 import {left, right} from "fp-ts/Either";
-import {
-  mockMe,
-  mockUser,
-  mockUserCreation,
-  mockUserUpdate
-} from "../../../mock-objects";
+import {mockMe, mockUserCreation, mockUserUpdate} from "../../../mock-objects";
 import {ApolloError} from "@apollo/client";
 import UserError from "../../../../src/features/user/types/user-error";
 import {GraphQLError} from "graphql";
 import {UserUpdate} from "../../../../src/features/user/types/user";
 
 const MockUserApi = mock<IUserAPI>();
-const userRepo: IUserRepository = new UserRepository(instance(MockUserApi));
+const meRepo: IMeRepository = new MeRepository(instance(MockUserApi));
 
 
 beforeEach(() => {
@@ -27,7 +22,7 @@ beforeEach(() => {
 
 describe('error catching', () => {
   const act = (error: Error) => {
-    return (userRepo as UserRepository).leftOrRight(() => {
+    return (meRepo as MeRepository).leftOrRight(() => {
       throw error;
     });
   };
@@ -46,7 +41,7 @@ describe('error catching', () => {
     const gqlError = new GraphQLError(
       'User not found',
       undefined, undefined, undefined, undefined, undefined,
-      {code: UserRepository.ERROR_USER_NOT_FOUND}
+      {code: MeRepository.ERROR_USER_NOT_FOUND}
     );
     const notFoundError = new ApolloError({
       errorMessage: 'User not found',
@@ -61,7 +56,7 @@ describe('error catching', () => {
   it('should return usernameTaken errors', async () => {
     // arrange
     const usernameTakenError = new Error('Username taken');
-    usernameTakenError.name = UserRepository.ERROR_USERNAME_TAKEN;
+    usernameTakenError.name = MeRepository.ERROR_USERNAME_TAKEN;
     // act
     const result = await act(usernameTakenError);
     // assert
@@ -71,10 +66,10 @@ describe('error catching', () => {
 
 describe('getCurrentUser()', () => {
   it('should return a user on success', async () => {
-    when(MockUserApi.getCurrentUser()).thenResolve(mockMe);
-    const result = await userRepo.getCurrentUser();
+    when(MockUserApi.getMe()).thenResolve(mockMe);
+    const result = await meRepo.getMe();
     expect(result).toStrictEqual(right(mockMe));
-    verify(MockUserApi.getCurrentUser()).once();
+    verify(MockUserApi.getMe()).once();
   });
 });
 
@@ -86,7 +81,7 @@ describe('createUser()', () => {
 
   it('should check username existence', async () => {
     // act
-    await userRepo.createUser(mockUserCreation);
+    await meRepo.createMe(mockUserCreation);
     // assert
     verify(MockUserApi.isUsernameTaken(mockUserCreation.username)).once();
   });
@@ -96,17 +91,17 @@ describe('createUser()', () => {
     when(MockUserApi.isUsernameTaken(mockUserCreation.username))
       .thenResolve(true);
     // act
-    const result = await userRepo.createUser(mockUserCreation);
+    const result = await meRepo.createMe(mockUserCreation);
     // assert
     expect(result).toStrictEqual(left(UserError.usernameTaken));
   });
 
   it('should return a user on success',
     async () => {
-      when(MockUserApi.createUser(mockUserCreation)).thenResolve(mockUser);
-      const result = await userRepo.createUser(mockUserCreation);
-      expect(result).toStrictEqual(right(mockUser));
-      verify(MockUserApi.createUser(mockUserCreation)).once();
+      when(MockUserApi.createMe(mockUserCreation)).thenResolve(mockMe);
+      const result = await meRepo.createMe(mockUserCreation);
+      expect(result).toStrictEqual(right(mockMe));
+      verify(MockUserApi.createMe(mockUserCreation)).once();
     }
   );
 });
@@ -115,7 +110,7 @@ describe('updateUser()', () => {
   beforeEach(() => {
     when(MockUserApi.isUsernameTaken(anything()))
       .thenResolve(false);
-    when(MockUserApi.updateUser(anything())).thenResolve(mockUser);
+    when(MockUserApi.updateMe(anything())).thenResolve(mockMe);
   });
 
   it('should not check username existence if it was not there', async () => {
@@ -125,14 +120,14 @@ describe('updateUser()', () => {
       username: undefined,
     };
     // act
-    await userRepo.updateUser(update);
+    await meRepo.updateMe(update);
     // assert
     verify(MockUserApi.isUsernameTaken(anything())).never();
   });
 
   it('should check username existence if there is one', async () => {
     // act
-    await userRepo.updateUser(mockUserUpdate);
+    await meRepo.updateMe(mockUserUpdate);
     // assert
     verify(MockUserApi.isUsernameTaken(mockUserUpdate.username!)).once();
   });
@@ -142,17 +137,17 @@ describe('updateUser()', () => {
     when(MockUserApi.isUsernameTaken(mockUserCreation.username))
       .thenResolve(true);
     // act
-    const result = await userRepo.updateUser(mockUserUpdate);
+    const result = await meRepo.updateMe(mockUserUpdate);
     // assert
     expect(result).toStrictEqual(left(UserError.usernameTaken));
   });
 
   it('should return a user on success', async () => {
       // act
-      const result = await userRepo.updateUser(mockUserUpdate);
+      const result = await meRepo.updateMe(mockUserUpdate);
       // assert
-      expect(result).toStrictEqual(right(mockUser));
-      verify(MockUserApi.updateUser(mockUserUpdate)).once();
+      expect(result).toStrictEqual(right(mockMe));
+      verify(MockUserApi.updateMe(mockUserUpdate)).once();
     }
   );
 });

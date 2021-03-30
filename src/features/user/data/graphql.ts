@@ -17,27 +17,33 @@ export const ME_QUERY = gql`
 `;
 
 export const REGISTER_MUTATION = gql`
-    mutation RegisterMutation($registerInput: UserCreation!) {
+    mutation CreateMe($registerInput: UserCreation!) {
         register(input: $registerInput) {
-            id
-            name
-            username
-            photoURLSource
-            photoURLMedium
-            photoURLSmall
+            user {
+                id
+                name
+                username
+                photoURLSource
+                photoURLMedium
+                photoURLSmall
+            }
+            activeStatus
         }
     }
 `;
 
 export const UPDATE_USER_MUTATION = gql`
-    mutation UpdateUserMutation($updateUserInput: UserUpdate!) {
+    mutation UpdateMe($updateUserInput: UserUpdate!) {
         updateUser(input: $updateUserInput) {
-            id
-            name
-            username
-            photoURLSource
-            photoURLMedium
-            photoURLSmall
+            user {
+                id
+                name
+                username
+                photoURLSource
+                photoURLMedium
+                photoURLSmall
+            }
+            activeStatus
         }
     }
 `;

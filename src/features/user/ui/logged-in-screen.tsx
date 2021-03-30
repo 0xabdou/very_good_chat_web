@@ -21,16 +21,16 @@ import SettingsScreen from "../../settings/ui/settings-screen";
 
 
 const LoggedInScreen = () => {
-  const state = useAppSelector(state => state.user);
+  const state = useAppSelector(state => state.me);
   const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
-  const {getCurrentUser} = useUserActions();
+  const {getMe} = useUserActions();
   const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();
 
   useEffect(() => {
-    dispatch(getCurrentUser());
+    dispatch(getMe());
     dispatch(getFriendRequests());
     dispatch(getFriends());
     dispatch(getNotifications());
@@ -50,7 +50,7 @@ const LoggedInScreen = () => {
   };
 
   const onRetry = useCallback(() => {
-    dispatch((getCurrentUser()));
+    dispatch((getMe()));
   }, []);
   let child: React.ReactNode;
   if (!state.initialized) {
@@ -59,7 +59,7 @@ const LoggedInScreen = () => {
     else
       child = <FullscreenLoader/>;
   } else {
-    if (state.currentUser == null) {
+    if (state.me == null) {
       child = (
         <ProfileUpdatingScreen
           registering
@@ -68,7 +68,7 @@ const LoggedInScreen = () => {
         />
       );
     } else {
-      const user = state.currentUser;
+      const me = state.me;
       child = (
         <Switch>
           <Route path='/profile'>
@@ -76,9 +76,9 @@ const LoggedInScreen = () => {
           </Route>
           <Route path='/edit-profile'>
             <ProfileUpdatingScreen
-              initialUsername={user.username}
-              initialName={user.name ?? undefined}
-              initialPhotoURL={user.photo?.source}
+              initialUsername={me.username}
+              initialName={me.name ?? undefined}
+              initialPhotoURL={me.photo?.source}
             />
           </Route>
           <Route path='/blocked-users'><BlockedUsersScreen/></Route>
@@ -87,7 +87,7 @@ const LoggedInScreen = () => {
           <Route path='/sent-requests'><FriendRequestsScreen/></Route>
           <Route path='/notifications'><NotificationsScreen/></Route>
           <Route path='/settings'><SettingsScreen/></Route>
-          <Redirect exact from={`/u/${user.username}`} to='/profile'/>
+          <Redirect exact from={`/u/${me.username}`} to='/profile'/>
           <Route path='/u/:username'>
             <FriendProfileScreen/>
           </Route>

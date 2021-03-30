@@ -44,7 +44,7 @@ const extraArg = {
   friendRepo: instance(MockFriendRepo),
   blockRepo: instance(MockBlockRepo)
 } as StoreExtraArg;
-const username = 'usernameeeeeeee';
+const username = 'usernausereeeeeee';
 const friendError = FriendError.network;
 const loadedState: FriendProfileState = {
   ...initialFriendProfileState,
@@ -108,7 +108,8 @@ describe('getFriendshipInfo', () => {
     // assert
     expect(result.type).toBe(getFriendshipInfo.fulfilled.type);
     expect(result.payload).toStrictEqual(mockFriendshipInfo);
-    verify(MockFriendRepo.getFriendshipInfo(deepEqual({username}))).once();
+    verify(MockFriendRepo.getFriendshipInfo(deepEqual({username})))
+      .once();
   });
 
   it('should return the right action when rejected', async () => {

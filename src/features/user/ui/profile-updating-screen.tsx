@@ -67,10 +67,10 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const [success, setSuccess] = useState(0);
 
   // Redux hooks
-  const state = useAppSelector(state => state.user);
+  const state = useAppSelector(state => state.me);
   const dispatch = useAppDispatch();
   const {signOut} = useAuthActions();
-  const {createUser, updateUser, resetUser} = useUserActions();
+  const {createMe, updateMe, reset} = useUserActions();
 
   // photo utils
   const photoUtils = usePhotoUtils();
@@ -147,7 +147,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const logoutConfirmed = useCallback(() => {
     setLoggingOut(false);
     dispatch(signOut());
-    dispatch(resetUser());
+    dispatch(reset());
   }, []);
 
   // Called when the user cancels the logout from the alert dialog
@@ -171,7 +171,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
       if (src) {
         photo = await photoUtils.urlToPhoto(src);
       }
-      dispatch(createUser({
+      dispatch(createMe({
         username,
         name,
         photo,
@@ -191,7 +191,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
         }
       }
       if (!Object.keys(update).length) return;
-      const result = await dispatch(updateUser(update));
+      const result = await dispatch(updateMe(update));
       if (result.meta.requestStatus == 'fulfilled') {
         setSuccess(s => s + 1);
       }

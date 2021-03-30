@@ -1,12 +1,8 @@
 import React from "react";
 import {
-  getMockAuthActions,
   getMockStore,
-  getMockUserActions,
-  initialUserState,
+  initialMeState,
   loggedInAuthState,
-  mockAuthActionObjects,
-  mockUserActionObjects
 } from "../../../mock-objects";
 import {AppDispatch, AppState, AppStore} from "../../../../src/store/store";
 import {
@@ -25,20 +21,34 @@ import {
   IPhotoUtils,
   PhotoUtilsContext
 } from "../../../../src/utils/photo-utils";
-import {anything, instance, mock, when} from "ts-mockito";
+import {
+  anything,
+  deepEqual,
+  instance,
+  mock,
+  resetCalls,
+  verify,
+  when
+} from "ts-mockito";
 import {
   UserCreation,
   UserUpdate
 } from "../../../../src/features/user/types/user";
+import {userActions} from "../../../../src/features/user/me-slice";
+import {authActions} from "../../../../src/features/auth/auth-slice";
 
-let mockAuthActions = getMockAuthActions();
-let mockUserActions = getMockUserActions();
+const MockAuthActions = mock<typeof authActions>();
+const MockUserActions = mock<typeof userActions>();
 const MockStore = getMockStore();
 const MockPhotoUtils = mock<IPhotoUtils>();
+const signOutAction = {type: 'signOut'} as any;
+const resetAction = {type: 'reset'} as any;
+const updateAction = {type: 'update'} as any;
+const createAction = {type: 'create'} as any;
 
-const userState = initialUserState;
+const meState = initialMeState;
 const initialState = {
-  user: userState,
+  me: meState,
   auth: loggedInAuthState,
 } as AppState;
 
@@ -49,8 +59,8 @@ const renderComponent = (
   render(
     <PhotoUtilsContext.Provider value={instance(MockPhotoUtils)}>
       <Provider store={mockStore}>
-        <AuthActionsContext.Provider value={mockAuthActions}>
-          <UserActionsContext.Provider value={mockUserActions}>
+        <AuthActionsContext.Provider value={instance(MockAuthActions)}>
+          <UserActionsContext.Provider value={instance(MockUserActions)}>
             <ProfileUpdatingScreen {...props} />
           </UserActionsContext.Provider>
         </AuthActionsContext.Provider>
@@ -59,9 +69,16 @@ const renderComponent = (
   );
 };
 
+beforeAll(() => {
+  when(MockUserActions.reset()).thenReturn(resetAction);
+  when(MockUserActions.updateMe(anything())).thenReturn(updateAction);
+  when(MockUserActions.createMe(anything())).thenReturn(createAction);
+  when(MockAuthActions.signOut()).thenReturn(signOutAction);
+});
+
 beforeEach(() => {
-  mockAuthActions = getMockAuthActions();
-  mockUserActions = getMockUserActions();
+  resetCalls(MockUserActions);
+  resetCalls(MockAuthActions);
 });
 
 test('Should display all the required components', () => {
@@ -123,7 +140,7 @@ test(
     // arrange
     const loadingState: AppState = {
       ...initialState,
-      user: {...userState, updatingUser: true},
+      me: {...meState, updatingUser: true},
     };
     const mockStore = MockStore(loadingState);
     // act
@@ -163,10 +180,10 @@ describe('Logging out', () => {
     // wait for dialog disappearance
     await waitForElementToBeRemoved(() => screen.queryByTestId('alert-dialog'));
     // assert
-    expect(mockUserActions.resetUser).toBeCalledTimes(1);
-    expect(mockAuthActions.signOut).toBeCalledTimes(1);
-    expect(mockStore.getActions()).toContain(mockUserActionObjects.resetUser);
-    expect(mockStore.getActions()).toContain(mockAuthActionObjects.signOut);
+    verify(MockUserActions.reset()).once();
+    verify(MockAuthActions.signOut()).once();
+    expect(mockStore.getActions()).toContain(resetAction);
+    expect(mockStore.getActions()).toContain(signOutAction);
   });
 
   test(
@@ -188,8 +205,8 @@ describe('Logging out', () => {
       // wait for dialog disappearance
       await waitForElementToBeRemoved(() => screen.queryByTestId('alert-dialog'));
       // assert
-      expect(mockUserActions.resetUser).toBeCalledTimes(0);
-      expect(mockAuthActions.signOut).toBeCalledTimes(0);
+      verify(MockUserActions.reset()).never();
+      verify(MockAuthActions.signOut()).never();
       expect(mockStore.getActions()).toHaveLength(0);
     },
   );
@@ -296,14 +313,13 @@ test(
     // click the save button again
     fireEvent.click(saveButton);
     // assert that createUser action was dispatched to redux
-    await waitFor(() => expect(mockUserActions.createUser).toHaveBeenCalledTimes(1));
     const creation: UserCreation = {
       photo: file,
       username: 'chuck_norris',
       name: 'chuck norris',
     };
-    expect(mockStore.getActions()).toContain(mockUserActionObjects.createUser);
-    expect(mockUserActions.createUser).toBeCalledWith(creation);
+    await waitFor(() => verify(MockUserActions.createMe(deepEqual(creation))).once());
+    expect(mockStore.getActions()).toContain(createAction);
   },
 );
 
@@ -341,10 +357,9 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      await waitFor(() => expect(mockUserActions.updateUser).toBeCalledTimes(1));
       const usernameUpdate: UserUpdate = {username: changedUsername};
-      expect(mockUserActions.updateUser).toBeCalledWith(usernameUpdate);
-      expect(mockStore.getActions()).toContain(mockUserActionObjects.updateUser);
+      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(usernameUpdate))).once());
+      expect(mockStore.getActions()).toContain(updateAction);
     },
   );
 
@@ -364,10 +379,9 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      await waitFor(() => expect(mockUserActions.updateUser).toBeCalledTimes(1));
       const nameUpdate: UserUpdate = {name: changedName};
-      expect(mockUserActions.updateUser).toBeCalledWith(nameUpdate);
-      expect(mockStore.getActions()).toContain(mockUserActionObjects.updateUser);
+      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(nameUpdate))).once());
+      expect(mockStore.getActions()).toContain(updateAction);
     }
   );
 
@@ -386,10 +400,9 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      await waitFor(() => expect(mockUserActions.updateUser).toBeCalledTimes(1));
       const nameUpdate: UserUpdate = {deleteName: true};
-      expect(mockUserActions.updateUser).toBeCalledWith(nameUpdate);
-      expect(mockStore.getActions()).toContain(mockUserActionObjects.updateUser);
+      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(nameUpdate))).once());
+      expect(mockStore.getActions()).toContain(updateAction);
     }
   );
 
@@ -421,10 +434,9 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      await waitFor(() => expect(mockUserActions.updateUser).toBeCalledTimes(1));
       const photoUpdate: UserUpdate = {photo: file};
-      expect(mockUserActions.updateUser).toBeCalledWith(photoUpdate);
-      expect(mockStore.getActions()).toContain(mockUserActionObjects.updateUser);
+      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(photoUpdate))).once());
+      expect(mockStore.getActions()).toContain(updateAction);
     }
   );
 
@@ -449,10 +461,9 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      await waitFor(() => expect(mockUserActions.updateUser).toBeCalledTimes(1));
       const photoUpdate: UserUpdate = {deletePhoto: true};
-      expect(mockUserActions.updateUser).toBeCalledWith(photoUpdate);
-      expect(mockStore.getActions()).toContain(mockUserActionObjects.updateUser);
+      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(photoUpdate))).once());
+      expect(mockStore.getActions()).toContain(updateAction);
     }
   );
 
@@ -467,7 +478,7 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      expect(mockUserActions.updateUser).toBeCalledTimes(0);
+      verify(MockUserActions.updateMe(anything())).never();
       expect(mockStore.getActions()).toHaveLength(0);
     }
   );

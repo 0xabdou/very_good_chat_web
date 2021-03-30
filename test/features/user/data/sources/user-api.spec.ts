@@ -6,10 +6,6 @@ import {
 } from "../../../../../src/features/user/data/sources/user-api";
 import {describe} from "@jest/globals";
 import {
-  RegisterMutation,
-  RegisterMutationVariables
-} from "../../../../../src/_generated/RegisterMutation";
-import {
   FIND_USERS_QUERY,
   ME_QUERY,
   REGISTER_MUTATION,
@@ -29,68 +25,72 @@ import {
   UsernameExistenceQuery,
   UsernameExistenceQueryVariables
 } from "../../../../../src/_generated/UsernameExistenceQuery";
-import {
-  UpdateUserMutation,
-  UpdateUserMutationVariables
-} from "../../../../../src/_generated/UpdateUserMutation";
+
 import {
   FindUsersQuery,
   FindUsersQueryVariables
 } from "../../../../../src/_generated/FindUsersQuery";
+import {
+  CreateMe,
+  CreateMeVariables
+} from "../../../../../src/_generated/CreateMe";
+import {
+  UpdateMe,
+  UpdateMeVariables
+} from "../../../../../src/_generated/UpdateMe";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const userAPI: IUserAPI = new UserAPI(instance(MockApolloClient));
 
-describe('createUser', () => {
+describe('createMe', () => {
   it('should return the created user on success', async () => {
     // arrange
     const registerInput = mockUserCreation;
-    when(MockApolloClient.mutate<RegisterMutation, RegisterMutationVariables>(
+    when(MockApolloClient.mutate<CreateMe, CreateMeVariables>(
       deepEqual({
         mutation: REGISTER_MUTATION,
         variables: {registerInput},
       }))).thenResolve({
-      data: {register: mockGQLUser}
+      data: {register: mockGQLMe}
     });
     // act
-    const result = await userAPI.createUser(mockUserCreation);
+    const result = await userAPI.createMe(mockUserCreation);
     // assert
-    expect(result).toMatchObject(mockUser);
+    expect(result).toMatchObject(mockMe);
     verify(MockApolloClient.mutate(deepEqual(
       {mutation: REGISTER_MUTATION, variables: {registerInput}}
     ))).once();
   });
 });
 
-describe('updateUser', () => {
+describe('updateMe', () => {
   it('should return the updated user on success', async () => {
     // arrange
     const updateUserInput = mockUserUpdate;
-    when(MockApolloClient.mutate
-      < UpdateUserMutation, UpdateUserMutationVariables > (
+    when(MockApolloClient.mutate <UpdateMe, UpdateMeVariables>(
       deepEqual({
         mutation: UPDATE_USER_MUTATION,
         variables: {updateUserInput},
       }))).thenResolve({
-      data: {updateUser: mockGQLUser}
+      data: {updateUser: mockGQLMe}
     });
     // act
-    const result = await userAPI.updateUser(mockUserUpdate);
+    const result = await userAPI.updateMe(mockUserUpdate);
     // assert
-    expect(result).toMatchObject(mockUser);
+    expect(result).toMatchObject(mockMe);
     verify(MockApolloClient.mutate(deepEqual(
       {mutation: UPDATE_USER_MUTATION, variables: {updateUserInput}}
     ))).once();
   });
 });
 
-describe('getCurrentUser', () => {
+describe('getMe', () => {
   it('should return the current user', async () => {
     // arrange
     when(MockApolloClient.query<MeQuery>(deepEqual({query: ME_QUERY})))
       .thenResolve({data: {me: mockGQLMe}} as ApolloQueryResult<MeQuery>);
     // act
-    const result = await userAPI.getCurrentUser();
+    const result = await userAPI.getMe();
     // assert
     expect(result).toMatchObject(mockMe);
     verify(MockApolloClient.query(deepEqual({query: ME_QUERY}))).once();

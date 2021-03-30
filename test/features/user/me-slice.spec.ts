@@ -3,22 +3,22 @@ import {anything, reset, verify, when} from "ts-mockito";
 import mockServices from "../../mock-services";
 import {
   getMockStore,
-  mockUser,
+  mockMe,
   mockUserCreation,
   mockUserUpdate
 } from "../../mock-objects";
 import {left, right} from "fp-ts/Either";
 import userReducer, {
-  userActions,
-  UserState
-} from "../../../src/features/user/user-slice";
+  MeState,
+  userActions
+} from "../../../src/features/user/me-slice";
 import UserError from "../../../src/features/user/types/user-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import User from "../../../src/features/user/types/user";
 import {AppStore} from "../../../src/store/store";
 
 
-const MockUserRepository = mockServices.mocks.userRepo;
+const MockUserRepository = mockServices.mocks.meRepo;
 const MockStore = getMockStore();
 const userError = UserError.general;
 let mockStore: AppStore;
@@ -28,55 +28,55 @@ beforeEach(() => {
   mockStore = MockStore();
 });
 
-const {getCurrentUser, createUser, updateUser} = userActions;
+const {getMe, createMe, updateMe} = userActions;
 
-describe('getCurrentUser', () => {
-  const act = () => getCurrentUser()(
+describe('getCurrenMe', () => {
+  const act = () => getMe()(
     mockStore.dispatch,
     mockStore.getState,
     mockServices.instances,
   );
 
   it('should return the right action if fulfilled', async () => {
-    when(MockUserRepository.getCurrentUser()).thenResolve(right(mockUser));
+    when(MockUserRepository.getMe()).thenResolve(right(mockMe));
     const result = await act();
-    expect(result.payload).toStrictEqual(mockUser);
-    expect(result.type).toStrictEqual(getCurrentUser.fulfilled.type);
-    verify(MockUserRepository.getCurrentUser()).once();
+    expect(result.payload).toStrictEqual(mockMe);
+    expect(result.type).toStrictEqual(getMe.fulfilled.type);
+    verify(MockUserRepository.getMe()).once();
   });
 
   it('should return the right action if rejected', async () => {
-    when(MockUserRepository.getCurrentUser()).thenResolve(left(userError));
+    when(MockUserRepository.getMe()).thenResolve(left(userError));
     const result = await act();
     expect(result.payload).toStrictEqual(userError);
-    expect(result.type).toStrictEqual(getCurrentUser.rejected.type);
-    verify(MockUserRepository.getCurrentUser()).once();
+    expect(result.type).toStrictEqual(getMe.rejected.type);
+    verify(MockUserRepository.getMe()).once();
   });
 
   describe('reducers', () => {
-    const initialState: UserState = {
+    const initialState: MeState = {
       initialized: false,
-      currentUser: null,
+      me: null,
       updatingUser: false,
       error: null,
     };
 
     it('should return the right state if fulfilled', () => {
       const action: PayloadAction<User> = {
-        type: getCurrentUser.fulfilled.type,
-        payload: mockUser
+        type: getMe.fulfilled.type,
+        payload: mockMe
       };
       const result = userReducer(initialState, action);
       expect(result).toStrictEqual({
         ...initialState,
-        currentUser: mockUser,
+        me: mockMe,
         initialized: true
       });
     });
 
     it('should return the right state if rejected with userNotFound error', () => {
       const action: PayloadAction<UserError> = {
-        type: getCurrentUser.rejected.type,
+        type: getMe.rejected.type,
         payload: UserError.notFound,
       };
       const result = userReducer(initialState, action);
@@ -85,7 +85,7 @@ describe('getCurrentUser', () => {
 
     it('should return the right state if rejected with some other error', () => {
       const action: PayloadAction<UserError> = {
-        type: getCurrentUser.rejected.type,
+        type: getMe.rejected.type,
         payload: userError
       };
       const result = userReducer(initialState, action);
@@ -94,51 +94,51 @@ describe('getCurrentUser', () => {
   });
 });
 
-describe('createUser', () => {
-  const act = () => createUser(mockUserCreation)(
+describe('createMe', () => {
+  const act = () => createMe(mockUserCreation)(
     mockStore.dispatch,
     mockStore.getState,
     mockServices.instances,
   );
 
   it('should return the right action if fulfilled', async () => {
-    when(MockUserRepository.createUser(mockUserCreation))
-      .thenResolve(right(mockUser));
+    when(MockUserRepository.createMe(mockUserCreation))
+      .thenResolve(right(mockMe));
     const expected: PayloadAction<User> = {
-      type: createUser.fulfilled.type,
-      payload: mockUser,
+      type: createMe.fulfilled.type,
+      payload: mockMe,
     };
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.createUser(mockUserCreation)).once();
+    verify(MockUserRepository.createMe(mockUserCreation)).once();
   });
 
   it('should return the right action if rejected', async () => {
-    when(MockUserRepository.createUser(mockUserCreation))
+    when(MockUserRepository.createMe(mockUserCreation))
       .thenResolve(left(userError));
     const expected: PayloadAction<UserError> = {
-      type: createUser.rejected.type,
+      type: createMe.rejected.type,
       payload: userError,
     };
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.createUser(mockUserCreation)).once();
+    verify(MockUserRepository.createMe(mockUserCreation)).once();
   });
 
   describe('reducers', () => {
-    const initialState: UserState = {
+    const initialState: MeState = {
       initialized: true,
-      currentUser: null,
+      me: null,
       updatingUser: false,
       error: null,
     };
-    const loadingState: UserState = {...initialState, updatingUser: true};
+    const loadingState: MeState = {...initialState, updatingUser: true};
 
     it('pending reducer should return the right state', () => {
       const action: PayloadAction = {
-        type: createUser.pending.type,
+        type: createMe.pending.type,
         payload: undefined,
       };
       const result = userReducer(initialState, action);
@@ -147,16 +147,16 @@ describe('createUser', () => {
 
     it('fulfilled reducer should return the right state', () => {
       const action: PayloadAction<User> = {
-        type: createUser.fulfilled.type,
-        payload: mockUser,
+        type: createMe.fulfilled.type,
+        payload: mockMe,
       };
       const result = userReducer(loadingState, action);
-      expect(result).toStrictEqual({...initialState, currentUser: mockUser});
+      expect(result).toStrictEqual({...initialState, me: mockMe});
     });
 
     it('rejected reducer should return the right state', () => {
       const action: PayloadAction<UserError> = {
-        type: createUser.rejected.type,
+        type: createMe.rejected.type,
         payload: userError,
       };
       const result = userReducer(loadingState, action);
@@ -165,51 +165,51 @@ describe('createUser', () => {
   });
 });
 
-describe('updateUser', () => {
-  const act = () => updateUser(mockUserUpdate)(
+describe('updateMe', () => {
+  const act = () => updateMe(mockUserUpdate)(
     mockStore.dispatch,
     mockStore.getState,
     mockServices.instances,
   );
 
   it('should return the right action if fulfilled', async () => {
-    when(MockUserRepository.updateUser(anything()))
-      .thenResolve(right(mockUser));
+    when(MockUserRepository.updateMe(anything()))
+      .thenResolve(right(mockMe));
     const expected: PayloadAction<User> = {
-      type: updateUser.fulfilled.type,
-      payload: mockUser,
+      type: updateMe.fulfilled.type,
+      payload: mockMe,
     };
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.updateUser(mockUserUpdate)).once();
+    verify(MockUserRepository.updateMe(mockUserUpdate)).once();
   });
 
   it('should return the right action if rejected', async () => {
-    when(MockUserRepository.updateUser(mockUserUpdate))
+    when(MockUserRepository.updateMe(mockUserUpdate))
       .thenResolve(left(userError));
     const expected: PayloadAction<UserError> = {
-      type: updateUser.rejected.type,
+      type: updateMe.rejected.type,
       payload: userError,
     };
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.updateUser(mockUserUpdate)).once();
+    verify(MockUserRepository.updateMe(mockUserUpdate)).once();
   });
 
   describe('reducers', () => {
-    const initialState: UserState = {
+    const initialState: MeState = {
       initialized: true,
-      currentUser: null,
+      me: null,
       updatingUser: false,
       error: null,
     };
-    const loadingState: UserState = {...initialState, updatingUser: true};
+    const loadingState: MeState = {...initialState, updatingUser: true};
 
     it('pending reducer should return the right state', () => {
       const action: PayloadAction = {
-        type: updateUser.pending.type,
+        type: updateMe.pending.type,
         payload: undefined,
       };
       const result = userReducer(initialState, action);
@@ -218,16 +218,16 @@ describe('updateUser', () => {
 
     it('fulfilled reducer should return the right state', () => {
       const action: PayloadAction<User> = {
-        type: updateUser.fulfilled.type,
-        payload: mockUser,
+        type: updateMe.fulfilled.type,
+        payload: mockMe,
       };
       const result = userReducer(loadingState, action);
-      expect(result).toStrictEqual({...initialState, currentUser: mockUser});
+      expect(result).toStrictEqual({...initialState, me: mockMe});
     });
 
     it('rejected reducer should return the right state', () => {
       const action: PayloadAction<UserError> = {
-        type: updateUser.rejected.type,
+        type: updateMe.rejected.type,
         payload: userError,
       };
       const result = userReducer(loadingState, action);

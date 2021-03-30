@@ -14,6 +14,7 @@ import BlockedUsersScreen
   from "../../../../src/features/block/ui/blocked-users-screen";
 import {getMockStore, mockBlock} from "../../../mock-objects";
 import BlockError from "../../../../src/features/block/types/block-error";
+import {Block} from "../../../../src/features/block/types/block";
 
 const MockBlockActions = mock<typeof blockActions>();
 const MockStore = getMockStore();
@@ -66,7 +67,7 @@ it('should display a fullscreen loader if loading', () => {
 
 it('should display a list of blocked users if there are any', () => {
   // arrange
-  const blocks = [
+  const blocks: Block[] = [
     mockBlock,
     {
       ...mockBlock,

@@ -1,5 +1,5 @@
 import React, {useContext} from "react";
-import {userActions} from "./user-slice";
+import {userActions} from "./me-slice";
 
 export const UserActionsContext = React.createContext(userActions);
 

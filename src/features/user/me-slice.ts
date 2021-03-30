@@ -1,27 +1,27 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import User, {UserCreation, UserUpdate} from "./types/user";
+import {Me, UserCreation, UserUpdate} from "./types/user";
 import {ThunkAPI} from "../../store/store";
 import UserError from "./types/user-error";
 import {isRight} from "fp-ts/Either";
 
-export type UserState = {
+export type MeState = {
   initialized: boolean,
-  currentUser: User | null,
+  me: Me | null,
   updatingUser: boolean,
   error: UserError | null,
 }
 
-const initialState: UserState = {
+const initialState: MeState = {
   initialized: false,
-  currentUser: null,
+  me: null,
   updatingUser: false,
   error: null,
 };
 
-const getCurrentUser = createAsyncThunk<User | null, void, ThunkAPI<UserError>>(
-  'user/getCurrentUser',
+const getMe = createAsyncThunk<Me | null, void, ThunkAPI<UserError>>(
+  'user/getMe',
   async (_, thunkApi) => {
-    const result = await thunkApi.extra.userRepo.getCurrentUser();
+    const result = await thunkApi.extra.meRepo.getMe();
     if (isRight(result)) {
       return result.right;
     }
@@ -29,10 +29,10 @@ const getCurrentUser = createAsyncThunk<User | null, void, ThunkAPI<UserError>>(
   }
 );
 
-const createUser = createAsyncThunk<User, UserCreation, ThunkAPI<UserError>>(
-  'user/createUser',
+const createMe = createAsyncThunk<Me, UserCreation, ThunkAPI<UserError>>(
+  'user/createMe',
   async (creation, thunkApi) => {
-    const result = await thunkApi.extra.userRepo.createUser(creation);
+    const result = await thunkApi.extra.meRepo.createMe(creation);
     if (isRight(result)) {
       return result.right;
     }
@@ -40,10 +40,10 @@ const createUser = createAsyncThunk<User, UserCreation, ThunkAPI<UserError>>(
   },
 );
 
-const updateUser = createAsyncThunk<User, UserUpdate, ThunkAPI<UserError>>(
-  'user/updateUser',
+const updateMe = createAsyncThunk<Me, UserUpdate, ThunkAPI<UserError>>(
+  'user/updateMe',
   async (update, thunkApi) => {
-    const result = await thunkApi.extra.userRepo.updateUser(update);
+    const result = await thunkApi.extra.meRepo.updateMe(update);
     if (isRight(result)) {
       return result.right;
     }
@@ -51,7 +51,7 @@ const updateUser = createAsyncThunk<User, UserUpdate, ThunkAPI<UserError>>(
   },
 );
 
-const handleRejected = (state: UserState, error: UserError | undefined) => {
+const handleRejected = (state: MeState, error: UserError | undefined) => {
   console.log('REJECTED WITH: ', error);
   if (error != undefined) {
     state.error = error;
@@ -59,24 +59,24 @@ const handleRejected = (state: UserState, error: UserError | undefined) => {
     state.error = UserError.general;
 };
 
-const userSlice = createSlice({
-  name: 'user',
+const meSlice = createSlice({
+  name: 'me',
   initialState: initialState,
   reducers: {
-    resetUser: (_) => initialState,
+    reset: (_) => initialState,
   },
   extraReducers: builder => {
     // getCurrentUser
     builder
-      .addCase(getCurrentUser.pending, state => {
+      .addCase(getMe.pending, state => {
         state.error = null;
       })
-      .addCase(getCurrentUser.fulfilled, (state, action) => {
+      .addCase(getMe.fulfilled, (state, action) => {
         state.initialized = true;
-        state.currentUser = action.payload;
+        state.me = action.payload;
         state.error = null;
       })
-      .addCase(getCurrentUser.rejected, (state, action) => {
+      .addCase(getMe.rejected, (state, action) => {
         if (action.payload == UserError.notFound) {
           state.initialized = true;
         } else
@@ -84,39 +84,39 @@ const userSlice = createSlice({
       });
     // createUser
     builder
-      .addCase(createUser.pending, state => {
+      .addCase(createMe.pending, state => {
         state.updatingUser = true;
         state.error = null;
       })
-      .addCase(createUser.fulfilled, (state, action) => {
-        state.currentUser = action.payload;
+      .addCase(createMe.fulfilled, (state, action) => {
+        state.me = action.payload;
         state.updatingUser = false;
       })
-      .addCase(createUser.rejected, (state, action) => {
+      .addCase(createMe.rejected, (state, action) => {
         handleRejected(state, action.payload);
         state.updatingUser = false;
       });
     // createUser
     builder
-      .addCase(updateUser.pending, state => {
+      .addCase(updateMe.pending, state => {
         state.updatingUser = true;
         state.error = null;
       })
-      .addCase(updateUser.fulfilled, (state, action) => {
+      .addCase(updateMe.fulfilled, (state, action) => {
         state.updatingUser = false;
-        state.currentUser = action.payload;
+        state.me = action.payload;
       })
-      .addCase(updateUser.rejected, (state, action) => {
+      .addCase(updateMe.rejected, (state, action) => {
         handleRejected(state, action.payload);
         state.updatingUser = false;
       });
   },
 });
 
-export default userSlice.reducer;
+export default meSlice.reducer;
 export const userActions = {
-  getCurrentUser,
-  createUser,
-  updateUser,
-  ...userSlice.actions
+  getMe,
+  createMe,
+  updateMe,
+  ...meSlice.actions
 };

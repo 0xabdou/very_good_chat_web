@@ -1,35 +1,39 @@
 import React from 'react';
 import {AppState, AppStore} from "../../../../src/store/store";
 import {
-  getMockAuthActions,
   getMockStore,
   initialAuthState,
-  initialUserState,
-  mockAuthActionObjects
+  initialMeState,
 } from "../../../mock-objects";
 import {render, screen} from "@testing-library/react";
 import RootScreen from "../../../../src/features/auth/ui/root-screen";
 import {Provider} from "react-redux";
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
-import {Mock} from "jest-mock";
+import {instance, mock, resetCalls, verify, when} from "ts-mockito";
+import {authActions} from "../../../../src/features/auth/auth-slice";
 
 const MockStore = getMockStore();
-const mockAuthActions = getMockAuthActions();
+const MockAuthActions = mock<typeof authActions>();
+const accessTokenAction = {type: 'at'} as any;
 
 const authState = initialAuthState;
 const initialState = {
   auth: authState,
-  user: initialUserState,
+  me: initialMeState,
 } as AppState;
 
+beforeAll(() => {
+  when(MockAuthActions.getAccessToken()).thenReturn(accessTokenAction);
+});
+
 beforeEach(() => {
-  (mockAuthActions.getAccessToken as unknown as Mock<any, any>).mockClear();
+  resetCalls(MockAuthActions);
 });
 
 const Wrapped = ({mockStore}: { mockStore: AppStore }) => {
   return (
     <Provider store={mockStore}>
-      <AuthActionsContext.Provider value={mockAuthActions}>
+      <AuthActionsContext.Provider value={instance(MockAuthActions)}>
         <RootScreen/>
       </AuthActionsContext.Provider>
     </Provider>
@@ -46,8 +50,9 @@ test('should dispatch getAccessToken', () => {
   // act
   renderComponent(mockStore);
   // assert
-  expect(mockAuthActions.getAccessToken).toBeCalledTimes(1);
-  expect(mockStore.getActions()).toContain(mockAuthActionObjects.getAccessToken);
+  verify(MockAuthActions.getAccessToken()).once();
+  expect(mockStore.getActions()).toHaveLength(1);
+  expect(mockStore.getActions()[0]).toBe(accessTokenAction);
 });
 
 test(

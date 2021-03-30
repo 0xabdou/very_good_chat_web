@@ -13,9 +13,9 @@ import Badges from "../../badge/ui/components/badges";
 const MainScreen = () => {
   const [searching, setSearching] = useState(false);
   const history = useHistory();
-  const state = useSelector((state: AppState) => state.user);
+  const state = useSelector((state: AppState) => state.me);
 
-  if (!state.currentUser)
+  if (!state.me)
     return <div/>;
 
   const goToProfile = useCallback(() => {
@@ -38,7 +38,7 @@ const MainScreen = () => {
       <TopBar>
         <Avatar
           className={topBarClasses.leading + ' ' + classes.avatar}
-          src={state.currentUser.photo?.small}
+          src={state.me.photo?.small}
           alt='profile photo'
           onClick={goToProfile}
         />

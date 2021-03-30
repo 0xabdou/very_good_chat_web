@@ -2,18 +2,16 @@ import React from "react";
 import {AppState, AppStore} from "../../../../src/store/store";
 import {Provider} from "react-redux";
 import {fireEvent, render, screen} from "@testing-library/react";
-import {
-  getMockAuthActions,
-  getMockStore,
-  initialAuthState,
-  mockAuthActionObjects
-} from "../../../mock-objects";
+import {getMockStore, initialAuthState,} from "../../../mock-objects";
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
 import AuthError from "../../../../src/features/auth/types/auth-error";
 import LoginScreen from "../../../../src/features/auth/ui/login-screen";
+import {instance, mock, resetCalls, verify, when} from "ts-mockito";
+import {authActions} from "../../../../src/features/auth/auth-slice";
 
 const MockStore = getMockStore();
-const mockAuthAction = getMockAuthActions();
+const MockAuthActions = mock<typeof authActions>();
+const signInAction = {type: 'signIn'} as any;
 
 const authState = initialAuthState;
 const initialState = {
@@ -25,7 +23,7 @@ const loginWithGoogleText = 'Login with Google';
 const Wrapped = ({mockStore}: { mockStore: AppStore }) => {
   return (
     <Provider store={mockStore}>
-      <AuthActionsContext.Provider value={mockAuthAction}>
+      <AuthActionsContext.Provider value={instance(MockAuthActions)}>
         <LoginScreen/>
       </AuthActionsContext.Provider>
     </Provider>
@@ -35,6 +33,14 @@ const Wrapped = ({mockStore}: { mockStore: AppStore }) => {
 const renderComponent = (mockStore: AppStore) => {
   render(<Wrapped mockStore={mockStore}/>);
 };
+
+beforeAll(() => {
+  when(MockAuthActions.signInWithGoogle()).thenReturn(signInAction);
+});
+
+beforeEach(() => {
+  resetCalls(MockAuthActions);
+});
 
 test('should contain a login button', () => {
   // arrange
@@ -54,7 +60,9 @@ test(
     renderComponent(mockStore);
     fireEvent.click(screen.getByText(loginWithGoogleText));
     // assert
-    expect(mockStore.getActions()).toContain(mockAuthActionObjects.signInWithGoogle);
+    verify(MockAuthActions.signInWithGoogle()).once();
+    expect(mockStore.getActions()).toHaveLength(1);
+    expect(mockStore.getActions()[0]).toBe(signInAction);
   },
 );
 

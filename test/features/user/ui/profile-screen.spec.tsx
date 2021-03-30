@@ -1,10 +1,5 @@
-import {
-  getMockStore,
-  getMockUserActions,
-  initialUserState,
-  mockUser
-} from "../../../mock-objects";
-import {instance, mock} from "ts-mockito";
+import {getMockStore, initialMeState, mockMe,} from "../../../mock-objects";
+import {instance, mock, reset} from "ts-mockito";
 import {
   IPhotoUtils,
   PhotoUtilsContext
@@ -18,13 +13,14 @@ import React from "react";
 import ProfileScreen from "../../../../src/features/user/ui/profile-screen";
 import {initialFriendsState} from "../../../../src/features/friend/friends-slice";
 import UserError from "../../../../src/features/user/types/user-error";
+import {userActions} from "../../../../src/features/user/me-slice";
 
-let mockUserActions = getMockUserActions();
+let MockUserActions = mock<typeof userActions>();
 const MockStore = getMockStore();
 const MockPhotoUtils = mock<IPhotoUtils>();
 
 const initialState = {
-  user: initialUserState,
+  me: initialMeState,
   friends: initialFriendsState
 } as AppState;
 
@@ -32,7 +28,7 @@ const renderIt = (mockStore: AppStore,) => {
   render(
     <PhotoUtilsContext.Provider value={instance(MockPhotoUtils)}>
       <Provider store={mockStore}>
-        <UserActionsContext.Provider value={mockUserActions}>
+        <UserActionsContext.Provider value={instance(MockUserActions)}>
           <ProfileScreen/>
         </UserActionsContext.Provider>
       </Provider>
@@ -41,7 +37,7 @@ const renderIt = (mockStore: AppStore,) => {
 };
 
 beforeEach(() => {
-  mockUserActions = getMockUserActions();
+  reset(MockUserActions);
 });
 
 it('should display a fullscreen loader if the state is not initialized', () => {
@@ -57,8 +53,8 @@ it('should display a retry page if the there is an error and no user', () => {
   // arrange
   const mockStore = MockStore({
     ...initialState,
-    user: {
-      ...initialUserState,
+    me: {
+      ...initialMeState,
       initialized: true,
       error: UserError.general
     }
@@ -73,9 +69,9 @@ it('should display all required components if there is a user', () => {
   // arrange
   const mockStore = MockStore({
     ...initialState,
-    user: {
-      ...initialUserState,
-      currentUser: mockUser,
+    me: {
+      ...initialMeState,
+      me: mockMe,
       initialized: true
     }
   });

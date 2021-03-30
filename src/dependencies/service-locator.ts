@@ -3,10 +3,7 @@ import TYPES from "./types";
 import GoogleAuth from "../features/auth/data/sources/google-auth";
 import IAuthRepository, {AuthRepository} from "../features/auth/data/auth-repository";
 import {IUserAPI, UserAPI} from "../features/user/data/sources/user-api";
-import {
-  IUserRepository,
-  UserRepository
-} from "../features/user/data/user-repository";
+import {IMeRepository, MeRepository} from "../features/user/data/me-repository";
 import StoreExtraArg from "../store/store-extra-arg";
 import {ApolloClient, ApolloLink, InMemoryCache} from "@apollo/client";
 import {AuthAPI, IAuthAPI} from "../features/auth/data/sources/auth-api";
@@ -109,9 +106,9 @@ const initDependencies = async () => {
     TYPES.IUserApi,
     new UserAPI(sl.get<ApolloClient<any>>(TYPES.ApolloClient))
   );
-  sl.register<IUserRepository>(
+  sl.register<IMeRepository>(
     TYPES.IUserRepository,
-    new UserRepository(sl.get(TYPES.IUserApi))
+    new MeRepository(sl.get(TYPES.IUserApi))
   );
   // Search
   sl.register<ISearchRepository>(
@@ -159,7 +156,7 @@ const initDependencies = async () => {
     TYPES.StoreExtraArgs,
     {
       authRepo: sl.get(TYPES.IAuthRepository),
-      userRepo: sl.get(TYPES.IUserRepository),
+      meRepo: sl.get(TYPES.IUserRepository),
       searchRepo: sl.get(TYPES.ISearchRepository),
       friendRepo: sl.get(TYPES.IFriendRepository),
       badgeRepo: sl.get(TYPES.IBadgeRepository),

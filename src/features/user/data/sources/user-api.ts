@@ -1,6 +1,10 @@
 import User, {Me, UserCreation, UserUpdate} from "../../types/user";
 import {ApolloClient} from "@apollo/client";
-import {MeQuery, MeQuery_me_user} from "../../../../_generated/MeQuery";
+import {
+  MeQuery,
+  MeQuery_me,
+  MeQuery_me_user
+} from "../../../../_generated/MeQuery";
 import {
   FIND_USERS_QUERY,
   ME_QUERY,
@@ -9,28 +13,22 @@ import {
   USERNAME_EXISTENCE_QUERY
 } from "../graphql";
 import {
-  RegisterMutation,
-  RegisterMutationVariables
-} from "../../../../_generated/RegisterMutation";
-import {
   UsernameExistenceQuery,
   UsernameExistenceQueryVariables
 } from "../../../../_generated/UsernameExistenceQuery";
 import {
-  UpdateUserMutation,
-  UpdateUserMutationVariables
-} from "../../../../_generated/UpdateUserMutation";
-import {
   FindUsersQuery,
   FindUsersQueryVariables
 } from "../../../../_generated/FindUsersQuery";
+import {CreateMe, CreateMeVariables} from "../../../../_generated/CreateMe";
+import {UpdateMe, UpdateMeVariables} from "../../../../_generated/UpdateMe";
 
 export interface IUserAPI {
-  getCurrentUser(): Promise<Me>;
+  getMe(): Promise<Me>;
 
-  createUser(creation: UserCreation): Promise<User>;
+  createMe(creation: UserCreation): Promise<Me>;
 
-  updateUser(update: UserUpdate): Promise<User>;
+  updateMe(update: UserUpdate): Promise<Me>;
 
   isUsernameTaken(username: string): Promise<boolean>;
 
@@ -44,40 +42,27 @@ export class UserAPI implements IUserAPI {
     this._client = client;
   }
 
-  async createUser(creation: UserCreation): Promise<User> {
-    const {data} = await this._client.mutate<RegisterMutation,
-      RegisterMutationVariables>({
+  async createMe(creation: UserCreation): Promise<Me> {
+    const {data} = await this._client.mutate<CreateMe, CreateMeVariables>({
       mutation: REGISTER_MUTATION,
       variables: {registerInput: creation},
     });
-    const user = data?.register!;
-    return {
-      ...user,
-      photo: {
-        source: user.photoURLSource!,
-        medium: user.photoURLMedium!,
-        small: user.photoURLSmall!
-      }
-    };
+    return UserAPI.parseMe(data?.register!);
   }
 
-  async updateUser(update: UserUpdate): Promise<User> {
-    const {data} = await this._client.mutate<UpdateUserMutation,
-      UpdateUserMutationVariables>({
+  async updateMe(update: UserUpdate): Promise<Me> {
+    const {data} = await this._client.mutate<UpdateMe, UpdateMeVariables>({
       mutation: UPDATE_USER_MUTATION,
       variables: {updateUserInput: update},
     });
-    return UserAPI.parseUser(data?.updateUser!);
+    return UserAPI.parseMe(data?.updateUser!);
   }
 
-  async getCurrentUser(): Promise<Me> {
+  async getMe(): Promise<Me> {
     const {data: {me}} = await this._client.query<MeQuery>({
       query: ME_QUERY
     });
-    return {
-      ...UserAPI.parseUser(me.user),
-      activeStatus: me.activeStatus
-    };
+    return UserAPI.parseMe(me);
   }
 
   async isUsernameTaken(username: string): Promise<boolean> {
@@ -98,7 +83,7 @@ export class UserAPI implements IUserAPI {
     return data.findUsers.map(user => UserAPI.parseUser(user));
   }
 
-  static parseUser(user: MeQuery_me_user) {
+  static parseUser(user: MeQuery_me_user): User {
     return {
       id: user.id,
       username: user.username,
@@ -108,6 +93,13 @@ export class UserAPI implements IUserAPI {
         medium: user.photoURLMedium!,
         small: user.photoURLSmall!
       }
+    };
+  }
+
+  static parseMe(me: MeQuery_me): Me {
+    return {
+      ...this.parseUser(me.user),
+      activeStatus: me.activeStatus
     };
   }
 }

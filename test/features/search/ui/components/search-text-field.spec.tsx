@@ -1,22 +1,22 @@
 import React from "react";
-import {
-  getMockSearchActions,
-  getMockStore,
-  mockSearchActionObjects
-} from "../../../../mock-objects";
+import {getMockStore} from "../../../../mock-objects";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {AppState, AppStore} from "../../../../../src/store/store";
 import {SearchActionsContext} from "../../../../../src/features/search/search-actions-context";
 import SearchTextField
   from "../../../../../src/features/search/ui/components/search-text-field";
-import {initialSearchState,} from "../../../../../src/features/search/search-slice";
+import {
+  initialSearchState,
+  searchActions,
+} from "../../../../../src/features/search/search-slice";
+import {anything, instance, mock, resetCalls, verify, when} from "ts-mockito";
 
 const MockStore = getMockStore();
-let mockSearchActions = getMockSearchActions();
-let {searchForUsers} = mockSearchActions;
+let MockSearchActions = mock<typeof searchActions>();
 let onFocus = jest.fn();
 let onBack = jest.fn();
+const searchAction = {type: 'search'} as any;
 
 const initialState = {
   search: initialSearchState
@@ -25,18 +25,21 @@ const initialState = {
 const renderComponent = (mockStore: AppStore) => {
   render(
     <Provider store={mockStore}>
-      <SearchActionsContext.Provider value={mockSearchActions}>
+      <SearchActionsContext.Provider value={instance(MockSearchActions)}>
         <SearchTextField onFocus={onFocus} onBack={onBack}/>
       </SearchActionsContext.Provider>
     </Provider>
   );
 };
 
+beforeAll(() => {
+  when(MockSearchActions.searchForUsers(anything())).thenReturn(searchAction);
+});
+
 beforeEach(() => {
   onFocus = jest.fn();
   onBack = jest.fn();
-  mockSearchActions = getMockSearchActions();
-  ({searchForUsers} = mockSearchActions);
+  resetCalls(MockSearchActions);
 });
 
 test(
@@ -56,10 +59,8 @@ test(
     // second change after 200ms delay
     fireEvent.change(textField, {target: {value: 'ab'}});
     // assert
-    await waitFor(() => expect(searchForUsers).toBeCalledWith('ab'));
-    expect(searchForUsers).toBeCalledTimes(1);
+    await waitFor(() => verify(MockSearchActions.searchForUsers('ab')).once());
     expect(mockStore.getActions()).toHaveLength(1);
-    expect(mockStore.getActions()[0])
-      .toStrictEqual(mockSearchActionObjects.searchForUsers);
+    expect(mockStore.getActions()[0]).toStrictEqual(searchAction);
   }
 );

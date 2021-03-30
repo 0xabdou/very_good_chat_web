@@ -1,35 +1,51 @@
 import React from 'react';
-import {
-  getMockStore,
-  getMockUserActions,
-  loggedInAuthState,
-  mockUser,
-  mockUserActionObjects
-} from "../../../mock-objects";
+import {getMockStore, loggedInAuthState, mockMe,} from "../../../mock-objects";
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {AppState, AppStore} from "../../../../src/store/store";
 import LoggedInScreen from "../../../../src/features/user/ui/logged-in-screen";
 import {UserActionsContext} from "../../../../src/features/user/user-actions-context";
-import {UserState} from "../../../../src/features/user/user-slice";
+import {MeState, userActions} from "../../../../src/features/user/me-slice";
 import UserError from "../../../../src/features/user/types/user-error";
 import {MemoryRouter} from "react-router-dom";
 import {initialSearchState} from "../../../../src/features/search/search-slice";
-import {initialBadgeState} from "../../../../src/features/badge/badge-slice";
-import {initialFriendsState} from "../../../../src/features/friend/friends-slice";
-import {initialNotificationState} from "../../../../src/features/notification/notification-slice";
+import {
+  badgeActions,
+  initialBadgeState
+} from "../../../../src/features/badge/badge-slice";
+import {
+  friendsActions,
+  initialFriendsState
+} from "../../../../src/features/friend/friends-slice";
+import {
+  initialNotificationState,
+  notificationActions
+} from "../../../../src/features/notification/notification-slice";
+import {instance, mock, resetCalls, verify, when} from "ts-mockito";
+import {FriendsActionsContext} from "../../../../src/features/friend/friends-actions-context";
+import {NotificationActionsContext} from '../../../../src/features/notification/notification-actions-context';
+import {BadgeActionsContext} from '../../../../src/features/badge/badge-actions-context';
 
-const mockUserActions = getMockUserActions();
+const MockUserActions = mock<typeof userActions>();
+const MockFriendActions = mock<typeof friendsActions>();
+const MockNotificationActions = mock<typeof notificationActions>();
+const MockBadgeActions = mock<typeof badgeActions>();
+
 const MockStore = getMockStore();
+const meAction = {type: 'me'} as any;
+const getFriendsAction = {type: 'friends'} as any;
+const getFriendsReqsAction = {type: 'friend reqs'} as any;
+const getNotificationsAction = {type: 'notification'} as any;
+const getBadgesAction = {type: 'badges'} as any;
 
-const initialUserState: UserState = {
+const initialMeState: MeState = {
   initialized: false,
-  currentUser: null,
+  me: null,
   updatingUser: false,
   error: null,
 };
 const initialState = {
-  user: initialUserState,
+  me: initialMeState,
   auth: loggedInAuthState,
   search: initialSearchState,
   badge: initialBadgeState,
@@ -39,23 +55,52 @@ const initialState = {
 const renderComponent = (mockStore: AppStore, path: string = '/') => {
   render(
     <Provider store={mockStore}>
-      <UserActionsContext.Provider value={mockUserActions}>
-        <MemoryRouter initialEntries={[path]} initialIndex={0}>
-          <LoggedInScreen/>
-        </MemoryRouter>
+      <UserActionsContext.Provider value={instance(MockUserActions)}>
+        <FriendsActionsContext.Provider value={instance(MockFriendActions)}>
+          <NotificationActionsContext.Provider
+            value={instance(MockNotificationActions)}>
+            <BadgeActionsContext.Provider value={instance(MockBadgeActions)}>
+              <MemoryRouter initialEntries={[path]} initialIndex={0}>
+                <LoggedInScreen/>
+              </MemoryRouter>
+            </BadgeActionsContext.Provider>
+          </NotificationActionsContext.Provider>
+        </FriendsActionsContext.Provider>
       </UserActionsContext.Provider>
     </Provider>
   );
 };
 
-test('Should dispatch getCurrentUser on render', () => {
+beforeAll(() => {
+  when(MockUserActions.getMe()).thenReturn(meAction);
+  when(MockFriendActions.getFriends()).thenReturn(getFriendsAction);
+  when(MockFriendActions.getFriendRequests()).thenReturn(getFriendsReqsAction);
+  when(MockNotificationActions.getNotifications()).thenReturn(getNotificationsAction);
+  when(MockBadgeActions.getBadges()).thenReturn(getBadgesAction);
+});
+
+beforeEach(() => {
+  resetCalls(MockUserActions);
+});
+
+test('Should dispatch all required actions on render', () => {
   // arrange
   const mockStore = MockStore(initialState);
   // act
   renderComponent(mockStore);
   // assert
-  expect(mockUserActions.getCurrentUser).toBeCalledTimes(1);
-  expect(mockStore.getActions()).toContain(mockUserActionObjects.getCurrentUser);
+  verify(MockUserActions.getMe()).once();
+  verify(MockFriendActions.getFriendRequests()).once();
+  verify(MockFriendActions.getFriends()).once();
+  verify(MockNotificationActions.getNotifications()).once();
+  verify(MockBadgeActions.getBadges()).once();
+  const actions = mockStore.getActions();
+  expect(actions).toHaveLength(5);
+  expect(actions[0]).toBe(meAction);
+  expect(actions[1]).toBe(getFriendsReqsAction);
+  expect(actions[2]).toBe(getFriendsAction);
+  expect(actions[3]).toBe(getNotificationsAction);
+  expect(actions[4]).toBe(getBadgesAction);
 });
 
 test('Should display a loader if the state is being initialized', () => {
@@ -74,7 +119,7 @@ test('Should display a retry button if there was an initialization error', () =>
   // arrange
   const errorState: AppState = {
     ...initialState,
-    user: {...initialUserState, error: UserError.network},
+    me: {...initialMeState, error: UserError.network},
   };
   const mockStore = MockStore(errorState);
   // act
@@ -93,7 +138,7 @@ test(
     // arrange
     const registrationState: AppState = {
       ...initialState,
-      user: {...initialUserState, initialized: true},
+      me: {...initialMeState, initialized: true},
     };
     const mockStore = MockStore(registrationState);
     // act
@@ -109,7 +154,7 @@ test(
 describe('When the state is initialized and a user is logged in', () => {
   const loggedInState: AppState = {
     ...initialState,
-    user: {...initialUserState, initialized: true, currentUser: mockUser},
+    me: {...initialMeState, initialized: true, me: mockMe},
     badge: initialBadgeState,
     friends: initialFriendsState
   };

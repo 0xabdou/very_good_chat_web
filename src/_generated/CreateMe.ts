@@ -3,13 +3,13 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
-import { UserUpdate } from "./globalTypes";
+import { UserCreation } from "./globalTypes";
 
 // ====================================================
-// GraphQL mutation operation: UpdateUserMutation
+// GraphQL mutation operation: CreateMe
 // ====================================================
 
-export interface UpdateUserMutation_updateUser {
+export interface CreateMe_register_user {
   __typename: "User";
   id: string;
   name: string | null;
@@ -19,10 +19,16 @@ export interface UpdateUserMutation_updateUser {
   photoURLSmall: string | null;
 }
 
-export interface UpdateUserMutation {
-  updateUser: UpdateUserMutation_updateUser;
+export interface CreateMe_register {
+  __typename: "Me";
+  user: CreateMe_register_user;
+  activeStatus: boolean;
 }
 
-export interface UpdateUserMutationVariables {
-  updateUserInput: UserUpdate;
+export interface CreateMe {
+  register: CreateMe_register;
+}
+
+export interface CreateMeVariables {
+  registerInput: UserCreation;
 }

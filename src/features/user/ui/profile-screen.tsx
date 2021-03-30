@@ -12,9 +12,9 @@ import RetryPage from "../../../components/retry-page";
 import {stringifyUserError} from "../types/user-error";
 
 const ProfileScreen: React.FC = () => {
-  const userState = useAppSelector(state => state.user);
+  const meState = useAppSelector(state => state.me);
   const history = useHistory();
-  const {getCurrentUser} = useContext(UserActionsContext);
+  const {getMe} = useContext(UserActionsContext);
   const dispatch = useAppDispatch();
 
   const classes = useStyles();
@@ -29,24 +29,24 @@ const ProfileScreen: React.FC = () => {
   }, [history]);
 
   const retry = useCallback(async () => {
-    dispatch(getCurrentUser());
+    dispatch(getMe());
   }, []);
 
-  if (!userState.initialized) {
+  if (!meState.initialized) {
     return <FullscreenLoader/>;
   }
-  if (!userState.currentUser && userState.error != null) {
+  if (!meState.me && meState.error != null) {
     return (
       <RetryPage
         onRetry={retry}
-        errorMessage={stringifyUserError(userState.error)}/>
+        errorMessage={stringifyUserError(meState.error)}/>
     );
   }
-  if (!userState.currentUser) {
+  if (!meState.me) {
     console.log('Displaying profile screen without a user');
     return <div/>;
   }
-  const user = userState.currentUser;
+  const user = meState.me;
   return (
     <div className={classes.outer} data-testid='profile-screen'>
       <TopBar>

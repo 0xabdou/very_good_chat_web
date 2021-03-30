@@ -63,14 +63,14 @@ type Mutation {
     declineFriendRequest(userID: String!): Friendship!
     loginWithGoogle(input: LoginInput!): LoginResponse!
     markNotificationAsSeen(notificationID: Int!): Boolean!
-    register(input: UserCreation!): User!
+    register(input: UserCreation!): Me!
     sendFriendRequest(userID: String!): Friendship!
     unblock(blocked_id: String!): String!
     unfriend(userID: String!): Friendship!
     updateActiveStatus(activeStatus: Boolean!): Boolean!
     updateBadge(badgeName: BadgeName!): Badge!
     updateLastSeen: Timestamp!
-    updateUser(input: UserUpdate!): User!
+    updateUser(input: UserUpdate!): Me!
 }
 
 type Notification {

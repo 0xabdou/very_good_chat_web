@@ -4,7 +4,7 @@ import {
   getDefaultMiddleware
 } from "@reduxjs/toolkit";
 import authReducer from '../features/auth/auth-slice';
-import userReducer from '../features/user/user-slice';
+import meReducer from '../features/user/me-slice';
 import searchReducer from '../features/search/search-slice';
 import friendProfileReducer from '../features/friend/friend-profile-slice';
 import friendsReducer from '../features/friend/friends-slice';
@@ -16,7 +16,7 @@ import StoreExtraArg from "./store-extra-arg";
 
 const rootReducer = combineReducers({
   auth: authReducer,
-  user: userReducer,
+  me: meReducer,
   search: searchReducer,
   friendProfile: friendProfileReducer,
   friends: friendsReducer,
