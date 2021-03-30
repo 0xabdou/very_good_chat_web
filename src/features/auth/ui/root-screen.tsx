@@ -3,7 +3,7 @@ import React, {useCallback, useEffect} from "react";
 import LoggedInScreen from "../../user/ui/logged-in-screen";
 import LoginScreen from "./login-screen";
 import {useAuthActions} from "../auth-actions-context";
-import UserActionsProvider from "../../user/user-actions-context";
+import MeActionsProvider from "../../user/me-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import FullscreenLoader from "../../../components/fullscreen-loader";
 import AuthError from "../types/auth-error";
@@ -40,9 +40,9 @@ const RootScreen = () => {
   const loggedIn = state.accessToken != null;
   if (loggedIn) {
     return (
-      <UserActionsProvider>
+      <MeActionsProvider>
         <LoggedInScreen/>
-      </UserActionsProvider>
+      </MeActionsProvider>
     );
   } else return <LoginScreen/>;
 };

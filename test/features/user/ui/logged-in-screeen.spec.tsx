@@ -4,8 +4,8 @@ import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {AppState, AppStore} from "../../../../src/store/store";
 import LoggedInScreen from "../../../../src/features/user/ui/logged-in-screen";
-import {UserActionsContext} from "../../../../src/features/user/user-actions-context";
-import {MeState, userActions} from "../../../../src/features/user/me-slice";
+import {MeActionsContext} from "../../../../src/features/user/me-actions-context";
+import {MeState, meActions} from "../../../../src/features/user/me-slice";
 import UserError from "../../../../src/features/user/types/user-error";
 import {MemoryRouter} from "react-router-dom";
 import {initialSearchState} from "../../../../src/features/search/search-slice";
@@ -26,7 +26,7 @@ import {FriendsActionsContext} from "../../../../src/features/friend/friends-act
 import {NotificationActionsContext} from '../../../../src/features/notification/notification-actions-context';
 import {BadgeActionsContext} from '../../../../src/features/badge/badge-actions-context';
 
-const MockUserActions = mock<typeof userActions>();
+const MockMeActions = mock<typeof meActions>();
 const MockFriendActions = mock<typeof friendsActions>();
 const MockNotificationActions = mock<typeof notificationActions>();
 const MockBadgeActions = mock<typeof badgeActions>();
@@ -55,7 +55,7 @@ const initialState = {
 const renderComponent = (mockStore: AppStore, path: string = '/') => {
   render(
     <Provider store={mockStore}>
-      <UserActionsContext.Provider value={instance(MockUserActions)}>
+      <MeActionsContext.Provider value={instance(MockMeActions)}>
         <FriendsActionsContext.Provider value={instance(MockFriendActions)}>
           <NotificationActionsContext.Provider
             value={instance(MockNotificationActions)}>
@@ -66,13 +66,13 @@ const renderComponent = (mockStore: AppStore, path: string = '/') => {
             </BadgeActionsContext.Provider>
           </NotificationActionsContext.Provider>
         </FriendsActionsContext.Provider>
-      </UserActionsContext.Provider>
+      </MeActionsContext.Provider>
     </Provider>
   );
 };
 
 beforeAll(() => {
-  when(MockUserActions.getMe()).thenReturn(meAction);
+  when(MockMeActions.getMe()).thenReturn(meAction);
   when(MockFriendActions.getFriends()).thenReturn(getFriendsAction);
   when(MockFriendActions.getFriendRequests()).thenReturn(getFriendsReqsAction);
   when(MockNotificationActions.getNotifications()).thenReturn(getNotificationsAction);
@@ -80,7 +80,7 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  resetCalls(MockUserActions);
+  resetCalls(MockMeActions);
 });
 
 test('Should dispatch all required actions on render', () => {
@@ -89,7 +89,7 @@ test('Should dispatch all required actions on render', () => {
   // act
   renderComponent(mockStore);
   // assert
-  verify(MockUserActions.getMe()).once();
+  verify(MockMeActions.getMe()).once();
   verify(MockFriendActions.getFriendRequests()).once();
   verify(MockFriendActions.getFriends()).once();
   verify(MockNotificationActions.getNotifications()).once();

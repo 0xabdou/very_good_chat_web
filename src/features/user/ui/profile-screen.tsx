@@ -6,7 +6,7 @@ import FullscreenLoader from "../../../components/fullscreen-loader";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
 import {useHistory} from "react-router-dom";
 import CommonProfileInfo from "./components/common-profile-info";
-import {UserActionsContext} from "../user-actions-context";
+import {MeActionsContext} from "../me-actions-context";
 import FriendsButton from "./components/friends-button";
 import RetryPage from "../../../components/retry-page";
 import {stringifyUserError} from "../types/user-error";
@@ -14,7 +14,7 @@ import {stringifyUserError} from "../types/user-error";
 const ProfileScreen: React.FC = () => {
   const meState = useAppSelector(state => state.me);
   const history = useHistory();
-  const {getMe} = useContext(UserActionsContext);
+  const {getMe} = useContext(MeActionsContext);
   const dispatch = useAppDispatch();
 
   const classes = useStyles();

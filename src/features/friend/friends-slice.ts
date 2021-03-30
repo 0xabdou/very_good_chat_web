@@ -25,7 +25,7 @@ let _requestsPolling: NodeJS.Timeout;
 let _friendsPolling: NodeJS.Timeout;
 
 const getFriends = createAsyncThunk<Friend[], void, ThunkAPI<FriendError>>(
-  'friend/getFriends',
+  'friends/getFriends',
   async (_, thunkAPI) => {
     if (!_friendsPolling) {
       _friendsPolling = setInterval(() => {

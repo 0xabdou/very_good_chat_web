@@ -17,7 +17,7 @@ import UserError from "../types/user-error";
 import {centeredLayout, nonSelectable, wrapper} from "../../../styles/shared";
 import {ErrorSnackbar, SuccessSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../../auth/auth-actions-context";
-import {useUserActions} from "../user-actions-context";
+import {useMeActions} from "../me-actions-context";
 import {usePhotoUtils} from "../../../utils/photo-utils";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {UserUpdate} from "../types/user";
@@ -70,7 +70,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const state = useAppSelector(state => state.me);
   const dispatch = useAppDispatch();
   const {signOut} = useAuthActions();
-  const {createMe, updateMe, reset} = useUserActions();
+  const {createMe, updateMe, reset} = useMeActions();
 
   // photo utils
   const photoUtils = usePhotoUtils();

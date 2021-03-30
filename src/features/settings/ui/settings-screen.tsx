@@ -3,14 +3,14 @@ import {Button, createStyles, makeStyles, Typography} from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
 import {useAppDispatch} from "../../../store/hooks";
 import {useAuthActions} from "../../auth/auth-actions-context";
-import {useUserActions} from "../../user/user-actions-context";
+import {useMeActions} from "../../user/me-actions-context";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useHistory} from "react-router-dom";
 import AlertDialog from "../../../components/alert-dialog";
 
 const SettingsScreen = () => {
   const {signOut} = useAuthActions();
-  const {resetUser} = useUserActions();
+  const {reset} = useMeActions();
   const dispatch = useAppDispatch();
   const [logoutMenuOpen, setLogoutMenuOpen] = useState(false);
   const history = useHistory();
@@ -25,7 +25,7 @@ const SettingsScreen = () => {
     setLogoutMenuOpen(false);
     const result = await dispatch(signOut());
     if (result.meta.requestStatus == 'fulfilled')
-      dispatch(resetUser());
+      dispatch(reset());
   }, []);
 
   const logoutCanceled = useCallback(() => {

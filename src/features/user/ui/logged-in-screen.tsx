@@ -3,7 +3,7 @@ import MainScreen from "./main-screen";
 import ProfileUpdatingScreen from "./profile-updating-screen";
 import {makeStyles} from "@material-ui/core";
 import UserError from "../types/user-error";
-import {useUserActions} from "../user-actions-context";
+import {useMeActions} from "../me-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import RetryPage from "../../../components/retry-page";
 import FullscreenLoader from "../../../components/fullscreen-loader";
@@ -24,7 +24,7 @@ const LoggedInScreen = () => {
   const state = useAppSelector(state => state.me);
   const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
-  const {getMe} = useUserActions();
+  const {getMe} = useMeActions();
   const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();

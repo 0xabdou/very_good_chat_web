@@ -8,9 +8,9 @@ import {
   mockUserUpdate
 } from "../../mock-objects";
 import {left, right} from "fp-ts/Either";
-import userReducer, {
+import meReducer, {
   MeState,
-  userActions
+  meActions
 } from "../../../src/features/user/me-slice";
 import UserError from "../../../src/features/user/types/user-error";
 import {PayloadAction} from "@reduxjs/toolkit";
@@ -28,9 +28,9 @@ beforeEach(() => {
   mockStore = MockStore();
 });
 
-const {getMe, createMe, updateMe} = userActions;
+const {getMe, createMe, updateMe} = meActions;
 
-describe('getCurrenMe', () => {
+describe('getMe', () => {
   const act = () => getMe()(
     mockStore.dispatch,
     mockStore.getState,
@@ -66,7 +66,7 @@ describe('getCurrenMe', () => {
         type: getMe.fulfilled.type,
         payload: mockMe
       };
-      const result = userReducer(initialState, action);
+      const result = meReducer(initialState, action);
       expect(result).toStrictEqual({
         ...initialState,
         me: mockMe,
@@ -79,7 +79,7 @@ describe('getCurrenMe', () => {
         type: getMe.rejected.type,
         payload: UserError.notFound,
       };
-      const result = userReducer(initialState, action);
+      const result = meReducer(initialState, action);
       expect(result).toStrictEqual({...initialState, initialized: true});
     });
 
@@ -88,7 +88,7 @@ describe('getCurrenMe', () => {
         type: getMe.rejected.type,
         payload: userError
       };
-      const result = userReducer(initialState, action);
+      const result = meReducer(initialState, action);
       expect(result).toStrictEqual({...initialState, error: userError});
     });
   });
@@ -141,7 +141,7 @@ describe('createMe', () => {
         type: createMe.pending.type,
         payload: undefined,
       };
-      const result = userReducer(initialState, action);
+      const result = meReducer(initialState, action);
       expect(result).toStrictEqual(loadingState);
     });
 
@@ -150,7 +150,7 @@ describe('createMe', () => {
         type: createMe.fulfilled.type,
         payload: mockMe,
       };
-      const result = userReducer(loadingState, action);
+      const result = meReducer(loadingState, action);
       expect(result).toStrictEqual({...initialState, me: mockMe});
     });
 
@@ -159,7 +159,7 @@ describe('createMe', () => {
         type: createMe.rejected.type,
         payload: userError,
       };
-      const result = userReducer(loadingState, action);
+      const result = meReducer(loadingState, action);
       expect(result).toStrictEqual({...initialState, error: userError});
     });
   });
@@ -212,7 +212,7 @@ describe('updateMe', () => {
         type: updateMe.pending.type,
         payload: undefined,
       };
-      const result = userReducer(initialState, action);
+      const result = meReducer(initialState, action);
       expect(result).toStrictEqual(loadingState);
     });
 
@@ -221,7 +221,7 @@ describe('updateMe', () => {
         type: updateMe.fulfilled.type,
         payload: mockMe,
       };
-      const result = userReducer(loadingState, action);
+      const result = meReducer(loadingState, action);
       expect(result).toStrictEqual({...initialState, me: mockMe});
     });
 
@@ -230,7 +230,7 @@ describe('updateMe', () => {
         type: updateMe.rejected.type,
         payload: userError,
       };
-      const result = userReducer(loadingState, action);
+      const result = meReducer(loadingState, action);
       expect(result).toStrictEqual({...initialState, error: userError});
     });
   });

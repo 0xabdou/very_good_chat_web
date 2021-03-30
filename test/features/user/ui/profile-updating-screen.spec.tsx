@@ -13,7 +13,7 @@ import {
   waitForElementToBeRemoved
 } from "@testing-library/react";
 import {Provider} from "react-redux";
-import {UserActionsContext} from "../../../../src/features/user/user-actions-context";
+import {MeActionsContext} from "../../../../src/features/user/me-actions-context";
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
 import {beforeEach, describe, test} from "@jest/globals";
 import ProfileUpdatingScreen, {ProfileUpdatingScreenProps} from "../../../../src/features/user/ui/profile-updating-screen";
@@ -34,11 +34,11 @@ import {
   UserCreation,
   UserUpdate
 } from "../../../../src/features/user/types/user";
-import {userActions} from "../../../../src/features/user/me-slice";
+import {meActions} from "../../../../src/features/user/me-slice";
 import {authActions} from "../../../../src/features/auth/auth-slice";
 
 const MockAuthActions = mock<typeof authActions>();
-const MockUserActions = mock<typeof userActions>();
+const MockMeActions = mock<typeof meActions>();
 const MockStore = getMockStore();
 const MockPhotoUtils = mock<IPhotoUtils>();
 const signOutAction = {type: 'signOut'} as any;
@@ -60,9 +60,9 @@ const renderComponent = (
     <PhotoUtilsContext.Provider value={instance(MockPhotoUtils)}>
       <Provider store={mockStore}>
         <AuthActionsContext.Provider value={instance(MockAuthActions)}>
-          <UserActionsContext.Provider value={instance(MockUserActions)}>
+          <MeActionsContext.Provider value={instance(MockMeActions)}>
             <ProfileUpdatingScreen {...props} />
-          </UserActionsContext.Provider>
+          </MeActionsContext.Provider>
         </AuthActionsContext.Provider>
       </Provider>
     </PhotoUtilsContext.Provider>
@@ -70,14 +70,14 @@ const renderComponent = (
 };
 
 beforeAll(() => {
-  when(MockUserActions.reset()).thenReturn(resetAction);
-  when(MockUserActions.updateMe(anything())).thenReturn(updateAction);
-  when(MockUserActions.createMe(anything())).thenReturn(createAction);
+  when(MockMeActions.reset()).thenReturn(resetAction);
+  when(MockMeActions.updateMe(anything())).thenReturn(updateAction);
+  when(MockMeActions.createMe(anything())).thenReturn(createAction);
   when(MockAuthActions.signOut()).thenReturn(signOutAction);
 });
 
 beforeEach(() => {
-  resetCalls(MockUserActions);
+  resetCalls(MockMeActions);
   resetCalls(MockAuthActions);
 });
 
@@ -180,7 +180,7 @@ describe('Logging out', () => {
     // wait for dialog disappearance
     await waitForElementToBeRemoved(() => screen.queryByTestId('alert-dialog'));
     // assert
-    verify(MockUserActions.reset()).once();
+    verify(MockMeActions.reset()).once();
     verify(MockAuthActions.signOut()).once();
     expect(mockStore.getActions()).toContain(resetAction);
     expect(mockStore.getActions()).toContain(signOutAction);
@@ -205,7 +205,7 @@ describe('Logging out', () => {
       // wait for dialog disappearance
       await waitForElementToBeRemoved(() => screen.queryByTestId('alert-dialog'));
       // assert
-      verify(MockUserActions.reset()).never();
+      verify(MockMeActions.reset()).never();
       verify(MockAuthActions.signOut()).never();
       expect(mockStore.getActions()).toHaveLength(0);
     },
@@ -318,7 +318,7 @@ test(
       username: 'chuck_norris',
       name: 'chuck norris',
     };
-    await waitFor(() => verify(MockUserActions.createMe(deepEqual(creation))).once());
+    await waitFor(() => verify(MockMeActions.createMe(deepEqual(creation))).once());
     expect(mockStore.getActions()).toContain(createAction);
   },
 );
@@ -358,7 +358,7 @@ describe('updating profile', () => {
       fireEvent.click(saveButton);
       // assert
       const usernameUpdate: UserUpdate = {username: changedUsername};
-      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(usernameUpdate))).once());
+      await waitFor(() => verify(MockMeActions.updateMe(deepEqual(usernameUpdate))).once());
       expect(mockStore.getActions()).toContain(updateAction);
     },
   );
@@ -380,7 +380,7 @@ describe('updating profile', () => {
       fireEvent.click(saveButton);
       // assert
       const nameUpdate: UserUpdate = {name: changedName};
-      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(nameUpdate))).once());
+      await waitFor(() => verify(MockMeActions.updateMe(deepEqual(nameUpdate))).once());
       expect(mockStore.getActions()).toContain(updateAction);
     }
   );
@@ -401,7 +401,7 @@ describe('updating profile', () => {
       fireEvent.click(saveButton);
       // assert
       const nameUpdate: UserUpdate = {deleteName: true};
-      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(nameUpdate))).once());
+      await waitFor(() => verify(MockMeActions.updateMe(deepEqual(nameUpdate))).once());
       expect(mockStore.getActions()).toContain(updateAction);
     }
   );
@@ -435,7 +435,7 @@ describe('updating profile', () => {
       fireEvent.click(saveButton);
       // assert
       const photoUpdate: UserUpdate = {photo: file};
-      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(photoUpdate))).once());
+      await waitFor(() => verify(MockMeActions.updateMe(deepEqual(photoUpdate))).once());
       expect(mockStore.getActions()).toContain(updateAction);
     }
   );
@@ -462,7 +462,7 @@ describe('updating profile', () => {
       fireEvent.click(saveButton);
       // assert
       const photoUpdate: UserUpdate = {deletePhoto: true};
-      await waitFor(() => verify(MockUserActions.updateMe(deepEqual(photoUpdate))).once());
+      await waitFor(() => verify(MockMeActions.updateMe(deepEqual(photoUpdate))).once());
       expect(mockStore.getActions()).toContain(updateAction);
     }
   );
@@ -478,7 +478,7 @@ describe('updating profile', () => {
       const saveButton = screen.getByTestId('submit-button');
       fireEvent.click(saveButton);
       // assert
-      verify(MockUserActions.updateMe(anything())).never();
+      verify(MockMeActions.updateMe(anything())).never();
       expect(mockStore.getActions()).toHaveLength(0);
     }
   );

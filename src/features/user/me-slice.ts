@@ -114,7 +114,7 @@ const meSlice = createSlice({
 });
 
 export default meSlice.reducer;
-export const userActions = {
+export const meActions = {
   getMe,
   createMe,
   updateMe,
