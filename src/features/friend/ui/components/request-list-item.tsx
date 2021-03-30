@@ -3,6 +3,7 @@ import React, {useCallback} from "react";
 import User from "../../../user/types/user";
 import {
   Avatar,
+  Badge,
   Icon,
   IconButton,
   ListItem,
@@ -12,6 +13,7 @@ import {
 } from "@material-ui/core";
 import {PulseLoader} from "react-spinners";
 import {formatDate} from "../../../../utils/date-utils";
+import Friend from "../../types/friend";
 
 export type RequestListItemProps = {
   req: FriendRequest,
@@ -39,6 +41,15 @@ const RequestListItem = (props: RequestListItemProps) => {
   }, [props.onClick]);
 
   const classes = useStyles();
+  let online = false;
+  let lastSeen: string | undefined;
+  if (props.confirmed) {
+    const friend = props.req as Friend;
+    if (friend.lastSeen) {
+      online = new Date().getTime() - friend.lastSeen <= 6000;
+      lastSeen = formatDate(friend.lastSeen, 'mini');
+    }
+  }
   return (
     <div style={props.style} data-testid='request-list-item'>
       <ListItem
@@ -46,7 +57,15 @@ const RequestListItem = (props: RequestListItemProps) => {
         onClick={onClick}
         button>
         <ListItemAvatar>
-          <Avatar src={user.photo?.small} alt='request-avatar'/>
+          <Badge
+            variant={online ? 'dot' : 'standard'}
+            badgeContent={lastSeen}
+            invisible={!online && !lastSeen}
+            anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
+            className={online ? classes.dot : classes.badge}
+          >
+            <Avatar src={user.photo?.small} alt='request-avatar'/>
+          </Badge>
         </ListItemAvatar>
         <ListItemText
           primary={user.username}
@@ -92,6 +111,28 @@ const useStyles = makeStyles({
   check: {
     color: 'green'
   },
+  dot: {
+    '& .MuiBadge-badge': {
+      background: '#5dda4e',
+      color: 'white',
+    },
+    '& .MuiBadge-dot': {
+      border: '1px solid white',
+      borderRadius: '50%',
+      height: '14px',
+      width: '14px',
+      margin: '5px',
+    },
+  },
+  badge: {
+    '& .MuiBadge-badge': {
+      background: '#317529',
+      color: 'white',
+      fontSize: '0.5rem',
+      border: '1px solid white',
+      margin: '2px',
+    }
+  }
 });
 
 export default RequestListItem;

@@ -14,7 +14,8 @@ import {stringifyFriendError} from "../types/friend-error";
 import {FriendRequest} from "../types/friend-request";
 
 const FriendsScreen = () => {
-  const state = useAppSelector(state => state.friends);
+  const friends = useAppSelector(state => state.friends.friends);
+  const error = useAppSelector(state => state.friends.friendsError);
   const dispatch = useAppDispatch();
   const actions = useFriendsActions();
   const history = useHistory();
@@ -35,11 +36,10 @@ const FriendsScreen = () => {
 
   const itemKey = useCallback((index: number, data: FriendRequest[]) => {
     return data[index].user.username;
-  }, [state.friendRequests]);
+  }, []);
 
   let child: React.ReactNode;
-  if (state.friends) {
-    const friends = state.friends;
+  if (friends) {
     if (friends.length) {
       child = <AutoSizer>
         {({height, width}) => {
@@ -71,12 +71,12 @@ const FriendsScreen = () => {
         </div>
       );
     }
-  } else if (state.friendsError != null) {
+  } else if (error != null) {
     child = (
       <div className={classes.centered}>
         <RetryButton
           onClick={retry}
-          message={stringifyFriendError(state.friendsError)}
+          message={stringifyFriendError(error)}
         />
       </div>
     );
