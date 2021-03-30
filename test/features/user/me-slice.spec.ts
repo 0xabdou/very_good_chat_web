@@ -1,6 +1,5 @@
 import {beforeEach, describe, expect, it} from "@jest/globals";
-import {anything, reset, verify, when} from "ts-mockito";
-import mockServices from "../../mock-services";
+import {anything, instance, mock, resetCalls, verify, when} from "ts-mockito";
 import {
   getMockStore,
   mockMe,
@@ -9,22 +8,27 @@ import {
 } from "../../mock-objects";
 import {left, right} from "fp-ts/Either";
 import meReducer, {
-  MeState,
-  meActions
+  meActions,
+  MeState
 } from "../../../src/features/user/me-slice";
 import UserError from "../../../src/features/user/types/user-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import User from "../../../src/features/user/types/user";
 import {AppStore} from "../../../src/store/store";
+import {IMeRepository} from "../../../src/features/user/data/me-repository";
+import StoreExtraArg from "../../../src/store/store-extra-arg";
 
 
-const MockUserRepository = mockServices.mocks.meRepo;
+const MockMeRepo = mock<IMeRepository>();
 const MockStore = getMockStore();
 const userError = UserError.general;
 let mockStore: AppStore;
+const extra = {
+  meRepo: instance(MockMeRepo)
+} as StoreExtraArg;
 
 beforeEach(() => {
-  reset(MockUserRepository);
+  resetCalls(MockMeRepo);
   mockStore = MockStore();
 });
 
@@ -34,23 +38,23 @@ describe('getMe', () => {
   const act = () => getMe()(
     mockStore.dispatch,
     mockStore.getState,
-    mockServices.instances,
+    extra
   );
 
   it('should return the right action if fulfilled', async () => {
-    when(MockUserRepository.getMe()).thenResolve(right(mockMe));
+    when(MockMeRepo.getMe()).thenResolve(right(mockMe));
     const result = await act();
     expect(result.payload).toStrictEqual(mockMe);
     expect(result.type).toStrictEqual(getMe.fulfilled.type);
-    verify(MockUserRepository.getMe()).once();
+    verify(MockMeRepo.getMe()).once();
   });
 
   it('should return the right action if rejected', async () => {
-    when(MockUserRepository.getMe()).thenResolve(left(userError));
+    when(MockMeRepo.getMe()).thenResolve(left(userError));
     const result = await act();
     expect(result.payload).toStrictEqual(userError);
     expect(result.type).toStrictEqual(getMe.rejected.type);
-    verify(MockUserRepository.getMe()).once();
+    verify(MockMeRepo.getMe()).once();
   });
 
   describe('reducers', () => {
@@ -98,11 +102,11 @@ describe('createMe', () => {
   const act = () => createMe(mockUserCreation)(
     mockStore.dispatch,
     mockStore.getState,
-    mockServices.instances,
+    extra
   );
 
   it('should return the right action if fulfilled', async () => {
-    when(MockUserRepository.createMe(mockUserCreation))
+    when(MockMeRepo.createMe(mockUserCreation))
       .thenResolve(right(mockMe));
     const expected: PayloadAction<User> = {
       type: createMe.fulfilled.type,
@@ -111,11 +115,11 @@ describe('createMe', () => {
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.createMe(mockUserCreation)).once();
+    verify(MockMeRepo.createMe(mockUserCreation)).once();
   });
 
   it('should return the right action if rejected', async () => {
-    when(MockUserRepository.createMe(mockUserCreation))
+    when(MockMeRepo.createMe(mockUserCreation))
       .thenResolve(left(userError));
     const expected: PayloadAction<UserError> = {
       type: createMe.rejected.type,
@@ -124,7 +128,7 @@ describe('createMe', () => {
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.createMe(mockUserCreation)).once();
+    verify(MockMeRepo.createMe(mockUserCreation)).once();
   });
 
   describe('reducers', () => {
@@ -169,11 +173,11 @@ describe('updateMe', () => {
   const act = () => updateMe(mockUserUpdate)(
     mockStore.dispatch,
     mockStore.getState,
-    mockServices.instances,
+    extra
   );
 
   it('should return the right action if fulfilled', async () => {
-    when(MockUserRepository.updateMe(anything()))
+    when(MockMeRepo.updateMe(anything()))
       .thenResolve(right(mockMe));
     const expected: PayloadAction<User> = {
       type: updateMe.fulfilled.type,
@@ -182,11 +186,11 @@ describe('updateMe', () => {
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.updateMe(mockUserUpdate)).once();
+    verify(MockMeRepo.updateMe(mockUserUpdate)).once();
   });
 
   it('should return the right action if rejected', async () => {
-    when(MockUserRepository.updateMe(mockUserUpdate))
+    when(MockMeRepo.updateMe(mockUserUpdate))
       .thenResolve(left(userError));
     const expected: PayloadAction<UserError> = {
       type: updateMe.rejected.type,
@@ -195,7 +199,7 @@ describe('updateMe', () => {
     const result = await act();
     expect(result.type).toStrictEqual(expected.type);
     expect(result.payload).toStrictEqual(expected.payload);
-    verify(MockUserRepository.updateMe(mockUserUpdate)).once();
+    verify(MockMeRepo.updateMe(mockUserUpdate)).once();
   });
 
   describe('reducers', () => {

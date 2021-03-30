@@ -4,14 +4,15 @@ import authReducer, {
   AuthState,
   AuthUser
 } from "../../../src/features/auth/auth-slice";
-import mockServices, {resetMocks} from "../../mock-services";
-import {verify, when} from "ts-mockito";
+import {instance, mock, resetCalls, verify, when} from "ts-mockito";
 import LoginResult from "../../../src/features/auth/types/login-result";
 import {left, right} from "fp-ts/Either";
 import AuthError from "../../../src/features/auth/types/auth-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import {getMockStore, initialAuthState} from "../../mock-objects";
 import {AppStore} from "../../../src/store/store";
+import IAuthRepository from "../../../src/features/auth/data/auth-repository";
+import StoreExtraArg from "../../../src/store/store-extra-arg";
 
 
 const {
@@ -20,7 +21,12 @@ const {
   signOut
 } = authActions;
 
+const MockAuthRepo = mock<IAuthRepository>();
 const MockStore = getMockStore();
+const extra = {
+  authRepo: instance(MockAuthRepo)
+} as StoreExtraArg;
+
 const accessToken = 'some_access_token';
 const authUser: AuthUser = {displayName: 'Display Name', photoURL: null};
 const loginResult = {...authUser, accessToken};
@@ -29,34 +35,35 @@ const initialState = initialAuthState;
 let mockStore: AppStore;
 const loadingState: AuthState = {...initialState, loading: true};
 
+
 beforeEach(() => {
   mockStore = MockStore();
-  resetMocks();
+  resetCalls(MockAuthRepo);
 });
 
 describe('signInWithGoogle thunk', () => {
   const act = () => signInWithGoogle()(
     mockStore.dispatch,
     mockStore.getState,
-    mockServices.instances,
+    extra,
   );
 
   it('should return the right action when fulfilled', async () => {
-    when(mockServices.mocks.authRepo.signInWithGoogle()).thenResolve(
+    when(MockAuthRepo.signInWithGoogle()).thenResolve(
       right(loginResult)
     );
     const result = await act();
     expect(result.payload).toStrictEqual(loginResult);
     expect(result.type).toStrictEqual(signInWithGoogle.fulfilled.type);
-    verify(mockServices.mocks.authRepo.signInWithGoogle()).once();
+    verify(MockAuthRepo.signInWithGoogle()).once();
   });
 
   it('should return the right action when rejected', async () => {
-    when(mockServices.mocks.authRepo.signInWithGoogle()).thenResolve(left(authError));
+    when(MockAuthRepo.signInWithGoogle()).thenResolve(left(authError));
     const result = await act();
     expect(result.payload).toStrictEqual(authError);
     expect(result.type).toStrictEqual(signInWithGoogle.rejected.type);
-    verify(mockServices.mocks.authRepo.signInWithGoogle()).once();
+    verify(MockAuthRepo.signInWithGoogle()).once();
   });
 
   describe('reducers', () => {
@@ -107,29 +114,29 @@ describe('getAccessToken thunk', () => {
   const act = () => getAccessToken()(
     mockStore.dispatch,
     mockStore.getState,
-    mockServices.instances,
+    extra,
   );
 
   it('should return the right action when fulfilled', async () => {
     // arrange
-    when(mockServices.mocks.authRepo.getAccessToken())
+    when(MockAuthRepo.getAccessToken())
       .thenResolve(right(accessToken));
     // act
     const result = await act();
     // assert
     expect(result.payload).toStrictEqual(accessToken);
-    verify(mockServices.mocks.authRepo.getAccessToken()).once();
+    verify(MockAuthRepo.getAccessToken()).once();
   });
 
   it('should return the right action when rejected', async () => {
     // arrange
-    when(mockServices.mocks.authRepo.getAccessToken())
+    when(MockAuthRepo.getAccessToken())
       .thenResolve(left(authError));
     // act
     const result = await act();
     // assert
     expect(result.payload).toStrictEqual(authError);
-    verify(mockServices.mocks.authRepo.getAccessToken()).once();
+    verify(MockAuthRepo.getAccessToken()).once();
   });
 
   describe('reducers', () => {
@@ -196,23 +203,23 @@ describe('signOut thunk', () => {
   const act = () => signOut()(
     mockStore.dispatch,
     mockStore.getState,
-    mockServices.instances,
+    extra,
   );
 
   it('should return the right action when fulfilled', async () => {
-    when(mockServices.mocks.authRepo.signOut()).thenResolve(right(null));
+    when(MockAuthRepo.signOut()).thenResolve(right(null));
     const result = await act();
     expect(result.payload).toBe(null);
     expect(result.type).toStrictEqual(signOut.fulfilled.type);
-    verify(mockServices.mocks.authRepo.signOut()).once();
+    verify(MockAuthRepo.signOut()).once();
   });
 
   it('should return the right action when rejected', async () => {
-    when(mockServices.mocks.authRepo.signOut()).thenResolve(left(authError));
+    when(MockAuthRepo.signOut()).thenResolve(left(authError));
     const result = await act();
     expect(result.payload).toBe(authError);
     expect(result.type).toStrictEqual(signOut.rejected.type);
-    verify(mockServices.mocks.authRepo.signOut()).once();
+    verify(MockAuthRepo.signOut()).once();
   });
 
   describe('reducers', () => {
