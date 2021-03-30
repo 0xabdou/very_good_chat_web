@@ -12,17 +12,17 @@ import UserError from "../../../../src/features/user/types/user-error";
 import {GraphQLError} from "graphql";
 import {UserUpdate} from "../../../../src/features/user/types/user";
 
-const MockUserApi = mock<IUserAPI>();
-const meRepo: IMeRepository = new MeRepository(instance(MockUserApi));
+const MockUserAPI = mock<IUserAPI>();
+const meRepo: IMeRepository = new MeRepository(instance(MockUserAPI));
 
 
 beforeEach(() => {
-  reset(MockUserApi);
+  reset(MockUserAPI);
 });
 
 describe('error catching', () => {
   const act = (error: Error) => {
-    return (meRepo as MeRepository).leftOrRight(() => {
+    return (meRepo as MeRepository)._leftOrRight(() => {
       throw error;
     });
   };
@@ -66,16 +66,16 @@ describe('error catching', () => {
 
 describe('getCurrentUser()', () => {
   it('should return a user on success', async () => {
-    when(MockUserApi.getMe()).thenResolve(mockMe);
+    when(MockUserAPI.getMe()).thenResolve(mockMe);
     const result = await meRepo.getMe();
     expect(result).toStrictEqual(right(mockMe));
-    verify(MockUserApi.getMe()).once();
+    verify(MockUserAPI.getMe()).once();
   });
 });
 
 describe('createUser()', () => {
   beforeAll(() => {
-    when(MockUserApi.isUsernameTaken(mockUserCreation.username))
+    when(MockUserAPI.isUsernameTaken(mockUserCreation.username))
       .thenResolve(false);
   });
 
@@ -83,12 +83,12 @@ describe('createUser()', () => {
     // act
     await meRepo.createMe(mockUserCreation);
     // assert
-    verify(MockUserApi.isUsernameTaken(mockUserCreation.username)).once();
+    verify(MockUserAPI.isUsernameTaken(mockUserCreation.username)).once();
   });
 
   it('should return usernameTaken error if the username is taken', async () => {
     // arrange
-    when(MockUserApi.isUsernameTaken(mockUserCreation.username))
+    when(MockUserAPI.isUsernameTaken(mockUserCreation.username))
       .thenResolve(true);
     // act
     const result = await meRepo.createMe(mockUserCreation);
@@ -98,19 +98,19 @@ describe('createUser()', () => {
 
   it('should return a user on success',
     async () => {
-      when(MockUserApi.createMe(mockUserCreation)).thenResolve(mockMe);
+      when(MockUserAPI.createMe(mockUserCreation)).thenResolve(mockMe);
       const result = await meRepo.createMe(mockUserCreation);
       expect(result).toStrictEqual(right(mockMe));
-      verify(MockUserApi.createMe(mockUserCreation)).once();
+      verify(MockUserAPI.createMe(mockUserCreation)).once();
     }
   );
 });
 
 describe('updateUser()', () => {
   beforeEach(() => {
-    when(MockUserApi.isUsernameTaken(anything()))
+    when(MockUserAPI.isUsernameTaken(anything()))
       .thenResolve(false);
-    when(MockUserApi.updateMe(anything())).thenResolve(mockMe);
+    when(MockUserAPI.updateMe(anything())).thenResolve(mockMe);
   });
 
   it('should not check username existence if it was not there', async () => {
@@ -122,19 +122,19 @@ describe('updateUser()', () => {
     // act
     await meRepo.updateMe(update);
     // assert
-    verify(MockUserApi.isUsernameTaken(anything())).never();
+    verify(MockUserAPI.isUsernameTaken(anything())).never();
   });
 
   it('should check username existence if there is one', async () => {
     // act
     await meRepo.updateMe(mockUserUpdate);
     // assert
-    verify(MockUserApi.isUsernameTaken(mockUserUpdate.username!)).once();
+    verify(MockUserAPI.isUsernameTaken(mockUserUpdate.username!)).once();
   });
 
   it('should return usernameTaken error if the username is taken', async () => {
     // arrange
-    when(MockUserApi.isUsernameTaken(mockUserCreation.username))
+    when(MockUserAPI.isUsernameTaken(mockUserCreation.username))
       .thenResolve(true);
     // act
     const result = await meRepo.updateMe(mockUserUpdate);
@@ -147,7 +147,33 @@ describe('updateUser()', () => {
       const result = await meRepo.updateMe(mockUserUpdate);
       // assert
       expect(result).toStrictEqual(right(mockMe));
-      verify(MockUserApi.updateMe(mockUserUpdate)).once();
+      verify(MockUserAPI.updateMe(mockUserUpdate)).once();
     }
   );
+});
+
+describe('updateActiveStatus', () => {
+  it('should update active status', async () => {
+    // arrange
+    const status = true;
+    when(MockUserAPI.updateActiveStatus(anything())).thenResolve(status);
+    // act
+    const result = await meRepo.updateActiveStatus(status);
+    // assert
+    expect(result).toStrictEqual(right(status));
+    verify(MockUserAPI.updateActiveStatus(status)).once();
+  });
+});
+
+describe('updateLastSeen', () => {
+  it('should last seen', async () => {
+    // arrange
+    const lastSeen = new Date().getTime();
+    when(MockUserAPI.updateLastSeen()).thenResolve(lastSeen);
+    // act
+    const result = await meRepo.updateLastSeen();
+    // assert
+    expect(result).toStrictEqual(right(lastSeen));
+    verify(MockUserAPI.updateLastSeen()).once();
+  });
 });

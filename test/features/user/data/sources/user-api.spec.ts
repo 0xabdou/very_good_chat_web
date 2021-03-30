@@ -9,6 +9,8 @@ import {
   FIND_USERS_QUERY,
   ME_QUERY,
   REGISTER_MUTATION,
+  UPDATE_ACTIVE_STATUS,
+  UPDATE_LAST_SEEN,
   UPDATE_USER_MUTATION,
   USERNAME_EXISTENCE_QUERY
 } from "../../../../../src/features/user/data/graphql";
@@ -38,6 +40,8 @@ import {
   UpdateMe,
   UpdateMeVariables
 } from "../../../../../src/_generated/UpdateMe";
+import {UpdateActiveStatus} from "../../../../../src/_generated/UpdateActiveStatus";
+import {UpdateLastSeen} from "../../../../../src/_generated/UpdateLastSeen";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 const userAPI: IUserAPI = new UserAPI(instance(MockApolloClient));
@@ -134,5 +138,38 @@ describe('findUsers', () => {
       variables: {findUsersSearchQuery: searchQuery},
     }))).once();
     expect(result[0]).toMatchObject(mockUser);
+  });
+});
+
+describe('updateActiveStatus', () => {
+  it('should update the active status', async () => {
+    // arrange
+    const status = true;
+    when(MockApolloClient.mutate(anything())).thenResolve({
+      data: {updateActiveStatus: status}
+    } as ApolloQueryResult<UpdateActiveStatus>);
+    // act
+    const result = await userAPI.updateActiveStatus(status);
+    // assert
+    expect(result).toBe(status);
+    verify(MockApolloClient.mutate(deepEqual({
+      mutation: UPDATE_ACTIVE_STATUS, variables: {activeStatus: status}
+    }))).once();
+  });
+});
+
+describe('updateLastSeen', () => {
+  it('should update the active status', async () => {
+    // arrange
+    const lastSeen = new Date().getTime();
+    when(MockApolloClient.mutate(anything())).thenResolve({
+      data: {updateLastSeen: lastSeen}
+    } as ApolloQueryResult<UpdateLastSeen>);
+    // act
+    const result = await userAPI.updateLastSeen();
+    // assert
+    expect(result).toBe(lastSeen);
+    verify(MockApolloClient.mutate(deepEqual({mutation: UPDATE_LAST_SEEN})))
+      .once();
   });
 });

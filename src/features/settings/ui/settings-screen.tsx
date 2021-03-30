@@ -1,7 +1,13 @@
 import React, {useCallback, useState} from 'react';
-import {Button, createStyles, makeStyles, Typography} from "@material-ui/core";
+import {
+  Button,
+  createStyles,
+  makeStyles,
+  Switch,
+  Typography
+} from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
-import {useAppDispatch} from "../../../store/hooks";
+import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {useAuthActions} from "../../auth/auth-actions-context";
 import {useMeActions} from "../../user/me-actions-context";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
@@ -9,13 +15,22 @@ import {useHistory} from "react-router-dom";
 import AlertDialog from "../../../components/alert-dialog";
 
 const SettingsScreen = () => {
+  const meState = useAppSelector(state => state.me);
   const {signOut} = useAuthActions();
-  const {reset} = useMeActions();
+  const {toggleActiveStatus, reset} = useMeActions();
   const dispatch = useAppDispatch();
   const [logoutMenuOpen, setLogoutMenuOpen] = useState(false);
   const history = useHistory();
   const classes = useStyles();
   const topBarClasses = useTopBarStyles();
+
+  const toggleAS = useCallback(() => {
+    dispatch(toggleActiveStatus());
+  }, []);
+
+  const goToBlockedUsersScreen = useCallback(() => {
+    history.push('/blocked-users');
+  }, []);
 
   const logoutClicked = useCallback(() => {
     setLogoutMenuOpen(true);
@@ -32,9 +47,6 @@ const SettingsScreen = () => {
     setLogoutMenuOpen(false);
   }, []);
 
-  const goToBlockedUsersScreen = useCallback(() => {
-    history.push('/blocked-users');
-  }, []);
 
   return (
     <div className={classes.outer} data-testid='settings-screen'>
@@ -43,8 +55,22 @@ const SettingsScreen = () => {
           Settings
         </Typography>
       </TopBar>
-      <SettingsItem label='Blocked users' onClick={goToBlockedUsersScreen}/>
-      <SettingsItem label='Log out' color='red' onClick={logoutClicked}/>
+      <SettingsItem
+        onClick={toggleAS}
+        disabled={meState.updatingUser}
+      >
+        Active status
+        <Switch
+          className={classes.switch}
+          disabled={meState.updatingUser}
+          checked={meState.me!.activeStatus}/>
+      </SettingsItem>
+      <SettingsItem onClick={goToBlockedUsersScreen}>
+        Blocked users
+      </SettingsItem>
+      <SettingsItem color='red' onClick={logoutClicked}>
+        Log out
+      </SettingsItem>
       <AlertDialog
         title='Log out'
         content='Are you sure you want to logout?'
@@ -57,16 +83,20 @@ const SettingsScreen = () => {
 };
 
 type SettingsItemProps = {
-  label: string,
+  children: React.ReactNode,
   onClick: () => void,
+  disabled?: boolean,
   color?: string,
 }
 
 const SettingsItem = (props: SettingsItemProps) => {
   const classes = useButtonStyles({color: props.color});
   return (
-    <Button className={classes.button} onClick={props.onClick}>
-      {props.label}
+    <Button
+      className={classes.button}
+      onClick={props.onClick}
+      disabled={props.disabled}>
+      {props.children}
     </Button>
   );
 };
@@ -78,6 +108,14 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     paddingTop: '56px',
+  },
+  switch: {
+    '& .Mui-checked': {
+      color: 'green',
+    },
+    '&& .MuiSwitch-track': {
+      backgroundColor: 'green',
+    }
   }
 });
 

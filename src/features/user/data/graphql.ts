@@ -66,3 +66,15 @@ export const FIND_USERS_QUERY = gql`
         }
     }
 `;
+
+export const UPDATE_ACTIVE_STATUS = gql`
+    mutation UpdateActiveStatus($activeStatus: Boolean!) {
+        updateActiveStatus(activeStatus: $activeStatus)
+    }
+`;
+
+export const UPDATE_LAST_SEEN = gql`
+    mutation UpdateLastSeen {
+        updateLastSeen
+    }
+`;

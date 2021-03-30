@@ -10,6 +10,10 @@ export interface IMeRepository {
   createMe(creation: UserCreation): Promise<Either<UserError, Me>>;
 
   updateMe(update: UserUpdate): Promise<Either<UserError, Me>>;
+
+  updateActiveStatus(activeStatus: boolean): Promise<Either<UserError, boolean>>;
+
+  updateLastSeen(): Promise<Either<UserError, number>>;
 }
 
 export class MeRepository implements IMeRepository {
@@ -23,11 +27,11 @@ export class MeRepository implements IMeRepository {
   }
 
   async getMe(): Promise<Either<UserError, Me>> {
-    return this.leftOrRight(() => this._userApi.getMe());
+    return this._leftOrRight(() => this._userApi.getMe());
   }
 
   createMe(creation: UserCreation): Promise<Either<UserError, Me>> {
-    return this.leftOrRight(async () => {
+    return this._leftOrRight(async () => {
       const taken = await this._userApi.isUsernameTaken(creation.username);
       if (taken) {
         const error = new Error('This username is taken');
@@ -39,7 +43,7 @@ export class MeRepository implements IMeRepository {
   }
 
   updateMe(update: UserUpdate): Promise<Either<UserError, Me>> {
-    return this.leftOrRight(async () => {
+    return this._leftOrRight(async () => {
       if (update.username) {
         const taken = await this._userApi.isUsernameTaken(update.username);
         if (taken) {
@@ -52,7 +56,15 @@ export class MeRepository implements IMeRepository {
     });
   }
 
-  async leftOrRight<R>(work: () => Promise<R>): Promise<Either<UserError, R>> {
+  updateActiveStatus(activeStatus: boolean): Promise<Either<UserError, boolean>> {
+    return this._leftOrRight(() => this._userApi.updateActiveStatus(activeStatus));
+  }
+
+  updateLastSeen(): Promise<Either<UserError, number>> {
+    return this._leftOrRight(() => this._userApi.updateLastSeen());
+  }
+
+  async _leftOrRight<R>(work: () => Promise<R>): Promise<Either<UserError, R>> {
     try {
       const result = await work();
       return right(result);
@@ -72,4 +84,6 @@ export class MeRepository implements IMeRepository {
       return left(UserError.general);
     }
   }
+
+
 }

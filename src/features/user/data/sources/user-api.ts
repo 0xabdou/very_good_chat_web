@@ -9,6 +9,8 @@ import {
   FIND_USERS_QUERY,
   ME_QUERY,
   REGISTER_MUTATION,
+  UPDATE_ACTIVE_STATUS,
+  UPDATE_LAST_SEEN,
   UPDATE_USER_MUTATION,
   USERNAME_EXISTENCE_QUERY
 } from "../graphql";
@@ -22,6 +24,11 @@ import {
 } from "../../../../_generated/FindUsersQuery";
 import {CreateMe, CreateMeVariables} from "../../../../_generated/CreateMe";
 import {UpdateMe, UpdateMeVariables} from "../../../../_generated/UpdateMe";
+import {
+  UpdateActiveStatus,
+  UpdateActiveStatusVariables
+} from "../../../../_generated/UpdateActiveStatus";
+import {UpdateLastSeen} from "../../../../_generated/UpdateLastSeen";
 
 export interface IUserAPI {
   getMe(): Promise<Me>;
@@ -33,6 +40,10 @@ export interface IUserAPI {
   isUsernameTaken(username: string): Promise<boolean>;
 
   findUsers(searchQuery: string): Promise<User[]>
+
+  updateActiveStatus(activeStatus: boolean): Promise<boolean>;
+
+  updateLastSeen(): Promise<number>;
 }
 
 export class UserAPI implements IUserAPI {
@@ -81,6 +92,21 @@ export class UserAPI implements IUserAPI {
       variables: {findUsersSearchQuery: searchQuery}
     });
     return data.findUsers.map(user => UserAPI.parseUser(user));
+  }
+
+  async updateActiveStatus(activeStatus: boolean): Promise<boolean> {
+    const {data} = await this._client.mutate<UpdateActiveStatus, UpdateActiveStatusVariables>({
+      mutation: UPDATE_ACTIVE_STATUS,
+      variables: {activeStatus}
+    });
+    return data?.updateActiveStatus!;
+  }
+
+  async updateLastSeen(): Promise<number> {
+    const {data} = await this._client.mutate<UpdateLastSeen>({
+      mutation: UPDATE_LAST_SEEN
+    });
+    return data?.updateLastSeen;
   }
 
   static parseUser(user: MeQuery_me_user): User {
