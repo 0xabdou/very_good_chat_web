@@ -3,7 +3,6 @@ import React, {useCallback} from "react";
 import User from "../../../user/types/user";
 import {
   Avatar,
-  Badge,
   Icon,
   IconButton,
   ListItem,
@@ -13,12 +12,10 @@ import {
 } from "@material-ui/core";
 import {PulseLoader} from "react-spinners";
 import {formatDate} from "../../../../utils/date-utils";
-import Friend from "../../types/friend";
 
 export type RequestListItemProps = {
   req: FriendRequest,
   style?: React.CSSProperties
-  confirmed?: Boolean,
   received?: Boolean,
   loading?: Boolean
   onClick?: (user: User) => void,
@@ -26,6 +23,7 @@ export type RequestListItemProps = {
   onCancel?: (user: User) => void,
 }
 const RequestListItem = (props: RequestListItemProps) => {
+  const classes = useStyles();
   const user = props.req.user;
 
   const onClick = useCallback(() => {
@@ -40,16 +38,7 @@ const RequestListItem = (props: RequestListItemProps) => {
     if (props.onCancel) props.onCancel(user);
   }, [props.onClick]);
 
-  const classes = useStyles();
-  let online = false;
-  let lastSeen: string | undefined;
-  if (props.confirmed) {
-    const friend = props.req as Friend;
-    if (friend.lastSeen) {
-      online = new Date().getTime() - friend.lastSeen <= 6000;
-      lastSeen = formatDate(friend.lastSeen, 'mini');
-    }
-  }
+  const secondary = `${props.received ? 'received' : 'sent'} ${formatDate(props.req.date)}`;
   return (
     <div style={props.style} data-testid='request-list-item'>
       <ListItem
@@ -57,22 +46,13 @@ const RequestListItem = (props: RequestListItemProps) => {
         onClick={onClick}
         button>
         <ListItemAvatar>
-          <Badge
-            variant={online ? 'dot' : 'standard'}
-            badgeContent={lastSeen}
-            invisible={!online && !lastSeen}
-            anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-            className={online ? classes.dot : classes.badge}
-          >
-            <Avatar src={user.photo?.small} alt='request-avatar'/>
-          </Badge>
+          <Avatar src={user.photo?.small} alt='request-avatar'/>
         </ListItemAvatar>
         <ListItemText
           primary={user.username}
-          secondary={formatDate(props.req.date)}
+          secondary={secondary}
         />
       </ListItem>
-      {!props.confirmed &&
       <div className={classes.actions} data-testid='request-actions'>
         {props.loading &&
         <span data-testid='request-loading'>
@@ -89,7 +69,6 @@ const RequestListItem = (props: RequestListItemProps) => {
           <Icon className={classes.check}>check</Icon>
         </IconButton>}
       </div>
-      }
     </div>
   );
 };

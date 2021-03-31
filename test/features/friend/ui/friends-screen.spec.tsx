@@ -104,7 +104,7 @@ it('should display requests', () => {
   // render
   renderIt(mockStore);
   // assert
-  const items = screen.getAllByTestId('request-list-item');
+  const items = screen.getAllByTestId('friend-list-item');
   expect(items).toHaveLength(mockFriends.length);
   expect(screen.getByText(mockFriends[0].user.username)).toBeInTheDocument();
 });

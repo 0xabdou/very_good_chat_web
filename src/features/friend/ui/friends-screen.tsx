@@ -7,11 +7,11 @@ import {useFriendsActions} from "../friends-actions-context";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {FixedSizeList} from "react-window";
-import RequestListItem from "./components/request-list-item";
 import User from "../../user/types/user";
 import {useHistory} from "react-router-dom";
 import {stringifyFriendError} from "../types/friend-error";
 import {FriendRequest} from "../types/friend-request";
+import FriendListItem from "./components/friend-list-item";
 
 const FriendsScreen = () => {
   const friends = useAppSelector(state => state.friends.friends);
@@ -53,11 +53,10 @@ const FriendsScreen = () => {
           >
             {({index, style, data}) => {
               return (
-                <RequestListItem
+                <FriendListItem
                   style={style}
-                  req={data[index]}
+                  friend={data[index]}
                   onClick={goToUserProfile}
-                  confirmed={true}
                 />
               );
             }}
