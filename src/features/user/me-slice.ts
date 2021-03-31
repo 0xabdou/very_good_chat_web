@@ -18,16 +18,9 @@ const initialState: MeState = {
   error: null,
 };
 
-let _lastSeenPolling: NodeJS.Timeout;
-
 const getMe = createAsyncThunk<Me | null, void, ThunkAPI<UserError>>(
   'me/getMe',
   async (_, thunkAPI) => {
-    if (!_lastSeenPolling) {
-      _lastSeenPolling = setInterval(() => {
-        thunkAPI.dispatch(updateLastSeen());
-      }, 5000);
-    }
     const result = await thunkAPI.extra.meRepo.getMe();
     if (isRight(result)) {
       return result.right;

@@ -13,19 +13,24 @@ import {useMeActions} from "../../user/me-actions-context";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useHistory} from "react-router-dom";
 import AlertDialog from "../../../components/alert-dialog";
+import {useFriendsActions} from "../../friend/friends-actions-context";
 
 const SettingsScreen = () => {
   const meState = useAppSelector(state => state.me);
   const {signOut} = useAuthActions();
   const {toggleActiveStatus, reset} = useMeActions();
+  const {getFriends} = useFriendsActions();
   const dispatch = useAppDispatch();
   const [logoutMenuOpen, setLogoutMenuOpen] = useState(false);
   const history = useHistory();
   const classes = useStyles();
   const topBarClasses = useTopBarStyles();
 
-  const toggleAS = useCallback(() => {
-    dispatch(toggleActiveStatus());
+  const toggleAS = useCallback(async () => {
+    const result = await dispatch(toggleActiveStatus());
+    if (result.meta.requestStatus == 'fulfilled') {
+      dispatch(getFriends());
+    }
   }, []);
 
   const goToBlockedUsersScreen = useCallback(() => {

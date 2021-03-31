@@ -14,15 +14,9 @@ export const initialNotificationState: NotificationState = {
   error: null
 };
 
-let _polling: NodeJS.Timeout;
 const getNotifications = createAsyncThunk<Notification[], void, ThunkAPI<NotificationError>>(
   'notification/getNotifications',
   async (_, thunkAPI) => {
-    if (!_polling) {
-      _polling = setInterval(async () => {
-        thunkAPI.dispatch(getNotifications());
-      }, 5000);
-    }
     const result = await thunkAPI.extra.notificationRepo.getNotifications();
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);

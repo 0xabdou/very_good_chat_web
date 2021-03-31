@@ -18,23 +18,27 @@ import {useNotificationActions} from "../../notification/notification-actions-co
 import FriendsScreen from "../../friend/ui/friends-screen";
 import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
 import SettingsScreen from "../../settings/ui/settings-screen";
+import {startPolling} from "../../../utils/polling";
 
 
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.me);
   const authUser = useAppSelector(state => state.auth.authUser);
   const dispatch = useAppDispatch();
-  const {getMe} = useMeActions();
+  const {getMe, updateLastSeen} = useMeActions();
   const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();
 
   useEffect(() => {
     dispatch(getMe());
-    dispatch(getFriendRequests());
-    dispatch(getFriends());
-    dispatch(getNotifications());
     dispatch(getBadges());
+    startPolling(() => {
+      dispatch(getFriendRequests());
+      dispatch(getFriends());
+      dispatch(getNotifications());
+      dispatch(updateLastSeen());
+    });
   }, []);
 
   const classes = useStyles();

@@ -21,17 +21,9 @@ export const initialFriendsState: FriendsState = {
   friendsError: null
 };
 
-let _requestsPolling: NodeJS.Timeout;
-let _friendsPolling: NodeJS.Timeout;
-
 const getFriends = createAsyncThunk<Friend[], void, ThunkAPI<FriendError>>(
   'friends/getFriends',
   async (_, thunkAPI) => {
-    if (!_friendsPolling) {
-      _friendsPolling = setInterval(() => {
-        thunkAPI.dispatch(getFriends());
-      }, 5000);
-    }
     const result = await thunkAPI.extra.friendRepo.getFriends();
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
@@ -42,13 +34,7 @@ const getFriendRequests = createAsyncThunk<FriendRequests, void, ThunkAPI<Friend
   'friends/getFriendRequests',
   async (_, thunkAPI) => {
     const result = await thunkAPI.extra.friendRepo.getFriendRequests();
-    if (isRight(result)) {
-      if (!_requestsPolling)
-        _requestsPolling = setInterval(() => {
-          thunkAPI.dispatch(getFriendRequests());
-        }, 5000);
-      return result.right;
-    }
+    if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
   }
 );
