@@ -18,7 +18,7 @@ import {useFriendsActions} from "../../friend/friends-actions-context";
 const SettingsScreen = () => {
   const meState = useAppSelector(state => state.me);
   const {signOut} = useAuthActions();
-  const {toggleActiveStatus, reset} = useMeActions();
+  const {toggleActiveStatus} = useMeActions();
   const {getFriends} = useFriendsActions();
   const dispatch = useAppDispatch();
   const [logoutMenuOpen, setLogoutMenuOpen] = useState(false);
@@ -43,9 +43,7 @@ const SettingsScreen = () => {
 
   const logoutConfirmed = useCallback(async () => {
     setLogoutMenuOpen(false);
-    const result = await dispatch(signOut());
-    if (result.meta.requestStatus == 'fulfilled')
-      dispatch(reset());
+    dispatch(signOut());
   }, []);
 
   const logoutCanceled = useCallback(() => {

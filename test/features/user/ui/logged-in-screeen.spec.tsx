@@ -1,6 +1,6 @@
 import React from 'react';
 import {getMockStore, loggedInAuthState, mockMe,} from "../../../mock-objects";
-import {render, screen} from "@testing-library/react";
+import {render, screen, waitFor} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {AppState, AppStore} from "../../../../src/store/store";
 import LoggedInScreen from "../../../../src/features/user/ui/logged-in-screen";
@@ -37,6 +37,7 @@ const getFriendsAction = {type: 'friends'} as any;
 const getFriendsReqsAction = {type: 'friend reqs'} as any;
 const getNotificationsAction = {type: 'notification'} as any;
 const getBadgesAction = {type: 'badges'} as any;
+const updateLSAction = {type: 'last seen'} as any;
 
 const initialMeState: MeState = {
   initialized: false,
@@ -77,30 +78,33 @@ beforeAll(() => {
   when(MockFriendActions.getFriendRequests()).thenReturn(getFriendsReqsAction);
   when(MockNotificationActions.getNotifications()).thenReturn(getNotificationsAction);
   when(MockBadgeActions.getBadges()).thenReturn(getBadgesAction);
+  when(MockMeActions.updateLastSeen()).thenReturn(updateLSAction);
 });
 
 beforeEach(() => {
   resetCalls(MockMeActions);
 });
 
-test('Should dispatch all required actions on render', () => {
+test('Should dispatch all required actions on render', async () => {
   // arrange
   const mockStore = MockStore(initialState);
   // act
   renderComponent(mockStore);
   // assert
+  const actions = mockStore.getActions();
   verify(MockMeActions.getMe()).once();
-  verify(MockFriendActions.getFriendRequests()).once();
+  verify(MockBadgeActions.getBadges()).once();
+  expect(actions[0]).toBe(meAction);
+  expect(actions[1]).toBe(getBadgesAction);
+  // polling
+  await waitFor(() => verify(MockFriendActions.getFriendRequests()).once());
   verify(MockFriendActions.getFriends()).once();
   verify(MockNotificationActions.getNotifications()).once();
-  verify(MockBadgeActions.getBadges()).once();
-  const actions = mockStore.getActions();
-  expect(actions).toHaveLength(5);
-  expect(actions[0]).toBe(meAction);
-  expect(actions[1]).toBe(getFriendsReqsAction);
-  expect(actions[2]).toBe(getFriendsAction);
-  expect(actions[3]).toBe(getNotificationsAction);
-  expect(actions[4]).toBe(getBadgesAction);
+  expect(actions[2]).toBe(getFriendsReqsAction);
+  expect(actions[3]).toBe(getFriendsAction);
+  expect(actions[4]).toBe(getNotificationsAction);
+  expect(actions[5]).toBe(updateLSAction);
+  expect(actions).toHaveLength(6);
 });
 
 test('Should display a loader if the state is being initialized', () => {

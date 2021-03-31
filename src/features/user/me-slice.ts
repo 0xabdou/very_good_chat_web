@@ -85,9 +85,7 @@ const handleRejected = (state: MeState, error: UserError | undefined) => {
 const meSlice = createSlice({
   name: 'me',
   initialState: initialState,
-  reducers: {
-    reset: (_) => initialState,
-  },
+  reducers: {},
   extraReducers: builder => {
     // getCurrentUser
     builder

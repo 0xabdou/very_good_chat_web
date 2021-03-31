@@ -42,7 +42,6 @@ const MockMeActions = mock<typeof meActions>();
 const MockStore = getMockStore();
 const MockPhotoUtils = mock<IPhotoUtils>();
 const signOutAction = {type: 'signOut'} as any;
-const resetAction = {type: 'reset'} as any;
 const updateAction = {type: 'update'} as any;
 const createAction = {type: 'create'} as any;
 
@@ -70,7 +69,6 @@ const renderComponent = (
 };
 
 beforeAll(() => {
-  when(MockMeActions.reset()).thenReturn(resetAction);
   when(MockMeActions.updateMe(anything())).thenReturn(updateAction);
   when(MockMeActions.createMe(anything())).thenReturn(createAction);
   when(MockAuthActions.signOut()).thenReturn(signOutAction);
@@ -180,9 +178,7 @@ describe('Logging out', () => {
     // wait for dialog disappearance
     await waitForElementToBeRemoved(() => screen.queryByTestId('alert-dialog'));
     // assert
-    verify(MockMeActions.reset()).once();
     verify(MockAuthActions.signOut()).once();
-    expect(mockStore.getActions()).toContain(resetAction);
     expect(mockStore.getActions()).toContain(signOutAction);
   });
 
@@ -205,7 +201,6 @@ describe('Logging out', () => {
       // wait for dialog disappearance
       await waitForElementToBeRemoved(() => screen.queryByTestId('alert-dialog'));
       // assert
-      verify(MockMeActions.reset()).never();
       verify(MockAuthActions.signOut()).never();
       expect(mockStore.getActions()).toHaveLength(0);
     },

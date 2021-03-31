@@ -70,7 +70,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const state = useAppSelector(state => state.me);
   const dispatch = useAppDispatch();
   const {signOut} = useAuthActions();
-  const {createMe, updateMe, reset} = useMeActions();
+  const {createMe, updateMe} = useMeActions();
 
   // photo utils
   const photoUtils = usePhotoUtils();
@@ -147,7 +147,6 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const logoutConfirmed = useCallback(() => {
     setLoggingOut(false);
     dispatch(signOut());
-    dispatch(reset());
   }, []);
 
   // Called when the user cancels the logout from the alert dialog

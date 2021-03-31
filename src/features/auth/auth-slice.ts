@@ -51,6 +51,7 @@ const signOut = createAsyncThunk<null, void, ThunkAPI<AuthError>>(
   async (_, thunkApi) => {
     const result = await thunkApi.extra.authRepo.signOut();
     if (isRight(result)) {
+      location.reload();
       return result.right;
     }
     return thunkApi.rejectWithValue(result.left);

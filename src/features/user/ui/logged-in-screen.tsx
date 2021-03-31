@@ -20,7 +20,6 @@ import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
 import SettingsScreen from "../../settings/ui/settings-screen";
 import {startPolling} from "../../../utils/polling";
 
-
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.me);
   const authUser = useAppSelector(state => state.auth.authUser);
