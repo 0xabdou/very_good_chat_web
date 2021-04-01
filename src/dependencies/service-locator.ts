@@ -22,6 +22,7 @@ import NotificationAPI, {INotificationAPI} from "../features/notification/data/s
 import NotificationRepository, {INotificationRepository} from "../features/notification/data/notification-repository";
 import BlockAPI, {IBlockAPI} from "../features/block/data/sources/block-api";
 import BlockRepository, {IBlockRepository} from "../features/block/data/block-respository";
+import {customFetch} from "../utils/custom-fetch";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -66,6 +67,7 @@ const initDependencies = async () => {
   const httpLink = createUploadLink({
     uri: `${SERVER_URL}/graphql`,
     credentials: 'include',
+    fetch: customFetch
   });
   const errorLink = onError(({graphQLErrors, networkError}) => {
     if (graphQLErrors) {
