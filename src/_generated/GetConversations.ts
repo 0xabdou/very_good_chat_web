@@ -33,6 +33,8 @@ export interface GetConversations_getConversations_messages {
   text: string | null;
   medias: GetConversations_getConversations_messages_medias[] | null;
   sentAt: any;
+  deliveredTo: string[];
+  seenBy: string[];
 }
 
 export interface GetConversations_getConversations {

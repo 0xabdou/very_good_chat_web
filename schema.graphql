@@ -70,8 +70,10 @@ type Media {
 
 type Message {
     conversationID: Int!
+    deliveredTo: [String!]!
     id: Int!
     medias: [Media!]
+    seenBy: [String!]!
     senderID: String!
     sentAt: Timestamp!
     text: String

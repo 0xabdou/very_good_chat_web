@@ -79,6 +79,8 @@ export default class ChatAPI implements IChatAPI {
       text: message.text ?? undefined,
       medias: message.medias?.map(ChatAPI.parseMedia),
       sentAt: message.sentAt,
+      deliveredTo: message.deliveredTo,
+      seenBy: message.seenBy
     };
   }
 

@@ -6,7 +6,9 @@ type Message = {
   senderID: string,
   text?: string,
   medias?: Media[],
-  sentAt: number
+  sentAt: number,
+  deliveredTo: string[],
+  seenBy: string[],
 }
 
 export default Message;

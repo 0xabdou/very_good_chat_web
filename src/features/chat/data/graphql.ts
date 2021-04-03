@@ -22,6 +22,8 @@ export const GET_CONVERSATIONS = gql`
                     type
                 }
                 sentAt
+                deliveredTo
+                seenBy
             }
             type
         }
@@ -50,6 +52,8 @@ export const GET_OR_CREATE_OTO_CONVERSATION = gql`
                     type
                 }
                 sentAt
+                deliveredTo
+                seenBy
             }
             type
         }
@@ -68,6 +72,8 @@ export const SEND_MESSAGE = gql`
                 type
             }
             sentAt
+            deliveredTo
+            seenBy
         }
     }
 `;

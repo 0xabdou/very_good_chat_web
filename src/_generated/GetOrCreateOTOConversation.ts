@@ -33,6 +33,8 @@ export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_mess
   text: string | null;
   medias: GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_medias[] | null;
   sentAt: any;
+  deliveredTo: string[];
+  seenBy: string[];
 }
 
 export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation {

@@ -1,13 +1,14 @@
 import {anything, deepEqual, instance, mock, verify, when} from "ts-mockito";
 import {ApolloClient, ApolloQueryResult} from "@apollo/client";
-import ChatAPI, {SendMessageInput} from "../../../../../src/features/chat/data/sources/chat-api";
+import ChatAPI from "../../../../../src/features/chat/data/sources/chat-api";
 import {
   mockConversation,
   mockGQLConversation,
   mockGQLMedia,
   mockGQLMessage,
   mockMedia,
-  mockMessage
+  mockMessage,
+  mockSendMessageInput
 } from "../../../../mock-objects";
 import {GetConversations} from "../../../../../src/_generated/GetConversations";
 import {
@@ -81,18 +82,14 @@ describe('sendMessage', () => {
     when(MockApolloClient.mutate(anything())).thenResolve({
       data: {sendMessage: mockGQLMessage}
     } as ApolloQueryResult<SendMessage>);
-    const sendMessageInput: SendMessageInput = {
-      conversationID: 911,
-      text: 'Hello world',
-      medias: [new File(['1', '2', '3'], "viva l'Algerie")]
-    };
+
     // act
-    const result = await chatAPI.sendMessage(sendMessageInput);
+    const result = await chatAPI.sendMessage(mockSendMessageInput);
     // assert
     expect(result).toStrictEqual(mockMessage);
     verify(MockApolloClient.mutate(deepEqual({
       mutation: SEND_MESSAGE,
-      variables: {message: sendMessageInput}
+      variables: {message: mockSendMessageInput}
     }))).once();
   });
 });

@@ -46,6 +46,7 @@ import {Media, MediaType} from "../src/features/chat/types/media";
 import Message from "../src/features/chat/types/message";
 import {GetConversations_getConversations} from "../src/_generated/GetConversations";
 import Conversation from "../src/features/chat/types/conversation";
+import {SendMessageInput} from "../src/features/chat/data/sources/chat-api";
 
 export const MockFile = mock<File>();
 
@@ -224,6 +225,8 @@ export const mockGQLMessage: SendMessage_sendMessage = {
   text: 'Hello world',
   medias: [mockGQLMedia],
   sentAt: new Date().getTime(),
+  deliveredTo: ['efgh'],
+  seenBy: ['abcd'],
 };
 
 export const mockMessage: Message = {
@@ -232,7 +235,9 @@ export const mockMessage: Message = {
   senderID: mockGQLMessage.senderID,
   text: mockGQLMessage.text ?? undefined,
   medias: [mockMedia],
-  sentAt: mockGQLMessage.sentAt
+  sentAt: mockGQLMessage.sentAt,
+  deliveredTo: mockGQLMessage.deliveredTo,
+  seenBy: mockGQLMessage.seenBy,
 };
 
 export const mockGQLConversation: GetConversations_getConversations = {
@@ -248,6 +253,12 @@ export const mockConversation: Conversation = {
   participants: [mockUser],
   messages: [mockMessage],
   type: ConversationType[mockGQLConversation.type]
+};
+
+export const mockSendMessageInput: SendMessageInput = {
+  conversationID: 911,
+  text: 'Hello world',
+  medias: [new File(['1', '2', '3'], "viva l'Algerie")]
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);
