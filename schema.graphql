@@ -20,6 +20,13 @@ type Block {
     user: User!
 }
 
+type Conversation {
+    id: Int!
+    messages: [Message!]!
+    participants: [User!]!
+    type: ConversationType!
+}
+
 type Friend {
     friendshipDate: Timestamp!
     lastSeen: Timestamp
@@ -56,15 +63,31 @@ type Me {
     user: User!
 }
 
+type Media {
+    type: MediaType!
+    url: String!
+}
+
+type Message {
+    conversationID: Int!
+    id: Int!
+    medias: [Media!]
+    senderID: String!
+    sentAt: Timestamp!
+    text: String
+}
+
 type Mutation {
     acceptFriendRequest(userID: String!): Friendship!
     block(blocked_id: String!): Block!
     cancelFriendRequest(userID: String!): Friendship!
     declineFriendRequest(userID: String!): Friendship!
+    getOrCreateOneToOneConversation(userID: String!): Conversation!
     loginWithGoogle(input: LoginInput!): LoginResponse!
     markNotificationAsSeen(notificationID: Int!): Boolean!
     register(input: UserCreation!): Me!
     sendFriendRequest(userID: String!): Friendship!
+    sendMessage(message: SendMessageInput!): Message!
     unblock(blocked_id: String!): String!
     unfriend(userID: String!): Friendship!
     updateActiveStatus(activeStatus: Boolean!): Boolean!
@@ -86,6 +109,7 @@ type Query {
     findUsers(searchQuery: String!): [User!]!
     getBadges: [Badge!]!
     getBlockedUsers: [Block!]!
+    getConversations: [Conversation!]!
     getFriendRequests: FriendRequests!
     getFriends: [Friend!]!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
@@ -107,6 +131,11 @@ enum BadgeName {
     NOTIFICATIONS
 }
 
+enum ConversationType {
+    GROUP
+    ONE_TO_ONE
+}
+
 enum FriendshipStatus {
     BLOCKED
     BLOCKING
@@ -116,6 +145,11 @@ enum FriendshipStatus {
     STRANGERS
 }
 
+enum MediaType {
+    IMAGE
+    VIDEO
+}
+
 enum NotificationType {
     REQUEST_ACCEPTED
     SYSTEM
@@ -123,6 +157,12 @@ enum NotificationType {
 
 input LoginInput {
     token: String!
+}
+
+input SendMessageInput {
+    conversationID: Int!
+    medias: [Upload!]
+    text: String
 }
 
 input UserCreation {

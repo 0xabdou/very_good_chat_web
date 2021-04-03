@@ -12,6 +12,11 @@ export enum BadgeName {
   NOTIFICATIONS = "NOTIFICATIONS",
 }
 
+export enum ConversationType {
+  GROUP = "GROUP",
+  ONE_TO_ONE = "ONE_TO_ONE",
+}
+
 export enum FriendshipStatus {
   BLOCKED = "BLOCKED",
   BLOCKING = "BLOCKING",
@@ -21,6 +26,11 @@ export enum FriendshipStatus {
   STRANGERS = "STRANGERS",
 }
 
+export enum MediaType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
+
 export enum NotificationType {
   REQUEST_ACCEPTED = "REQUEST_ACCEPTED",
   SYSTEM = "SYSTEM",
@@ -28,6 +38,12 @@ export enum NotificationType {
 
 export interface LoginInput {
   token: string;
+}
+
+export interface SendMessageInput {
+  conversationID: number;
+  text?: string | null;
+  medias?: any[] | null;
 }
 
 export interface UserCreation {

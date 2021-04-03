@@ -22,6 +22,9 @@ import {FriendRequests} from "../src/features/friend/types/friend-request";
 import {UpdateBadge_updateBadge} from "../src/_generated/UpdateBadge";
 import {
   BadgeName as GQLBadgeName,
+  ConversationType,
+  ConversationType as GQLConversationType,
+  MediaType as GQLMediaType,
   NotificationType as GQLNotificationType
 } from "../src/_generated/globalTypes";
 import {Badge, BadgeName} from "../src/features/badge/types/badge";
@@ -35,6 +38,14 @@ import {BlockMutation_block} from "../src/_generated/BlockMutation";
 import {Block} from "../src/features/block/types/block";
 import {UserAPI} from "../src/features/user/data/sources/user-api";
 import Friend from "../src/features/friend/types/friend";
+import {
+  SendMessage_sendMessage,
+  SendMessage_sendMessage_medias
+} from "../src/_generated/SendMessage";
+import {Media, MediaType} from "../src/features/chat/types/media";
+import Message from "../src/features/chat/types/message";
+import {GetConversations_getConversations} from "../src/_generated/GetConversations";
+import Conversation from "../src/features/chat/types/conversation";
 
 export const MockFile = mock<File>();
 
@@ -190,6 +201,53 @@ export const mockGQLBlock: BlockMutation_block = {
 export const mockBlock: Block = {
   user: UserAPI.parseUser(mockGQLBlock.user),
   date: mockGQLBlock.date,
+};
+
+export const mockGQLMedia: SendMessage_sendMessage_medias = {
+  __typename: 'Media',
+  url: 'media url',
+  type: GQLMediaType.IMAGE
+};
+
+export const mockMedia: Media = {
+  url: mockGQLMedia.url,
+  type: MediaType[mockGQLMedia.type]
+};
+
+const conversationID = 199;
+
+export const mockGQLMessage: SendMessage_sendMessage = {
+  __typename: 'Message',
+  id: 911,
+  conversationID,
+  senderID: 'sendIDD',
+  text: 'Hello world',
+  medias: [mockGQLMedia],
+  sentAt: new Date().getTime(),
+};
+
+export const mockMessage: Message = {
+  id: mockGQLMessage.id,
+  conversationID: mockGQLMessage.conversationID,
+  senderID: mockGQLMessage.senderID,
+  text: mockGQLMessage.text ?? undefined,
+  medias: [mockMedia],
+  sentAt: mockGQLMessage.sentAt
+};
+
+export const mockGQLConversation: GetConversations_getConversations = {
+  __typename: 'Conversation',
+  id: conversationID,
+  participants: [mockGQLUser],
+  messages: [mockGQLMessage],
+  type: GQLConversationType.ONE_TO_ONE,
+};
+
+export const mockConversation: Conversation = {
+  id: mockGQLConversation.id,
+  participants: [mockUser],
+  messages: [mockMessage],
+  type: ConversationType[mockGQLConversation.type]
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);
