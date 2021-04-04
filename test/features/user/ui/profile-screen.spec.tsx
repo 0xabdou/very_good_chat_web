@@ -1,9 +1,6 @@
 import {getMockStore, initialMeState, mockMe,} from "../../../mock-objects";
 import {instance, mock, reset} from "ts-mockito";
-import {
-  IPhotoUtils,
-  PhotoUtilsContext
-} from "../../../../src/utils/photo-utils";
+import {FileUtilsContext, IFileUtils} from "../../../../src/utils/file-utils";
 import {AppState, AppStore} from "../../../../src/store/store";
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
@@ -17,7 +14,7 @@ import {meActions} from "../../../../src/features/user/me-slice";
 
 let MockMeActions = mock<typeof meActions>();
 const MockStore = getMockStore();
-const MockPhotoUtils = mock<IPhotoUtils>();
+const MockPhotoUtils = mock<IFileUtils>();
 
 const initialState = {
   me: initialMeState,
@@ -26,13 +23,13 @@ const initialState = {
 
 const renderIt = (mockStore: AppStore,) => {
   render(
-    <PhotoUtilsContext.Provider value={instance(MockPhotoUtils)}>
+    <FileUtilsContext.Provider value={instance(MockPhotoUtils)}>
       <Provider store={mockStore}>
         <MeActionsContext.Provider value={instance(MockMeActions)}>
           <ProfileScreen/>
         </MeActionsContext.Provider>
       </Provider>
-    </PhotoUtilsContext.Provider>
+    </FileUtilsContext.Provider>
   );
 };
 

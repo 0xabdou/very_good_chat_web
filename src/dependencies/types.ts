@@ -1,5 +1,5 @@
 enum TYPES {
-  ILocalStorage = 'ILocalStorage',
+  IFileUtils= 'IFileUtils',
   ApolloClient = 'ApolloClient',
   Axios = 'Axios',
   // Auth

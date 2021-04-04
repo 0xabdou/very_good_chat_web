@@ -25,6 +25,7 @@ import BlockRepository, {IBlockRepository} from "../features/block/data/block-re
 import {customFetch} from "../utils/custom-fetch";
 import ChatAPI, {IChatAPI} from "../features/chat/data/sources/chat-api";
 import ChatRepository, {IChatRepository} from "../features/chat/data/chat-repository";
+import {FileUtils, IFileUtils} from "../utils/file-utils";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -93,6 +94,8 @@ const initDependencies = async () => {
       withCredentials: true,
     }),
   );
+
+  sl.register<IFileUtils>(TYPES.IFileUtils, new FileUtils());
 
   sl.register<IAuthAPI>(
     TYPES.IAuthApi,
@@ -176,6 +179,7 @@ const initDependencies = async () => {
       blockRepo: sl.get(TYPES.IBlockRepository),
       notificationRepo: sl.get(TYPES.INotificationRepository),
       chatRepo: sl.get(TYPES.IChatRepository),
+      fileUtils: sl.get(TYPES.IFileUtils),
     },
   );
   sl.register(

@@ -17,10 +17,7 @@ import {MeActionsContext} from "../../../../src/features/user/me-actions-context
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
 import {beforeEach, describe, test} from "@jest/globals";
 import ProfileUpdatingScreen, {ProfileUpdatingScreenProps} from "../../../../src/features/user/ui/profile-updating-screen";
-import {
-  IPhotoUtils,
-  PhotoUtilsContext
-} from "../../../../src/utils/photo-utils";
+import {FileUtilsContext, IFileUtils} from "../../../../src/utils/file-utils";
 import {
   anything,
   deepEqual,
@@ -40,7 +37,7 @@ import {authActions} from "../../../../src/features/auth/auth-slice";
 const MockAuthActions = mock<typeof authActions>();
 const MockMeActions = mock<typeof meActions>();
 const MockStore = getMockStore();
-const MockPhotoUtils = mock<IPhotoUtils>();
+const MockPhotoUtils = mock<IFileUtils>();
 const signOutAction = {type: 'signOut'} as any;
 const updateAction = {type: 'update'} as any;
 const createAction = {type: 'create'} as any;
@@ -56,7 +53,7 @@ const renderComponent = (
   props: ProfileUpdatingScreenProps = {},
 ) => {
   render(
-    <PhotoUtilsContext.Provider value={instance(MockPhotoUtils)}>
+    <FileUtilsContext.Provider value={instance(MockPhotoUtils)}>
       <Provider store={mockStore}>
         <AuthActionsContext.Provider value={instance(MockAuthActions)}>
           <MeActionsContext.Provider value={instance(MockMeActions)}>
@@ -64,7 +61,7 @@ const renderComponent = (
           </MeActionsContext.Provider>
         </AuthActionsContext.Provider>
       </Provider>
-    </PhotoUtilsContext.Provider>
+    </FileUtilsContext.Provider>
   );
 };
 
@@ -219,7 +216,7 @@ test(
       height: 100,
       width: 100
     });
-    when(MockPhotoUtils.photoToURL(file)).thenResolve(url);
+    when(MockPhotoUtils.fileToURL(file)).thenResolve(url);
     when(MockPhotoUtils.cropPhoto(url, anything())).thenResolve(croppedUrl);
     // act
     renderComponent(mockStore);
@@ -277,9 +274,9 @@ test(
       height: 100,
       width: 100
     });
-    when(MockPhotoUtils.photoToURL(file)).thenResolve(url);
+    when(MockPhotoUtils.fileToURL(file)).thenResolve(url);
     when(MockPhotoUtils.cropPhoto(url, anything())).thenResolve(croppedUrl);
-    when(MockPhotoUtils.urlToPhoto(croppedUrl)).thenResolve(file);
+    when(MockPhotoUtils.urlToFile(croppedUrl)).thenResolve(file);
     // act
     renderComponent(mockStore, {registering: true});
     // pick a photo
@@ -411,8 +408,8 @@ describe('updating profile', () => {
       // change photo
       const url = 'https://picsum.com/url/';
       const file = new File(['(⌐□_□)'], 'chucknorris.png', {type: 'image/png'});
-      when(MockPhotoUtils.urlToPhoto(anything())).thenResolve(file);
-      when(MockPhotoUtils.photoToURL(anything())).thenResolve(url);
+      when(MockPhotoUtils.urlToFile(anything())).thenResolve(file);
+      when(MockPhotoUtils.fileToURL(anything())).thenResolve(url);
       when(MockPhotoUtils.cropPhoto(anything(), anything())).thenResolve(url);
       when(MockPhotoUtils.getPhotoDimensions(anything())).thenResolve({
         height: 100,

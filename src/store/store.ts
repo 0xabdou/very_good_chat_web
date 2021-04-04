@@ -11,6 +11,7 @@ import friendsReducer from '../features/friend/friends-slice';
 import badgeReducer from '../features/badge/badge-slice';
 import notificationReducer from '../features/notification/notification-slice';
 import blockReducer from '../features/block/block-slice';
+import chatReducer from '../features/chat/chat-slice';
 
 import StoreExtraArg from "./store-extra-arg";
 
@@ -22,7 +23,8 @@ const rootReducer = combineReducers({
   friends: friendsReducer,
   badge: badgeReducer,
   notification: notificationReducer,
-  block: blockReducer
+  block: blockReducer,
+  chat: chatReducer
 });
 
 const createStore = (services: StoreExtraArg) => {

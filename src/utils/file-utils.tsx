@@ -1,22 +1,35 @@
 import {Area} from "react-easy-crop/types";
 import React, {useContext} from "react";
+import {Media, MediaType} from "../features/chat/types/media";
 
-export interface IPhotoUtils {
-  photoToURL: (photo: File) => Promise<string>;
-  urlToPhoto: (url: string) => Promise<File>;
+export interface IFileUtils {
+  fileToURL: (photo: File) => Promise<string>;
+  urlToFile: (url: string, name: string) => Promise<File>;
+  getMedia: (file: File) => Promise<Media>;
   cropPhoto: (photoURL: string, cropArea: Area) => Promise<string>;
   getPhotoDimensions: (photoURL: string) => Promise<{ height: number, width: number }>,
 }
 
-export class PhotoUtils implements IPhotoUtils {
-  async photoToURL(photo: File) {
-    return URL.createObjectURL(photo);
+export class FileUtils implements IFileUtils {
+  async fileToURL(file: File) {
+    return URL.createObjectURL(file);
   }
 
-  async urlToPhoto(url: string) {
+  async urlToFile(url: string, name: string) {
     const res = await fetch(url);
     const blob = await res.blob();
-    return new File([blob], 'profile_photo', {type: blob.type});
+    return new File([blob], name, {type: blob.type});
+  }
+
+  async getMedia(file: File): Promise<Media> {
+    const ext = file.name.split('.').pop();
+    let type: MediaType;
+    const imageExt = ['png', 'jpg', 'jpeg'];
+    if (imageExt.indexOf(ext!) != -1) type = MediaType.IMAGE;
+    else if (ext == 'mp4') type = MediaType.VIDEO;
+    else throw new Error('Unsupported media type');
+    const url = await this.fileToURL(file);
+    return {url, type};
   }
 
   async cropPhoto(photoURL: string, cropArea: Area): Promise<string> {
@@ -82,16 +95,16 @@ export class PhotoUtils implements IPhotoUtils {
 
 }
 
-export const PhotoUtilsContext = React.createContext<IPhotoUtils>(new PhotoUtils());
+export const FileUtilsContext = React.createContext<IFileUtils>(new FileUtils());
 
-export const usePhotoUtils = () => useContext(PhotoUtilsContext);
+export const useFileUtils = () => useContext(FileUtilsContext);
 
-const PhotoUtilsProvider = ({children}: { children: React.ReactNode }) => {
+const FileUtilsProvider = ({children}: { children: React.ReactNode }) => {
   return (
-    <PhotoUtilsContext.Provider value={new PhotoUtils()}>
+    <FileUtilsContext.Provider value={new FileUtils()}>
       {children}
-    </PhotoUtilsContext.Provider>
+    </FileUtilsContext.Provider>
   );
 };
 
-export default PhotoUtilsProvider;
+export default FileUtilsProvider;

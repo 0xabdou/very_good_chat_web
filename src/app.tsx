@@ -8,7 +8,7 @@ import TYPES from "./dependencies/types";
 import useDependencies from "./dependencies/use-dependencies";
 import {StylesProvider, ThemeProvider} from "@material-ui/styles";
 import {unstable_createMuiStrictModeTheme as createMuiTheme} from "@material-ui/core";
-import PhotoUtilsProvider from "./utils/photo-utils";
+import FileUtilsProvider from "./utils/file-utils";
 import RootScreen from "./features/auth/ui/root-screen";
 import {BrowserRouter} from "react-router-dom";
 
@@ -25,11 +25,11 @@ const App = () => {
       <BrowserRouter>
         <StylesProvider injectFirst>
           <ThemeProvider theme={theme}>
-            <PhotoUtilsProvider>
+            <FileUtilsProvider>
               <Provider store={sl.get<AppStore>(TYPES.AppStore)}>
                 <RootScreen/>
               </Provider>
-            </PhotoUtilsProvider>
+            </FileUtilsProvider>
           </ThemeProvider>
         </StylesProvider>
       </BrowserRouter>

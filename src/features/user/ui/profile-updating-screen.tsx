@@ -18,7 +18,7 @@ import {centeredLayout, nonSelectable, wrapper} from "../../../styles/shared";
 import {ErrorSnackbar, SuccessSnackbar} from "../../../components/snackbars";
 import {useAuthActions} from "../../auth/auth-actions-context";
 import {useMeActions} from "../me-actions-context";
-import {usePhotoUtils} from "../../../utils/photo-utils";
+import {useFileUtils} from "../../../utils/file-utils";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import {UserUpdate} from "../types/user";
 
@@ -73,7 +73,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
   const {createMe, updateMe} = useMeActions();
 
   // photo utils
-  const photoUtils = usePhotoUtils();
+  const photoUtils = useFileUtils();
 
   const stringifyError = useCallback((e: UserError | null) => {
     switch (e) {
@@ -98,7 +98,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
 
   // Called by the ProfilePhotoPicker component when the user selects a photo
   const photoPicked = useCallback(async (photo: File) => {
-    const newCropSrc = await photoUtils.photoToURL(photo);
+    const newCropSrc = await photoUtils.fileToURL(photo);
     cropPhoto(newCropSrc);
   }, []);
 
@@ -168,7 +168,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
     if (props.registering) {
       let photo: File | undefined;
       if (src) {
-        photo = await photoUtils.urlToPhoto(src);
+        photo = await photoUtils.urlToFile(src, 'profile-photo');
       }
       dispatch(createMe({
         username,
@@ -184,7 +184,7 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
       }
       if (src != props.initialPhotoURL) {
         if (src) {
-          update.photo = await photoUtils.urlToPhoto(src);
+          update.photo = await photoUtils.urlToFile(src, 'profile-photo');
         } else {
           update.deletePhoto = true;
         }

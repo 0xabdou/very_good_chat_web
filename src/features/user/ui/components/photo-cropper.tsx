@@ -3,7 +3,7 @@ import {Area, Point} from "react-easy-crop/types";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import CircleButton, {CircleButtonProps} from "./circle-button";
 import {makeStyles} from "@material-ui/core";
-import {PhotoUtilsContext} from "../../../../utils/photo-utils";
+import {FileUtilsContext} from "../../../../utils/file-utils";
 
 type PhotoCropperProps = {
   src: string,
@@ -15,7 +15,7 @@ const PhotoCropper = (props: PhotoCropperProps) => {
   const [crop, setCrop] = useState<Point>({x: 0, y: 0});
   const [zoom, setZoom] = useState(1);
   const [area, setArea] = useState<Area>();
-  const photoUtils = useContext(PhotoUtilsContext);
+  const photoUtils = useContext(FileUtilsContext);
 
   useEffect(() => {
     const setInitialCrop = async () => {
