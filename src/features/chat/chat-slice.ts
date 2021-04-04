@@ -56,7 +56,11 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
       sent: false
     };
     thunkAPI.dispatch(chatActions.messagePending(pendingMessage));
-    const result = await thunkAPI.extra.chatRepo.sendMessage(input);
+    const result = await thunkAPI.extra.chatRepo.sendMessage({
+      conversationID: input.conversationID,
+      text: input.text,
+      medias: input.medias
+    });
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
   }
@@ -121,6 +125,8 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.rejected, (state, action) => {
         const {conversationID, tempID} = action.meta.arg;
+        console.log(conversationID);
+        console.log(state.conversations);
         const conv = state.conversations!.find(c => c.id == conversationID)!;
         const messageIndex = conv.messages.findIndex(m => m.id == tempID);
         conv.messages[messageIndex].error = true;
