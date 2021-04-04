@@ -23,6 +23,8 @@ import NotificationRepository, {INotificationRepository} from "../features/notif
 import BlockAPI, {IBlockAPI} from "../features/block/data/sources/block-api";
 import BlockRepository, {IBlockRepository} from "../features/block/data/block-respository";
 import {customFetch} from "../utils/custom-fetch";
+import ChatAPI, {IChatAPI} from "../features/chat/data/sources/chat-api";
+import ChatRepository, {IChatRepository} from "../features/chat/data/chat-repository";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -153,6 +155,15 @@ const initDependencies = async () => {
     TYPES.INotificationRepository,
     new NotificationRepository(sl.get(TYPES.INotificationAPI))
   );
+  // Chat
+  sl.register<IChatAPI>(
+    TYPES.IChatAPI,
+    new ChatAPI(sl.get(TYPES.ApolloClient))
+  );
+  sl.register<IChatRepository>(
+    TYPES.IChatRepository,
+    new ChatRepository(sl.get(TYPES.IChatAPI))
+  );
   // Redux
   sl.register<StoreExtraArg>(
     TYPES.StoreExtraArgs,
@@ -164,6 +175,7 @@ const initDependencies = async () => {
       badgeRepo: sl.get(TYPES.IBadgeRepository),
       blockRepo: sl.get(TYPES.IBlockRepository),
       notificationRepo: sl.get(TYPES.INotificationRepository),
+      chatRepo: sl.get(TYPES.IChatRepository),
     },
   );
   sl.register(

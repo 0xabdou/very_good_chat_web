@@ -23,6 +23,9 @@ enum TYPES {
   // Notification
   INotificationAPI = 'INotificationAPI',
   INotificationRepository = 'INotificationRepository',
+  // Chat
+  IChatAPI = 'IChatAPI',
+  IChatRepository = 'IChatRepository',
   // Other
   StoreExtraArgs = 'StoreExtraArgs',
   AppStore = 'AppStore',

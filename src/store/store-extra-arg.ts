@@ -5,6 +5,7 @@ import {IFriendRepository} from "../features/friend/data/friend-repository";
 import {IBadgeRepository} from "../features/badge/data/badge-repository";
 import {INotificationRepository} from "../features/notification/data/notification-repository";
 import {IBlockRepository} from "../features/block/data/block-respository";
+import {IChatRepository} from "../features/chat/data/chat-repository";
 
 type StoreExtraArg = {
   authRepo: IAuthRepository,
@@ -14,6 +15,7 @@ type StoreExtraArg = {
   badgeRepo: IBadgeRepository,
   blockRepo: IBlockRepository,
   notificationRepo: INotificationRepository,
+  chatRepo: IChatRepository
 };
 
 export default StoreExtraArg;

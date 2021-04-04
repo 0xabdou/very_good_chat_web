@@ -9,6 +9,8 @@ type Message = {
   sentAt: number,
   deliveredTo: string[],
   seenBy: string[],
+  sent: boolean,
+  error?: boolean,
 }
 
 export default Message;

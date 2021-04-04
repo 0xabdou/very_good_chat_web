@@ -238,6 +238,7 @@ export const mockMessage: Message = {
   sentAt: mockGQLMessage.sentAt,
   deliveredTo: mockGQLMessage.deliveredTo,
   seenBy: mockGQLMessage.seenBy,
+  sent: true,
 };
 
 export const mockGQLConversation: GetConversations_getConversations = {
