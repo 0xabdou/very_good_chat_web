@@ -276,7 +276,7 @@ test(
     });
     when(MockPhotoUtils.fileToURL(file)).thenResolve(url);
     when(MockPhotoUtils.cropPhoto(url, anything())).thenResolve(croppedUrl);
-    when(MockPhotoUtils.urlToFile(croppedUrl)).thenResolve(file);
+    when(MockPhotoUtils.urlToFile(croppedUrl, anything())).thenResolve(file);
     // act
     renderComponent(mockStore, {registering: true});
     // pick a photo
@@ -408,7 +408,7 @@ describe('updating profile', () => {
       // change photo
       const url = 'https://picsum.com/url/';
       const file = new File(['(⌐□_□)'], 'chucknorris.png', {type: 'image/png'});
-      when(MockPhotoUtils.urlToFile(anything())).thenResolve(file);
+      when(MockPhotoUtils.urlToFile(anything(), 'profile-photo')).thenResolve(file);
       when(MockPhotoUtils.fileToURL(anything())).thenResolve(url);
       when(MockPhotoUtils.cropPhoto(anything(), anything())).thenResolve(url);
       when(MockPhotoUtils.getPhotoDimensions(anything())).thenResolve({

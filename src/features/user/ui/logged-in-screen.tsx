@@ -20,6 +20,7 @@ import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
 import SettingsScreen from "../../settings/ui/settings-screen";
 import {startPolling} from "../../../utils/polling";
 import useChatActions from "../../chat/chat-actions-provider";
+import ConversationScreen from "../../chat/ui/conversation-screen";
 
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.me);
@@ -96,6 +97,9 @@ const LoggedInScreen = () => {
           <Redirect exact from={`/u/${me.username}`} to='/profile'/>
           <Route path='/u/:username'>
             <FriendProfileScreen/>
+          </Route>
+          <Route path='/c/:id'>
+            <ConversationScreen/>
           </Route>
           <Route path='/'>
             <MainScreen/>

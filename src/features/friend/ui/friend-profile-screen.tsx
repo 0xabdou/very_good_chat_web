@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 
 import {useParams} from "react-router-dom";
-import {makeStyles} from "@material-ui/core";
+import {createStyles, makeStyles} from "@material-ui/core";
 import User from "../../user/types/user";
 import CommonProfileInfo from "../../user/ui/components/common-profile-info";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
@@ -11,6 +11,9 @@ import FriendshipButton from "./components/friendship-button";
 import {ErrorSnackbar} from "../../../components/snackbars";
 import FriendError, {stringifyFriendError} from "../types/friend-error";
 import MoreButton from "./components/more-button";
+import {FriendshipStatus} from "../types/friendship";
+import ChatButton from "./components/chat-button";
+import {Theme} from "@material-ui/core/styles/createMuiTheme";
 
 const FriendProfileScreen = () => {
   const state = useAppSelector(state => state.friendProfile, shallowEqual);
@@ -37,7 +40,11 @@ const FriendProfileScreen = () => {
       <MoreButton/>
       <div className={classes.wrapper}>
         {!!user && <CommonProfileInfo user={user}/>}
-        <FriendshipButton/>
+        <div className={classes.buttonGroup}>
+          <FriendshipButton/>
+          {state.friendship?.status == FriendshipStatus.FRIENDS && user &&
+          <ChatButton user={user}/>}
+        </div>
       </div>
       <ErrorSnackbar<FriendError>
         currentError={state.error}
@@ -59,7 +66,37 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     alignItems: 'center',
     margin: 'auto',
+    width: '100%',
   },
+  buttonGroup: {
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'center'
+
+  }
 });
+
+export const useFriendProfileButtonStyles = makeStyles<Theme, { block: boolean }>(createStyles({
+  wrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '5rem',
+    minWidth: '105px',
+  },
+  marginLeft: {
+    marginLeft: '1rem'
+  },
+  button: props => ({
+    '&&': {
+      color: props.block ? 'red' : 'black',
+      fontSize: '1.8rem'
+    }
+  }),
+  label: props => ({
+    color: props.block ? 'red' : 'black',
+  }),
+}));
 
 export default FriendProfileScreen;

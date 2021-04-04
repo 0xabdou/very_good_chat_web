@@ -25,14 +25,21 @@ import {instance, mock, resetCalls, verify, when} from "ts-mockito";
 import {FriendsActionsContext} from "../../../../src/features/friend/friends-actions-context";
 import {NotificationActionsContext} from '../../../../src/features/notification/notification-actions-context';
 import {BadgeActionsContext} from '../../../../src/features/badge/badge-actions-context';
+import {
+  chatActions,
+  initialChatState
+} from "../../../../src/features/chat/chat-slice";
+import { ChatActionsContext } from '../../../../src/features/chat/chat-actions-provider';
 
 const MockMeActions = mock<typeof meActions>();
 const MockFriendActions = mock<typeof friendsActions>();
 const MockNotificationActions = mock<typeof notificationActions>();
 const MockBadgeActions = mock<typeof badgeActions>();
+const MockChatActions = mock<typeof chatActions>();
 
 const MockStore = getMockStore();
 const meAction = {type: 'me'} as any;
+const getConversationsAction = {type: 'convos'} as any;
 const getFriendsAction = {type: 'friends'} as any;
 const getFriendsReqsAction = {type: 'friend reqs'} as any;
 const getNotificationsAction = {type: 'notification'} as any;
@@ -50,7 +57,8 @@ const initialState = {
   auth: loggedInAuthState,
   search: initialSearchState,
   badge: initialBadgeState,
-  notification: initialNotificationState
+  notification: initialNotificationState,
+  chat: initialChatState
 } as AppState;
 
 const renderComponent = (mockStore: AppStore, path: string = '/') => {
@@ -60,11 +68,13 @@ const renderComponent = (mockStore: AppStore, path: string = '/') => {
         <FriendsActionsContext.Provider value={instance(MockFriendActions)}>
           <NotificationActionsContext.Provider
             value={instance(MockNotificationActions)}>
+            <ChatActionsContext.Provider value={instance(MockChatActions)}>
             <BadgeActionsContext.Provider value={instance(MockBadgeActions)}>
               <MemoryRouter initialEntries={[path]} initialIndex={0}>
                 <LoggedInScreen/>
               </MemoryRouter>
             </BadgeActionsContext.Provider>
+            </ChatActionsContext.Provider>
           </NotificationActionsContext.Provider>
         </FriendsActionsContext.Provider>
       </MeActionsContext.Provider>
@@ -79,6 +89,7 @@ beforeAll(() => {
   when(MockNotificationActions.getNotifications()).thenReturn(getNotificationsAction);
   when(MockBadgeActions.getBadges()).thenReturn(getBadgesAction);
   when(MockMeActions.updateLastSeen()).thenReturn(updateLSAction);
+  when(MockChatActions.getConversations()).thenReturn(getConversationsAction);
 });
 
 beforeEach(() => {
@@ -93,18 +104,20 @@ test('Should dispatch all required actions on render', async () => {
   // assert
   const actions = mockStore.getActions();
   verify(MockMeActions.getMe()).once();
+  verify(MockChatActions.getConversations()).once();
   verify(MockBadgeActions.getBadges()).once();
   expect(actions[0]).toBe(meAction);
-  expect(actions[1]).toBe(getBadgesAction);
+  expect(actions[1]).toBe(getConversationsAction);
+  expect(actions[2]).toBe(getBadgesAction);
   // polling
   await waitFor(() => verify(MockFriendActions.getFriendRequests()).once());
   verify(MockFriendActions.getFriends()).once();
   verify(MockNotificationActions.getNotifications()).once();
-  expect(actions[2]).toBe(getFriendsReqsAction);
-  expect(actions[3]).toBe(getFriendsAction);
-  expect(actions[4]).toBe(getNotificationsAction);
-  expect(actions[5]).toBe(updateLSAction);
-  expect(actions).toHaveLength(6);
+  expect(actions[3]).toBe(getFriendsReqsAction);
+  expect(actions[4]).toBe(getFriendsAction);
+  expect(actions[5]).toBe(getNotificationsAction);
+  expect(actions[6]).toBe(updateLSAction);
+  expect(actions).toHaveLength(7);
 });
 
 test('Should display a loader if the state is being initialized', () => {

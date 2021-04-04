@@ -1,6 +1,12 @@
 import React, {useCallback, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
-import {Icon, IconButton, makeStyles, MenuItem} from "@material-ui/core";
+import {
+  createStyles,
+  Icon,
+  IconButton,
+  makeStyles,
+  MenuItem
+} from "@material-ui/core";
 import {Friendship, FriendshipStatus} from "../../types/friendship";
 import {PulseLoader} from "react-spinners";
 import {useFriendProfileActions} from "../../friend-profile-actions-context";
@@ -8,6 +14,7 @@ import FriendError from "../../types/friend-error";
 import AlertDialog from "../../../../components/alert-dialog";
 import GenericMenu from "../../../../components/generic-menu";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import {useFriendProfileButtonStyles} from "../friend-profile-screen";
 
 const FriendshipButton = () => {
   const state = useAppSelector(state => state.friendProfile);
@@ -18,10 +25,10 @@ const FriendshipButton = () => {
   const [anchorEl3, setAnchorEl3] = useState<HTMLElement | null>(null);
   const [alerting, setAlerting] = useState(false);
 
-  const classes = useStyles({
-    block: (state.friendship?.status == FriendshipStatus.BLOCKING
-      || state.friendship?.status == FriendshipStatus.BLOCKED)
-  });
+  const block = (state.friendship?.status == FriendshipStatus.BLOCKING
+    || state.friendship?.status == FriendshipStatus.BLOCKED);
+  const classes = useStyles({block});
+  const buttonClasses = useFriendProfileButtonStyles({block});
 
   const onClose = useCallback(() => {
     setAnchorEl1(null);
@@ -127,7 +134,7 @@ const FriendshipButton = () => {
     child = (
       <>
         <IconButton
-          className={classes.button}
+          className={buttonClasses.button}
           aria-controls="customized-menu"
           aria-haspopup="true"
           onClick={onTap}
@@ -136,12 +143,12 @@ const FriendshipButton = () => {
         >
           <i className={icon}/>
         </IconButton>
-        <span className={classes.blockText}>{label}</span>
+        <span className={buttonClasses.label}>{label}</span>
       </>
     );
   }
   return (
-    <div className={classes.wrapper} data-testid='friendship-button'>
+    <div className={buttonClasses.wrapper} data-testid='friendship-button'>
       {child}
       <GenericMenu
         anchorEl={anchorEl1}
@@ -188,23 +195,7 @@ const FriendshipButton = () => {
   );
 };
 
-const useStyles = makeStyles<Theme, { block: boolean }>({
-  wrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '5rem',
-  },
-  button: props => ({
-    '&&': {
-      color: props.block ? 'red' : 'black',
-      fontSize: '1.8rem'
-    }
-  }),
-  blockText: props => ({
-    color: props.block ? 'red' : 'black',
-  }),
+const useStyles = makeStyles<Theme, { block: boolean }>(createStyles({
   clearIcon: {
     color: 'red',
     marginRight: '1rem'
@@ -213,6 +204,6 @@ const useStyles = makeStyles<Theme, { block: boolean }>({
     color: 'green',
     marginRight: '1rem'
   }
-});
+}));
 
 export default FriendshipButton;
