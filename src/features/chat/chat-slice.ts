@@ -86,6 +86,9 @@ const chatSlice = createSlice({
   extraReducers: builder => {
     // getConversations
     builder
+      .addCase(getConversations.pending, state => {
+        state.error = null;
+      })
       .addCase(getConversations.fulfilled, (state, action) => {
         state.conversations = action.payload;
       })

@@ -7,8 +7,8 @@ import {AppState} from "../../../store/store";
 import {wrapper} from "../../../styles/shared";
 import SearchTextField from "../../search/ui/components/search-text-field";
 import SearchScreen from "../../search/ui/search-screen";
-import SearchActionsProvider from "../../search/search-actions-context";
 import Badges from "../../badge/ui/components/badges";
+import ChatScreen from "../../chat/ui/chat-screen";
 
 const MainScreen = () => {
   const [searching, setSearching] = useState(false);
@@ -52,19 +52,11 @@ const MainScreen = () => {
         onBack={endSearch}
       />
       {searching && <SearchScreen/>}
-      {!searching && <ChatsScreen/>}
+      {!searching && <ChatScreen/>}
     </div>
   );
 };
 
-const ChatsScreen = () => {
-  const classes = useStyles();
-  return (
-    <SearchActionsProvider>
-      <div className={classes.full}>Chatting</div>
-    </SearchActionsProvider>
-  );
-};
 
 const useStyles = makeStyles({
   wrapper: {

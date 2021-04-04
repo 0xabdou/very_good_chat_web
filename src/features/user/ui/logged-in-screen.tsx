@@ -19,6 +19,7 @@ import FriendsScreen from "../../friend/ui/friends-screen";
 import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
 import SettingsScreen from "../../settings/ui/settings-screen";
 import {startPolling} from "../../../utils/polling";
+import useChatActions from "../../chat/chat-actions-provider";
 
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.me);
@@ -28,9 +29,11 @@ const LoggedInScreen = () => {
   const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();
+  const {getConversations} = useChatActions();
 
   useEffect(() => {
     dispatch(getMe());
+    dispatch(getConversations());
     dispatch(getBadges());
     startPolling(() => {
       dispatch(getFriendRequests());

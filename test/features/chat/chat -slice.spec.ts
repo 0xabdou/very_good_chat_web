@@ -106,6 +106,19 @@ describe('getConversations', () => {
   });
 
   describe('reducers', () => {
+    it('should return the right state if pending', () => {
+      // arrange
+      const inputState: ChatState = {...initialChatState, error: chatError};
+      const outputState: ChatState = {...inputState, error: null};
+      const action: PayloadAction<undefined> = {
+        type: getConversations.pending.type, payload: undefined
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
     it('should return the right state if fulfilled', () => {
       // arrange
       const inputState: ChatState = {...initialChatState};
