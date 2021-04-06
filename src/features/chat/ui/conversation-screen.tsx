@@ -21,9 +21,7 @@ const ConversationScreen = () => {
 
   if (!conversation) return <FullscreenLoader/>;
 
-  const otherUser = me != null
-    ? conversation.participants.find(u => u.id != me!.id)
-    : undefined;
+  const otherUser = conversation.participants[0];
   return (
     <div className={classes.outer} data-testid='conversation-screen'>
       <TopBar>
@@ -36,7 +34,7 @@ const ConversationScreen = () => {
           {otherUser?.name ?? otherUser?.username}
         </Typography>
       </TopBar>
-      <MessagesList messages={conversation.messages}/>
+      <MessagesList messages={conversation.messages} currentUserID={me?.id}/>
       <ChatTextField conversationID={conversation.id}/>
     </div>
   );

@@ -53,7 +53,7 @@ class ServiceLocator {
 
 const sl = new ServiceLocator();
 const initDependencies = async () => {
-  const SERVER_URL = `${viteEnv.VITE_BACKEND_URL}`;
+  const SERVER_URL = `${processEnv.VITE_BACKEND_URL}`;
   // Auth
   sl.register<GoogleAuth>(TYPES.GoogleAuth, new GoogleAuth());
   const authMiddleware = new ApolloLink((operation, forward) => {

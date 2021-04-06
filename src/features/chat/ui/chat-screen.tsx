@@ -9,16 +9,22 @@ import RetryButton from "../../../components/retry-button";
 import useChatActions from "../chat-actions-provider";
 import {stringifyChatError} from "../types/chat-error";
 import {PulseLoader} from "react-spinners";
+import {useHistory} from "react-router-dom";
 
 const ChatScreen = () => {
   const chatState = useAppSelector(state => state.chat);
   const dispatch = useAppDispatch();
   const actions = useChatActions();
+  const history = useHistory();
   const classes = useStyles();
 
   const retry = useCallback(() => {
     dispatch(actions.getConversations());
   }, []);
+
+  const onItemClick = useCallback((conversation: Conversation) => {
+    history.push(`/c/${conversation.id}`);
+  }, [history]);
 
   const itemKey = useCallback((index: number, data: Conversation[]) => {
     return data[index].id;
@@ -28,36 +34,42 @@ const ChatScreen = () => {
   if (chatState.conversations) {
     const convs = chatState.conversations.filter(c => c.messages.length > 0);
     if (convs.length) {
-      child = <AutoSizer>
-        {({height, width}) => {
-          return <FixedSizeList
-            itemCount={convs.length}
-            itemData={convs}
-            itemKey={itemKey}
-            height={height}
-            width={width}
-            itemSize={72}
-          >
-            {({index, style, data}) => {
-              return (
-                <ConversationListItem
-                  style={style}
-                  conversation={data[index]}
-                />
-              );
-            }}
-          </FixedSizeList>;
-        }}
-      </AutoSizer>;
+      child = (
+        <AutoSizer>
+          {({height, width}) => {
+            return (
+              <FixedSizeList
+                itemCount={convs.length}
+                itemData={convs}
+                itemKey={itemKey}
+                height={height}
+                width={width}
+                itemSize={72}>
+                {({index, style, data}) => {
+                  return (
+                    <ConversationListItem
+                      style={style}
+                      conversation={data[index]}
+                      onClick={onItemClick}
+                    />
+                  );
+                }}
+              </FixedSizeList>
+            );
+          }}
+        </AutoSizer>
+      );
     } else {
-      child =
-        <span className={classes.centered}>You have no conversations</span>;
+      child = (
+        <span className={classes.centered}>You have no conversations</span>
+      );
     }
   } else if (chatState.error != null) {
     child = (
       <div className={classes.centered}>
-        <RetryButton onClick={retry}
-                     message={stringifyChatError(chatState.error)}/>
+        <RetryButton
+          onClick={retry}
+          message={stringifyChatError(chatState.error)}/>
       </div>
     );
   } else {

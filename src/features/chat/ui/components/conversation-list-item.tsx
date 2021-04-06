@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback} from "react";
 import Conversation from "../../types/conversation";
 import {
   Avatar,
@@ -9,10 +9,15 @@ import {
 
 export type ConversationListItemProps = {
   conversation: Conversation
+  onClick: (conversation: Conversation) => void,
   style?: React.CSSProperties
 };
 
 const ConversationListItem = (props: ConversationListItemProps) => {
+  const onClick = useCallback(() => {
+    props.onClick(props.conversation);
+  }, [props.conversation, props.onClick]);
+
   const user = props.conversation.participants[0];
   const message = props.conversation.messages.length > 0
     ? props.conversation.messages[0]
@@ -20,7 +25,7 @@ const ConversationListItem = (props: ConversationListItemProps) => {
   const secondary = message ? message.text ?? `Media` : '';
   return (
     <div style={props.style} data-testid='conversation-list-item'>
-      <ListItem>
+      <ListItem button onClick={onClick}>
         <ListItemAvatar>
           <Avatar
             src={user.photo?.small}
