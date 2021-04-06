@@ -1,43 +1,88 @@
-import React, {useEffect, useRef} from "react";
-import Message from "../../types/message";
-import {makeStyles} from "@material-ui/core";
+import React, {useRef} from "react";
+import {Avatar, Icon, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import Conversation from "../../types/conversation";
+import Message from "../../types/message";
 
 export type MessageListItemProps = {
-  message: Message,
-  incoming: boolean,
+  conversation: Conversation,
   index: number,
-  setHeight: (index: number, height: number) => void,
-  style?: React.CSSProperties
+  currentUserID?: string,
 };
 
-const MessageListItem = (props: MessageListItemProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const classes = useStyles({incoming: props.incoming});
+const _sameSender = (message1: Message, message2: Message) => {
+  return message1.senderID == message2.senderID;
+};
 
-  useEffect(() => {
-    const height = ref.current?.clientHeight ?? 72;
-    console.log('CURRENT height: ', ref?.current?.clientHeight);
-    props.setHeight(props.index, height);
-  }, [ref.current, props.setHeight, props.index]);
+const MessageListItem = React.memo((props: MessageListItemProps) => {
+  const messages = props.conversation.messages;
+  const index = props.index;
+  const message = messages[index];
+  const incoming = props.currentUserID != message.senderID;
+  const otherUser = props.conversation.participants[0];
+  const ref = useRef<HTMLDivElement>(null);
+  let bubbleType: BubbleType;
+  const before = messages[index - 1];
+  const after = messages[index + 1];
+  if (!before && !after) bubbleType = BubbleType.ISOLATED;
+  else if (before && after) {
+    if (_sameSender(message, before)) {
+      if (_sameSender(message, after)) bubbleType = BubbleType.MIDDLE;
+      else bubbleType = BubbleType.LAST;
+    } else {
+      if (_sameSender(message, after)) bubbleType = BubbleType.FIRST;
+      else bubbleType = BubbleType.ISOLATED;
+    }
+  } else if (after) {
+    if (_sameSender(message, after)) bubbleType = BubbleType.FIRST;
+    else bubbleType = BubbleType.ISOLATED;
+  } else {
+    if (_sameSender(message, before)) bubbleType = BubbleType.LAST;
+    else bubbleType = BubbleType.ISOLATED;
+  }
+
+  const classes = useStyles({incoming, bubbleType});
 
   return (
-    <div
-      style={props.style}
-      data-testid='message-list-item'
-    >
+    <div data-testid='message-list-item'>
       <div className={classes.wrapper} ref={ref}>
+        {incoming &&
+        <Avatar className={classes.sender} src={otherUser.photo?.small}/>}
         <div className={classes.bubble}>
-          {props.message.text}
+          {message.text}
+        </div>
+        <div className={classes.status}>
+          <Icon className={classes.statusIcon}>check</Icon>
         </div>
       </div>
     </div>
   );
-};
+});
+
+enum BubbleType {
+  ISOLATED = 'ISOLATED',
+  FIRST = 'FIRST',
+  MIDDLE = 'MIDDLE',
+  LAST = 'LAST'
+}
 
 type MessageListStyleProps = {
   incoming: boolean,
+  bubbleType: BubbleType
 }
+
+const _getBorderRadius = (type: BubbleType): [string, string] => {
+  switch (type) {
+    case BubbleType.FIRST:
+      return ['18px', '4px'];
+    case BubbleType.LAST:
+      return ['4px', '18px'];
+    case BubbleType.MIDDLE:
+      return ['4px', '4px'];
+    case BubbleType.ISOLATED:
+      return ['18px', '18px'];
+  }
+};
 
 const useStyles = makeStyles<Theme, MessageListStyleProps>({
   wrapper: props => ({
@@ -46,20 +91,53 @@ const useStyles = makeStyles<Theme, MessageListStyleProps>({
   }),
   bubble: props => {
     let background, color: string;
+    let tl, tr, bl, br: string;
     if (props.incoming) {
       background = 'grey';
       color = 'black';
+      tr = br = '18px';
+      [tl, bl] = _getBorderRadius(props.bubbleType);
     } else {
       background = 'black';
       color = 'white';
+      tl = bl = '18px';
+      [tr, br] = _getBorderRadius(props.bubbleType);
     }
     return {
-      padding: '12px 8px',
-      borderRadius: '18px',
+      margin: '1px',
+      padding: '8px 12px',
+      maxWidth: '70%',
+      overflowWrap: 'break-word',
+      borderRadius: `${tl} ${tr} ${br} ${bl}`,
       background,
       color
     };
   },
+  status: {
+    marginLeft: props => props.incoming ? 'auto' : '4px',
+    marginRight: '4px',
+    marginTop: 'auto',
+    width: '14px',
+    height: '14px',
+    borderRadius: '50%',
+    background: 'grey',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusIcon: {
+    '&&': {
+      fontSize: '10px',
+      color: 'white',
+    }
+  },
+  sender: {
+    marginTop: 'auto',
+    marginLeft: '8px',
+    marginRight: '8px',
+    width: '28px',
+    height: '28px',
+  }
 });
 
 export default MessageListItem;

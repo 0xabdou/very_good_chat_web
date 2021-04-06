@@ -359,9 +359,9 @@ describe('sendMessage', () => {
           {
             ...convs[1],
             messages: [
-              pendingMessage,
               convs[1].messages[0],
               convs[1].messages[2],
+              pendingMessage,
             ]
           },
           convs[0],

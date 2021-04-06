@@ -28,6 +28,7 @@
     "react-router-dom": "^5.2.0",
     "react-spinners": "^0.10.4",
     "react-virtualized-auto-sizer": "^1.0.5",
+    "react-virtuoso": "^1.6.0",
     "react-window": "^1.8.6",
     "sass": "^1.32.5",
     "universal-cookie": "^4.0.4"

@@ -1,62 +1,42 @@
-import React, {useCallback, useRef} from "react";
+import React, {useCallback} from "react";
 import {makeStyles} from "@material-ui/core";
 import Message from "../../types/message";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {VariableSizeList} from "react-window";
 import MessageListItem from "./message-list-item";
+import Conversation from "../../types/conversation";
+import {ItemContent, Virtuoso} from "react-virtuoso";
+import AutoSizer from "react-virtualized-auto-sizer";
 
 export type MessagesListProps = {
-  messages: Message[],
+  conversation: Conversation,
   currentUserID?: string,
 }
 
-type Heights = { [index: number]: number }
-
 const MessagesList = (props: MessagesListProps) => {
   const classes = useStyles();
-  const heights = useRef<Heights>({});
-  const listRef = useRef<VariableSizeList>(null);
 
-  const setHeight = useCallback((index: number, height: number) => {
-    heights.current[index] = height;
-    listRef?.current?.resetAfterIndex(0);
-  }, [listRef, heights]);
+  const itemContent: ItemContent<Message> = useCallback((index) => {
+    return (
+      <MessageListItem
+        conversation={props.conversation}
+        index={index}
+        currentUserID={props.currentUserID}
+      />
+    );
+  }, [props.conversation, props.currentUserID]);
 
-  const itemKey = useCallback((index: number, data: Message[]) => {
-    return data[index].id;
-  }, []);
-
-  const itemSize = useCallback((index: number): number => {
-    return heights.current[index] ?? 72;
-  }, [heights]);
-
-  const messages = [...props.messages].reverse();
   return (
     <div className={classes.outer}>
       <AutoSizer>
-        {({height, width}) => {
-          return <VariableSizeList
-            itemCount={messages.length}
-            itemData={messages}
-            itemKey={itemKey}
-            itemSize={itemSize}
-            overscanCount={3}
-            height={height}
-            width={width}
-            ref={listRef}
-          >
-            {({index, style, data}) => {
-              return (
-                <MessageListItem
-                  style={style}
-                  message={data[index]}
-                  incoming={data[index].senderID != props.currentUserID}
-                  index={index}
-                  setHeight={setHeight}
-                />
-              );
-            }}
-          </VariableSizeList>;
+        {({width, height}) => {
+          return (
+            <Virtuoso
+              style={{height, width, overflowX: 'hidden'}}
+              data={props.conversation.messages}
+              itemContent={itemContent}
+              followOutput="smooth"
+              initialTopMostItemIndex={props.conversation.messages.length - 1}
+            />
+          );
         }}
       </AutoSizer>
     </div>

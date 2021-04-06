@@ -83,7 +83,7 @@ const chatSlice = createSlice({
       const pendingMessage = action.payload;
       const index = state.conversations!.findIndex(c => c.id == pendingMessage.conversationID);
       const conv = state.conversations!.splice(index, 1)[0];
-      conv.messages.unshift(pendingMessage);
+      conv.messages.push(pendingMessage);
       state.conversations?.unshift(conv);
     }
   },
