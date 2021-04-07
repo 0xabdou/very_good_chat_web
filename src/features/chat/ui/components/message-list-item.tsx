@@ -1,8 +1,9 @@
 import React, {useRef} from "react";
-import {Avatar, Icon, makeStyles} from "@material-ui/core";
+import {Avatar, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import Message from "../../types/message";
 import Conversation from "../../types/conversation";
+import DeliveryStatus, {DeliveryStatusType} from "./delivery-status";
 
 export type MessageListItemProps = {
   conversation: Conversation,
@@ -40,21 +41,56 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     if (_sameSender(message, before)) bubbleType = BubbleType.LAST;
     else bubbleType = BubbleType.ISOLATED;
   }
-  let deliveryStatus: DeliveryStatus;
-  deliveryStatus = DeliveryStatus.NONE;
+  let deliveryStatusType: DeliveryStatusType;
+  let date: number;
+  if (incoming) {
+    if (!after) deliveryStatusType = DeliveryStatusType.SEEN;
+    else deliveryStatusType = DeliveryStatusType.NONE;
+    date = message.sentAt;
+  } else if (!message.sent) {
+    deliveryStatusType = DeliveryStatusType.SENDING;
+    date = message.sentAt;
+  } else if (message.seenBy[0]) {
+    const lastSeen = props.conversation.seenDates[message.seenBy[0].userID] ?? 0;
+    if (message.sentAt == lastSeen) deliveryStatusType = DeliveryStatusType.SEEN;
+    else deliveryStatusType = DeliveryStatusType.NONE;
+    date = message.seenBy[0].date;
+  } else if (message.deliveredTo[0]) {
+    deliveryStatusType = DeliveryStatusType.DELIVERED;
+    date = message.deliveredTo[0].date;
+  } else {
+    deliveryStatusType = DeliveryStatusType.SENT;
+    date = message.sentAt;
+  }
+  const showIncomingAvatar = incoming
+    && (!after || (after && !_sameSender(message, after)));
+  const showDeliveryStatus = !incoming || (incoming && !after);
 
-  const classes = useStyles({incoming, bubbleType, deliveryStatus});
+  const classes = useStyles({
+    incoming,
+    bubbleType,
+    deliveryStatus: deliveryStatusType
+  });
 
   return (
     <div data-testid='message-list-item'>
       <div className={classes.wrapper} ref={ref}>
-        {incoming &&
-        <Avatar className={classes.sender} src={otherUser.photo?.small}/>}
+        <div className={classes.incomingAvatarWrapper}>
+          {showIncomingAvatar &&
+          <Avatar className={classes.incomingAvatar}
+                  src={otherUser.photo?.small}/>}
+        </div>
         <div className={classes.bubble}>
           {message.text}
         </div>
         <div className={classes.status}>
-          <Icon className={classes.statusIcon}>check</Icon>
+          {showDeliveryStatus &&
+          <DeliveryStatus
+            type={deliveryStatusType}
+            date={date}
+            photoURL={otherUser.photo?.small}
+          />
+          }
         </div>
       </div>
     </div>
@@ -68,18 +104,10 @@ enum BubbleType {
   LAST = 'LAST'
 }
 
-enum DeliveryStatus {
-  SENDING = 'SENDING',
-  SENT = 'SENT',
-  DELIVERED = 'DELIVERED',
-  SEEN = 'SEEN',
-  NONE = 'NONE'
-}
-
-type MessageListStyleProps = {
+type messageListItemProps = {
   incoming: boolean,
   bubbleType: BubbleType,
-  deliveryStatus: DeliveryStatus,
+  deliveryStatus: DeliveryStatusType,
 }
 
 const _getBorderRadius = (type: BubbleType): [string, string] => {
@@ -95,7 +123,7 @@ const _getBorderRadius = (type: BubbleType): [string, string] => {
   }
 };
 
-const useStyles = makeStyles<Theme, MessageListStyleProps>({
+const useStyles = makeStyles<Theme, messageListItemProps>({
   wrapper: props => ({
     display: 'flex',
     justifyContent: props.incoming ? 'flex-start' : 'flex-end',
@@ -130,22 +158,15 @@ const useStyles = makeStyles<Theme, MessageListStyleProps>({
     marginTop: 'auto',
     width: '14px',
     height: '14px',
-    borderRadius: '50%',
-    background: 'grey',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  statusIcon: {
-    '&&': {
-      fontSize: '10px',
-      color: 'white',
-    }
-  },
-  sender: {
+  incomingAvatarWrapper: {
+    width: '28px',
+    height: '28px',
     marginTop: 'auto',
     marginLeft: '8px',
     marginRight: '8px',
+  },
+  incomingAvatar: {
     width: '28px',
     height: '28px',
   }
