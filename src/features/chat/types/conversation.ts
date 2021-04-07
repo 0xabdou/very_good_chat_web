@@ -6,11 +6,16 @@ type Conversation = {
   participants: User[],
   messages: Message[]
   type: ConversationType
+  seenDates: UsersLastSeen,
 };
 
 enum ConversationType {
   ONE_TO_ONE = 'ONE_TO_ONE',
   GROUP = 'GROUP'
+}
+
+export type UsersLastSeen = {
+  [userID: string]: number
 }
 
 export default Conversation;

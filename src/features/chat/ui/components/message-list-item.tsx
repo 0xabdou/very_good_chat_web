@@ -1,13 +1,13 @@
 import React, {useRef} from "react";
 import {Avatar, Icon, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import Conversation from "../../types/conversation";
 import Message from "../../types/message";
+import Conversation from "../../types/conversation";
 
 export type MessageListItemProps = {
   conversation: Conversation,
   index: number,
-  currentUserID?: string,
+  currentUserID: string,
 };
 
 const _sameSender = (message1: Message, message2: Message) => {
@@ -40,8 +40,10 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     if (_sameSender(message, before)) bubbleType = BubbleType.LAST;
     else bubbleType = BubbleType.ISOLATED;
   }
+  let deliveryStatus: DeliveryStatus;
+  deliveryStatus = DeliveryStatus.NONE;
 
-  const classes = useStyles({incoming, bubbleType});
+  const classes = useStyles({incoming, bubbleType, deliveryStatus});
 
   return (
     <div data-testid='message-list-item'>
@@ -66,9 +68,18 @@ enum BubbleType {
   LAST = 'LAST'
 }
 
+enum DeliveryStatus {
+  SENDING = 'SENDING',
+  SENT = 'SENT',
+  DELIVERED = 'DELIVERED',
+  SEEN = 'SEEN',
+  NONE = 'NONE'
+}
+
 type MessageListStyleProps = {
   incoming: boolean,
-  bubbleType: BubbleType
+  bubbleType: BubbleType,
+  deliveryStatus: DeliveryStatus,
 }
 
 const _getBorderRadius = (type: BubbleType): [string, string] => {

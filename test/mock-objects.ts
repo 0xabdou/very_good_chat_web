@@ -44,9 +44,13 @@ import {
 } from "../src/_generated/SendMessage";
 import {Media, MediaType} from "../src/features/chat/types/media";
 import Message from "../src/features/chat/types/message";
-import {GetConversations_getConversations} from "../src/_generated/GetConversations";
+import {
+  GetConversations_getConversations as GQLConversation,
+  GetConversations_getConversations_messages as GQLMessage
+} from "../src/_generated/GetConversations";
 import Conversation from "../src/features/chat/types/conversation";
-import {SendMessageInput} from "../src/features/chat/data/sources/chat-api";
+import ChatAPI, {SendMessageInput} from "../src/features/chat/data/sources/chat-api";
+import {GetFriends_getFriends_user as GQLUser} from "../src/_generated/GetFriends";
 
 export const MockFile = mock<File>();
 
@@ -225,8 +229,16 @@ export const mockGQLMessage: SendMessage_sendMessage = {
   text: 'Hello world',
   medias: [mockGQLMedia],
   sentAt: new Date().getTime(),
-  deliveredTo: ['efgh'],
-  seenBy: ['abcd'],
+  deliveredTo: [{
+    __typename: "Delivery",
+    userID: 'abcd',
+    date: new Date().getTime()
+  }],
+  seenBy: [{
+    __typename: "Delivery",
+    userID: 'efgh',
+    date: new Date().getTime()
+  }],
 };
 
 export const mockMessage: Message = {
@@ -236,25 +248,58 @@ export const mockMessage: Message = {
   text: mockGQLMessage.text ?? undefined,
   medias: [mockMedia],
   sentAt: mockGQLMessage.sentAt,
-  deliveredTo: mockGQLMessage.deliveredTo,
-  seenBy: mockGQLMessage.seenBy,
+  deliveredTo: mockGQLMessage.deliveredTo.map(d => ({
+    userID: d.userID,
+    date: d.date
+  })),
+  seenBy: mockGQLMessage.seenBy.map(d => ({userID: d.userID, date: d.date})),
   sent: true,
 };
 
-export const mockGQLConversation: GetConversations_getConversations = {
-  __typename: 'Conversation',
-  id: conversationID,
-  participants: [mockGQLUser],
-  messages: [mockGQLMessage],
-  type: GQLConversationType.ONE_TO_ONE,
+const getConvs = (): [GQLConversation, Conversation] => {
+  const user1: GQLUser = {...mockGQLUser, id: 'zblbola'};
+  const message1: GQLMessage = {
+    ...mockGQLMessage,
+    id: 0,
+    sentAt: new Date().getTime(),
+    seenBy: [{
+      __typename: 'Delivery',
+      userID: user1.id,
+      date: new Date().getTime()
+    }]
+  };
+  const user2: GQLUser = {...mockGQLUser, id: 'a3sobix'};
+  const message2: GQLMessage = {
+    ...mockGQLMessage,
+    id: 2,
+    sentAt: new Date().getTime() + 10000,
+    seenBy: [{
+      __typename: 'Delivery',
+      userID: user2.id,
+      date: new Date().getTime() + 10000
+    }]
+  };
+  const GQLConv = {
+    __typename: 'Conversation' as 'Conversation',
+    id: 546576879,
+    type: GQLConversationType.ONE_TO_ONE,
+    participants: [user1, user2],
+    messages: [message1, message2]
+  };
+  const conv = {
+    id: GQLConv.id,
+    type: ConversationType[GQLConv.type],
+    participants: GQLConv.participants.map(UserAPI.parseUser),
+    messages: GQLConv.messages.map(ChatAPI.parseMessage),
+    seenDates: {
+      [`${user1.id}`]: message1.sentAt,
+      [`${user2.id}`]: message2.sentAt,
+    }
+  };
+  return [GQLConv, conv];
 };
 
-export const mockConversation: Conversation = {
-  id: mockGQLConversation.id,
-  participants: [mockUser],
-  messages: [mockMessage],
-  type: ConversationType[mockGQLConversation.type]
-};
+export const [mockGQLConversation, mockConversation] = getConvs();
 
 export const mockSendMessageInput: SendMessageInput = {
   conversationID: 911,

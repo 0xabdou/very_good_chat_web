@@ -22,8 +22,14 @@ export const GET_CONVERSATIONS = gql`
                     type
                 }
                 sentAt
-                deliveredTo
-                seenBy
+                deliveredTo {
+                    userID
+                    date
+                }
+                seenBy {
+                    userID
+                    date
+                }
             }
             type
         }
@@ -52,8 +58,14 @@ export const GET_OR_CREATE_OTO_CONVERSATION = gql`
                     type
                 }
                 sentAt
-                deliveredTo
-                seenBy
+                deliveredTo {
+                    userID
+                    date
+                }
+                seenBy {
+                    userID
+                    date
+                }
             }
             type
         }
@@ -72,8 +84,14 @@ export const SEND_MESSAGE = gql`
                 type
             }
             sentAt
-            deliveredTo
-            seenBy
+            deliveredTo {
+                userID
+                date
+            }
+            seenBy {
+                userID
+                date
+            }
         }
     }
 `;

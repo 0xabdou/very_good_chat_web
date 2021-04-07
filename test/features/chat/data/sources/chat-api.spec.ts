@@ -1,6 +1,7 @@
 import {anything, deepEqual, instance, mock, verify, when} from "ts-mockito";
 import {ApolloClient, ApolloQueryResult} from "@apollo/client";
 import ChatAPI from "../../../../../src/features/chat/data/sources/chat-api";
+import {GetConversations} from "../../../../../src/_generated/GetConversations";
 import {
   mockConversation,
   mockGQLConversation,
@@ -10,7 +11,6 @@ import {
   mockMessage,
   mockSendMessageInput
 } from "../../../../mock-objects";
-import {GetConversations} from "../../../../../src/_generated/GetConversations";
 import {
   GET_CONVERSATIONS,
   GET_OR_CREATE_OTO_CONVERSATION,
@@ -30,6 +30,7 @@ describe('parsing', () => {
     // assert
     expect(result).toStrictEqual(mockConversation);
   });
+
   test('parseMessage', () => {
     // act
     const result = ChatAPI.parseMessage(mockGQLMessage);

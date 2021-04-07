@@ -2,13 +2,13 @@ import React, {useCallback} from "react";
 import {makeStyles} from "@material-ui/core";
 import Message from "../../types/message";
 import MessageListItem from "./message-list-item";
-import Conversation from "../../types/conversation";
 import {ItemContent, Virtuoso} from "react-virtuoso";
 import AutoSizer from "react-virtualized-auto-sizer";
+import Conversation from "../../types/conversation";
 
 export type MessagesListProps = {
   conversation: Conversation,
-  currentUserID?: string,
+  currentUserID: string,
 }
 
 const MessagesList = (props: MessagesListProps) => {

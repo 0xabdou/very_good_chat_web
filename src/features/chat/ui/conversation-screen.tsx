@@ -34,7 +34,7 @@ const ConversationScreen = () => {
           {otherUser?.name ?? otherUser?.username}
         </Typography>
       </TopBar>
-      <MessagesList conversation={conversation} currentUserID={me?.id}/>
+      <MessagesList conversation={conversation} currentUserID={me?.id ?? ''}/>
       <ChatTextField conversationID={conversation.id}/>
     </div>
   );

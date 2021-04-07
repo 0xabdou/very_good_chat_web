@@ -7,10 +7,15 @@ type Message = {
   text?: string,
   medias?: Media[],
   sentAt: number,
-  deliveredTo: string[],
-  seenBy: string[],
+  deliveredTo: Delivery[],
+  seenBy: Delivery[],
   sent: boolean,
   error?: boolean,
+}
+
+export type Delivery = {
+  userID: string,
+  date: number
 }
 
 export default Message;

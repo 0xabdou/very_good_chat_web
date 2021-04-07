@@ -1,5 +1,5 @@
-import Conversation from "../../types/conversation";
-import Message from "../../types/message";
+import Conversation, {UsersLastSeen} from "../../types/conversation";
+import Message, {Delivery} from "../../types/message";
 import {ApolloClient} from "@apollo/client";
 import {
   GetConversations,
@@ -15,6 +15,7 @@ import {ConversationType} from "../../../../_generated/globalTypes";
 import {
   SendMessage,
   SendMessage_sendMessage,
+  SendMessage_sendMessage_deliveredTo,
   SendMessage_sendMessage_medias,
   SendMessageVariables
 } from "../../../../_generated/SendMessage";
@@ -62,12 +63,30 @@ export default class ChatAPI implements IChatAPI {
     return ChatAPI.parseMessage(data?.sendMessage!);
   }
 
-  static parseConversation(conversation: GetConversations_getConversations): Conversation {
+  static parseConversation(conv: GetConversations_getConversations): Conversation {
+    const seenDates: UsersLastSeen = {};
+    let pIDs: string[] = [];
+    conv.participants.forEach(p => {
+      seenDates[p.id] = 0;
+      pIDs.push(p.id);
+    });
+    let mIdx = conv.messages.length - 1;
+    while (mIdx >= 0 && pIDs.length) {
+      const message = conv.messages[mIdx];
+      for (let seenBy of message.seenBy) {
+        if (pIDs.indexOf(seenBy.userID) != -1) {
+          seenDates[seenBy.userID] = message.sentAt;
+          pIDs = pIDs.filter(id => id != seenBy.userID);
+        }
+      }
+      mIdx--;
+    }
     return {
-      id: conversation.id,
-      participants: conversation.participants.map(UserAPI.parseUser),
-      messages: conversation.messages.map(ChatAPI.parseMessage),
-      type: ConversationType[conversation.type]
+      id: conv.id,
+      participants: conv.participants.map(UserAPI.parseUser),
+      messages: conv.messages.map(ChatAPI.parseMessage),
+      type: ConversationType[conv.type],
+      seenDates
     };
   }
 
@@ -79,8 +98,8 @@ export default class ChatAPI implements IChatAPI {
       text: message.text ?? undefined,
       medias: message.medias?.map(ChatAPI.parseMedia),
       sentAt: message.sentAt,
-      deliveredTo: message.deliveredTo,
-      seenBy: message.seenBy,
+      deliveredTo: message.deliveredTo.map(ChatAPI.parseDelivery),
+      seenBy: message.seenBy.map(ChatAPI.parseDelivery),
       sent: true
     };
   }
@@ -90,6 +109,10 @@ export default class ChatAPI implements IChatAPI {
       url: media.url,
       type: MediaType[media.type]
     };
+  }
+
+  static parseDelivery(delivery: SendMessage_sendMessage_deliveredTo): Delivery {
+    return {userID: delivery.userID, date: delivery.date};
   }
 }
 
