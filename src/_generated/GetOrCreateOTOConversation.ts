@@ -25,6 +25,18 @@ export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_mess
   type: MediaType;
 }
 
+export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_deliveredTo {
+  __typename: "Delivery";
+  userID: string;
+  date: any;
+}
+
+export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_seenBy {
+  __typename: "Delivery";
+  userID: string;
+  date: any;
+}
+
 export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages {
   __typename: "Message";
   id: number;
@@ -33,8 +45,8 @@ export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_mess
   text: string | null;
   medias: GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_medias[] | null;
   sentAt: any;
-  deliveredTo: string[];
-  seenBy: string[];
+  deliveredTo: GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_deliveredTo[];
+  seenBy: GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_seenBy[];
 }
 
 export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation {

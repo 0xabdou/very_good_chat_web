@@ -27,6 +27,11 @@ type Conversation {
     type: ConversationType!
 }
 
+type Delivery {
+    date: Timestamp!
+    userID: String!
+}
+
 type Friend {
     friendshipDate: Timestamp!
     lastSeen: Timestamp
@@ -70,10 +75,10 @@ type Media {
 
 type Message {
     conversationID: Int!
-    deliveredTo: [String!]!
+    deliveredTo: [Delivery!]!
     id: Int!
     medias: [Media!]
-    seenBy: [String!]!
+    seenBy: [Delivery!]!
     senderID: String!
     sentAt: Timestamp!
     text: String

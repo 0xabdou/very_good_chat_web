@@ -15,6 +15,18 @@ export interface SendMessage_sendMessage_medias {
   type: MediaType;
 }
 
+export interface SendMessage_sendMessage_deliveredTo {
+  __typename: "Delivery";
+  userID: string;
+  date: any;
+}
+
+export interface SendMessage_sendMessage_seenBy {
+  __typename: "Delivery";
+  userID: string;
+  date: any;
+}
+
 export interface SendMessage_sendMessage {
   __typename: "Message";
   id: number;
@@ -23,8 +35,8 @@ export interface SendMessage_sendMessage {
   text: string | null;
   medias: SendMessage_sendMessage_medias[] | null;
   sentAt: any;
-  deliveredTo: string[];
-  seenBy: string[];
+  deliveredTo: SendMessage_sendMessage_deliveredTo[];
+  seenBy: SendMessage_sendMessage_seenBy[];
 }
 
 export interface SendMessage {

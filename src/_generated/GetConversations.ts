@@ -25,6 +25,18 @@ export interface GetConversations_getConversations_messages_medias {
   type: MediaType;
 }
 
+export interface GetConversations_getConversations_messages_deliveredTo {
+  __typename: "Delivery";
+  userID: string;
+  date: any;
+}
+
+export interface GetConversations_getConversations_messages_seenBy {
+  __typename: "Delivery";
+  userID: string;
+  date: any;
+}
+
 export interface GetConversations_getConversations_messages {
   __typename: "Message";
   id: number;
@@ -33,8 +45,8 @@ export interface GetConversations_getConversations_messages {
   text: string | null;
   medias: GetConversations_getConversations_messages_medias[] | null;
   sentAt: any;
-  deliveredTo: string[];
-  seenBy: string[];
+  deliveredTo: GetConversations_getConversations_messages_deliveredTo[];
+  seenBy: GetConversations_getConversations_messages_seenBy[];
 }
 
 export interface GetConversations_getConversations {
