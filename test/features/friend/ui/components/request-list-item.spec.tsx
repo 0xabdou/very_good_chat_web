@@ -3,7 +3,7 @@ import {fireEvent, render, screen} from "@testing-library/react";
 import RequestListItem, {RequestListItemProps} from "../../../../../src/features/friend/ui/components/request-list-item";
 import {mockFriendRequests,} from "../../../../mock-objects";
 import User from "../../../../../src/features/user/types/user";
-import {formatDate} from "../../../../../src/utils/date-utils";
+import {formatDate} from "../../../../../src/shared/utils/date-utils";
 
 const renderIt = (props: RequestListItemProps) => {
   render(<RequestListItem {...props}/>);

@@ -1,7 +1,7 @@
 import {FriendRequests} from "./types/friend-request";
 import FriendError from "./types/friend-error";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import {isRight} from "fp-ts/Either";
 import Friend from "./types/friend";
 

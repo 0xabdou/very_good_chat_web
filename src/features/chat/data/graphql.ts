@@ -95,3 +95,27 @@ export const SEND_MESSAGE = gql`
         }
     }
 `;
+
+export const SUBSCRIBE_TO_MESSAGE = gql`
+    subscription SubscribeToMessages {
+        subscribeToMessages {
+            id
+            conversationID
+            senderID
+            text
+            medias {
+                url
+                type
+            }
+            sentAt
+            deliveredTo {
+                userID
+                date
+            }
+            seenBy {
+                userID
+                date
+            }
+        }
+    }
+`;

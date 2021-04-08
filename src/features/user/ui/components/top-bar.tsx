@@ -1,7 +1,7 @@
 import React from "react";
 import {AppBar, createStyles, makeStyles, Toolbar} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import {nonSelectable} from "../../../../styles/shared";
+import {nonSelectable} from "../../../../shared/styles/shared";
 
 type TopBarProps = {
   children: React.ReactNode,

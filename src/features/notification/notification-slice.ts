@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {Notification} from "./types/notification";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import NotificationError from "./types/notification-error";
 import {isRight} from "fp-ts/Either";
 

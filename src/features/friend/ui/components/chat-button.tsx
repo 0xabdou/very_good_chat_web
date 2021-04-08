@@ -1,11 +1,11 @@
 import {IconButton} from "@material-ui/core";
 import React, {useCallback, useState} from "react";
 import User from "../../../user/types/user";
-import {useAppDispatch} from "../../../../store/hooks";
+import {useAppDispatch} from "../../../../core/redux/hooks";
 import useChatActions from "../../../chat/chat-actions-provider";
 import {useHistory} from "react-router-dom";
 import {useStore} from "react-redux";
-import {AppState} from "../../../../store/store";
+import {AppState} from "../../../../core/redux/store";
 import {ConversationType} from "../../../../_generated/globalTypes";
 import Conversation from "../../../chat/types/conversation";
 import {useFriendProfileButtonStyles} from "../friend-profile-screen";

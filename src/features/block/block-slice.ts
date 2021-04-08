@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {Block} from "./types/block";
 import BlockError from "./types/block-error";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import {isRight} from "fp-ts/Either";
 
 export type BlockState = {

@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {Me, UserCreation, UserUpdate} from "./types/user";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import UserError from "./types/user-error";
 import {isRight} from "fp-ts/Either";
 

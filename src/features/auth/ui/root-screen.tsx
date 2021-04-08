@@ -4,10 +4,10 @@ import LoggedInScreen from "../../user/ui/logged-in-screen";
 import LoginScreen from "./login-screen";
 import {useAuthActions} from "../auth-actions-context";
 import MeActionsProvider from "../../user/me-actions-context";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
-import FullscreenLoader from "../../../components/fullscreen-loader";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
+import FullscreenLoader from "../../../shared/components/fullscreen-loader";
 import AuthError from "../types/auth-error";
-import RetryPage from "../../../components/retry-page";
+import RetryPage from "../../../shared/components/retry-page";
 
 const RootScreen = () => {
   const state = useAppSelector(state => state.auth, shallowEqual);

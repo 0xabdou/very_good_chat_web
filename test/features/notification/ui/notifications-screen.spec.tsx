@@ -1,6 +1,6 @@
 import React from "react";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
-import {AppState, AppStore} from "../../../../src/store/store";
+import {AppState, AppStore} from "../../../../src/core/redux/store";
 import {Provider} from "react-redux";
 import {
   anything,

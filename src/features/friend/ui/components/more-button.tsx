@@ -1,8 +1,8 @@
 import React, {useCallback, useState} from "react";
 import {Icon, IconButton, makeStyles, MenuItem} from "@material-ui/core";
-import GenericMenu from "../../../../components/generic-menu";
-import AlertDialog from "../../../../components/alert-dialog";
-import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
+import GenericMenu from "../../../../shared/components/generic-menu";
+import AlertDialog from "../../../../shared/components/alert-dialog";
+import {useAppDispatch, useAppSelector} from "../../../../core/redux/hooks";
 import {useFriendProfileActions} from "../../friend-profile-actions-context";
 import {FriendshipStatus} from "../../types/friendship";
 

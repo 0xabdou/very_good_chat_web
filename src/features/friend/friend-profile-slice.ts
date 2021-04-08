@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import User from "../user/types/user";
 import {Friendship, FriendshipInfo, FriendshipStatus} from "./types/friendship";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import FriendError from "./types/friend-error";
 import {isRight} from "fp-ts/Either";
 import {blockToFriendError} from "../block/types/block-error";

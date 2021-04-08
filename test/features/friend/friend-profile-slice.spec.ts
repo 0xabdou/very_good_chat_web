@@ -8,7 +8,7 @@ import {
   when
 } from "ts-mockito";
 import {IFriendRepository} from "../../../src/features/friend/data/friend-repository";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import reducer, {
   _handleFSChanged,
   _handleFSChanging,
@@ -24,7 +24,7 @@ import {
   mockFriendshipInfo,
   mockUser
 } from "../../mock-objects";
-import {AppState, AppStore} from "../../../src/store/store";
+import {AppState, AppStore} from "../../../src/core/redux/store";
 import {left, right} from "fp-ts/Either";
 import FriendError from "../../../src/features/friend/types/friend-error";
 import {PayloadAction} from "@reduxjs/toolkit";

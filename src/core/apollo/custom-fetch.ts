@@ -1,7 +1,7 @@
-import sl from "../dependencies/service-locator";
-import {AppStore} from "../store/store";
-import TYPES from "../dependencies/types";
-import {authActions} from "../features/auth/auth-slice";
+import sl from "../../dependencies/service-locator";
+import {AppStore} from "../redux/store";
+import TYPES from "../../dependencies/types";
+import {authActions} from "../../features/auth/auth-slice";
 
 let refreshingPromise: Promise<string> | null;
 
@@ -14,7 +14,7 @@ export const customFetch: WindowOrWorkerGlobalScope['fetch'] = async (uri, optio
       if (!refreshingPromise) {
         refreshingPromise = new Promise<string>(async (resolve, reject) => {
           const response = await fetch(
-            `${processEnv.VITE_BACKEND_URL}/auth/refresh_token`,
+            `${processEnv.VITE_SERVER_URL_HTTP}/auth/refresh_token`,
             {credentials: 'include'}
           );
           const json = await response.json();

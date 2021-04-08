@@ -1,7 +1,7 @@
 import {Button, makeStyles} from "@material-ui/core";
 import React, {useCallback} from "react";
 import {useHistory} from "react-router-dom";
-import {useAppSelector} from "../../../../store/hooks";
+import {useAppSelector} from "../../../../core/redux/hooks";
 
 const FriendsButton = () => {
     const friends = useAppSelector(state => state.friends.friends);

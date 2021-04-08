@@ -7,12 +7,12 @@ import {
   Typography
 } from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {useAuthActions} from "../../auth/auth-actions-context";
 import {useMeActions} from "../../user/me-actions-context";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useHistory} from "react-router-dom";
-import AlertDialog from "../../../components/alert-dialog";
+import AlertDialog from "../../../shared/components/alert-dialog";
 import {useFriendsActions} from "../../friend/friends-actions-context";
 
 const SettingsScreen = () => {

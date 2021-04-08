@@ -1,4 +1,4 @@
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import {getMockStore, mockBlock} from "../../mock-objects";
 import reducer, {
   blockActions,

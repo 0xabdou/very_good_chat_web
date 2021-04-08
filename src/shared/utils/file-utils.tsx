@@ -1,6 +1,6 @@
 import {Area} from "react-easy-crop/types";
 import React, {useContext} from "react";
-import {Media, MediaType} from "../features/chat/types/media";
+import {Media, MediaType} from "../../features/chat/types/media";
 
 export interface IFileUtils {
   fileToURL: (photo: File) => Promise<string>;

@@ -13,7 +13,7 @@ import {
   makeStyles
 } from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import {formatDate} from "../../../../utils/date-utils";
+import {formatDate} from "../../../../shared/utils/date-utils";
 
 export type NotificationListItemProps = {
   notification: Notification,

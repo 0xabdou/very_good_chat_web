@@ -12,9 +12,9 @@ import reducer, {meActions, MeState} from "../../../src/features/user/me-slice";
 import UserError from "../../../src/features/user/types/user-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import User from "../../../src/features/user/types/user";
-import {AppState, AppStore} from "../../../src/store/store";
+import {AppState, AppStore} from "../../../src/core/redux/store";
 import {IMeRepository} from "../../../src/features/user/data/me-repository";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 
 
 const MockMeRepo = mock<IMeRepository>();

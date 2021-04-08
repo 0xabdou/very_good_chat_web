@@ -2,7 +2,7 @@ import {Badge, Icon, IconButton, makeStyles} from "@material-ui/core";
 import React, {useCallback, useEffect, useState} from "react";
 import {useHistory} from "react-router-dom";
 import {useTopBarStyles} from "../../../user/ui/components/top-bar";
-import {useAppSelector} from "../../../../store/hooks";
+import {useAppSelector} from "../../../../core/redux/hooks";
 
 const Badges = () => {
   const badgeState = useAppSelector(state => state.badge);

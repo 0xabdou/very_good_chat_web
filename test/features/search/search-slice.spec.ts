@@ -5,7 +5,7 @@ import reducer, {
 import {getMockStore, mockUser} from "../../mock-objects";
 import {anything, instance, mock, resetCalls, verify, when} from "ts-mockito";
 import {ISearchRepository} from "../../../src/features/search/data/search-repository";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import {left, right} from "fp-ts/Either";
 import {SearchError} from "../../../src/features/search/types/search-error";
 import {PayloadAction} from "@reduxjs/toolkit";

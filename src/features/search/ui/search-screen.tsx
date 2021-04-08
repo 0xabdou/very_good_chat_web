@@ -6,7 +6,7 @@ import {
   ListItemText,
   makeStyles
 } from "@material-ui/core";
-import {useAppSelector} from "../../../store/hooks";
+import {useAppSelector} from "../../../core/redux/hooks";
 import {PulseLoader} from "react-spinners";
 import {FixedSizeList} from "react-window";
 import AutoSizer from 'react-virtualized-auto-sizer';

@@ -1,7 +1,7 @@
 import Conversation from "./types/conversation";
 import ChatError from "./types/chat-error";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import {isRight} from "fp-ts/Either";
 import {SendMessageInput} from "./data/sources/chat-api";
 import Message from "./types/message";
@@ -55,7 +55,7 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
       seenBy: [],
       sent: false
     };
-    thunkAPI.dispatch(chatActions.messagePending(pendingMessage));
+    thunkAPI.dispatch(chatActions.appendMessage(pendingMessage));
     const result = await thunkAPI.extra.chatRepo.sendMessage({
       conversationID: input.conversationID,
       text: input.text,
@@ -63,6 +63,15 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
     });
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
+  }
+);
+
+const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
+  'chat/subscribeToMessages',
+  async (_, thunkAPI) => {
+    thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((message) => {
+      thunkAPI.dispatch(chatActions.appendMessage(message));
+    });
   }
 );
 
@@ -79,13 +88,13 @@ const chatSlice = createSlice({
   name: 'chat',
   initialState: initialChatState,
   reducers: {
-    messagePending(state: ChatState, action: PayloadAction<Message>) {
-      const pendingMessage = action.payload;
-      const index = state.conversations!.findIndex(c => c.id == pendingMessage.conversationID);
+    appendMessage(state: ChatState, action: PayloadAction<Message>) {
+      const message = action.payload;
+      const index = state.conversations!.findIndex(c => c.id == message.conversationID);
       const conv = state.conversations!.splice(index, 1)[0];
-      conv.messages.push(pendingMessage);
+      conv.messages.push(message);
       state.conversations?.unshift(conv);
-    }
+    },
   },
   extraReducers: builder => {
     // getConversations
@@ -140,5 +149,6 @@ export const chatActions = {
   getConversations,
   getOrCreateOTOConversation,
   sendMessage,
+  subscribeToMessages,
   ...chatSlice.actions
 };

@@ -1,7 +1,7 @@
 import {anything, instance, mock, reset, verify, when} from "ts-mockito";
 import {IChatRepository} from "../../../src/features/chat/data/chat-repository";
-import {IFileUtils} from "../../../src/utils/file-utils";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import {IFileUtils} from "../../../src/shared/utils/file-utils";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import {
   getMockStore,
   mockConversation,
@@ -9,7 +9,7 @@ import {
   mockMessage,
   mockTheDate
 } from "../../mock-objects";
-import {AppState, AppStore} from "../../../src/store/store";
+import {AppState, AppStore} from "../../../src/core/redux/store";
 import reducer, {
   _handleRejected,
   chatActions,
@@ -241,7 +241,7 @@ describe('getOrCreateOTOConversation', () => {
 
 
 describe('sendMessage', () => {
-  const {sendMessage, messagePending} = chatActions;
+  const {sendMessage, appendMessage} = chatActions;
   const conversationID = 911;
   const tempID = 199;
   const input: SendMessageInput & { tempID: number } = {
@@ -272,7 +272,7 @@ describe('sendMessage', () => {
     when(MockFileUtils.getMedia(anything())).thenResolve(mockMedia);
   });
 
-  it('should dispatch messagePending with the right message', async () => {
+  it('should dispatch appendMessage with the right message', async () => {
     // arrange
     when(MockChatRepo.sendMessage(anything())).thenResolve(right(mockMessage));
     // act
@@ -280,7 +280,7 @@ describe('sendMessage', () => {
     // assert
     expect(mockStore.getActions()).toHaveLength(3);
     const action = mockStore.getActions()[1] as PayloadAction<Message>;
-    expect(action.type).toBe(messagePending.type);
+    expect(action.type).toBe(appendMessage.type);
     expect(action.payload).toStrictEqual(pendingMessage);
   });
 
@@ -336,7 +336,7 @@ describe('sendMessage', () => {
     };
     const inputState: ChatState = {...initialChatState, conversations: convs};
 
-    test('messagePending', () => {
+    test('appendMessage', () => {
       // arrange
       const pendingMessage = inputState.conversations![1].messages[1];
       const inputState1: ChatState = {
@@ -368,7 +368,7 @@ describe('sendMessage', () => {
           convs[2]
         ]
       };
-      const action: PayloadAction<Message> = messagePending(pendingMessage);
+      const action: PayloadAction<Message> = appendMessage(pendingMessage);
       // act
       const result = reducer(inputState1, action);
       // assert

@@ -7,8 +7,8 @@ import {
   mockFriendship,
   mockUser,
 } from "../../mock-objects";
-import {AppState, AppStore} from "../../../src/store/store";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import {AppState, AppStore} from "../../../src/core/redux/store";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import FriendError from "../../../src/features/friend/types/friend-error";
 import reducer, {
   _handleRejected,

@@ -1,7 +1,7 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import User from "../user/types/user";
 import {SearchError} from "./types/search-error";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import {isRight} from "fp-ts/These";
 
 export type SearchState = {

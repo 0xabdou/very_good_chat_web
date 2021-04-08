@@ -1,11 +1,11 @@
 import React, {useCallback} from "react";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {makeStyles} from "@material-ui/core";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {FixedSizeList} from "react-window";
 import Conversation from "../types/conversation";
 import ConversationListItem from "./components/conversation-list-item";
-import RetryButton from "../../../components/retry-button";
+import RetryButton from "../../../shared/components/retry-button";
 import useChatActions from "../chat-actions-provider";
 import {stringifyChatError} from "../types/chat-error";
 import {PulseLoader} from "react-spinners";

@@ -3,6 +3,7 @@
 schema {
     query: Query
     mutation: Mutation
+    subscription: Subscription
 }
 
 type AuthUser {
@@ -122,6 +123,10 @@ type Query {
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
     getNotifications: [Notification!]!
     me: Me!
+}
+
+type Subscription {
+    subscribeToMessages: Message!
 }
 
 type User {

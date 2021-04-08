@@ -1,7 +1,10 @@
 import {getMockStore, initialMeState, mockMe,} from "../../../mock-objects";
 import {instance, mock, reset} from "ts-mockito";
-import {FileUtilsContext, IFileUtils} from "../../../../src/utils/file-utils";
-import {AppState, AppStore} from "../../../../src/store/store";
+import {
+  FileUtilsContext,
+  IFileUtils
+} from "../../../../src/shared/utils/file-utils";
+import {AppState, AppStore} from "../../../../src/core/redux/store";
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {MeActionsContext} from "../../../../src/features/user/me-actions-context";

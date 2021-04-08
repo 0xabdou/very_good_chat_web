@@ -2,7 +2,7 @@ import React from "react";
 import {getMockStore} from "../../../../mock-objects";
 import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {Provider} from "react-redux";
-import {AppState, AppStore} from "../../../../../src/store/store";
+import {AppState, AppStore} from "../../../../../src/core/redux/store";
 import {SearchActionsContext} from "../../../../../src/features/search/search-actions-context";
 import SearchTextField
   from "../../../../../src/features/search/ui/components/search-text-field";

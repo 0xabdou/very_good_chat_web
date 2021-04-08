@@ -4,7 +4,7 @@ import User, {
   UserUpdate
 } from "../src/features/user/types/user";
 import {instance, mock} from "ts-mockito";
-import {AppDispatch, AppState} from "../src/store/store";
+import {AppDispatch, AppState} from "../src/core/redux/store";
 import createMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import {AuthState} from "../src/features/auth/auth-slice";

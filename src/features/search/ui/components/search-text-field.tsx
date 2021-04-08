@@ -14,7 +14,7 @@ import React, {
 } from "react";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useSearchActions} from "../../search-actions-context";
-import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
+import {useAppDispatch, useAppSelector} from "../../../../core/redux/hooks";
 
 type SearchTextFieldProps = {
   onFocus: () => void,

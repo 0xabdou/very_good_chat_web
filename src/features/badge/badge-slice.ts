@@ -1,6 +1,6 @@
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {Badge, BadgeName} from "./types/badge";
-import {ThunkAPI} from "../../store/store";
+import {ThunkAPI} from "../../core/redux/store";
 import BadgeError from "./types/badge-error";
 import {isRight} from "fp-ts/Either";
 

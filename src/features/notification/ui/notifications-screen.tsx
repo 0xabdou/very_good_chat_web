@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect} from "react";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {PulseLoader} from "react-spinners";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {FixedSizeList} from "react-window";

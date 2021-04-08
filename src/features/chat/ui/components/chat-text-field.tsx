@@ -1,6 +1,6 @@
 import React, {ChangeEvent, FormEvent, useCallback, useState} from "react";
 import {Icon, IconButton, makeStyles, TextField} from "@material-ui/core";
-import {useAppDispatch} from "../../../../store/hooks";
+import {useAppDispatch} from "../../../../core/redux/hooks";
 import useChatActions from "../../chat-actions-provider";
 
 export type ChatTextFieldProps = {

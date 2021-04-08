@@ -4,7 +4,11 @@ import {
   initialMeState,
   loggedInAuthState,
 } from "../../../mock-objects";
-import {AppDispatch, AppState, AppStore} from "../../../../src/store/store";
+import {
+  AppDispatch,
+  AppState,
+  AppStore
+} from "../../../../src/core/redux/store";
 import {
   fireEvent,
   render,
@@ -17,7 +21,10 @@ import {MeActionsContext} from "../../../../src/features/user/me-actions-context
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
 import {beforeEach, describe, test} from "@jest/globals";
 import ProfileUpdatingScreen, {ProfileUpdatingScreenProps} from "../../../../src/features/user/ui/profile-updating-screen";
-import {FileUtilsContext, IFileUtils} from "../../../../src/utils/file-utils";
+import {
+  FileUtilsContext,
+  IFileUtils
+} from "../../../../src/shared/utils/file-utils";
 import {
   anything,
   deepEqual,

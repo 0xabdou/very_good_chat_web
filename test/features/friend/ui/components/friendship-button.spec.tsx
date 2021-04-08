@@ -6,7 +6,7 @@ import {
   waitForElementToBeRemoved
 } from "@testing-library/react";
 import {Provider} from "react-redux";
-import {AppState, AppStore} from "../../../../../src/store/store";
+import {AppState, AppStore} from "../../../../../src/core/redux/store";
 import {instance, mock, reset, when} from "ts-mockito";
 import {
   friendProfileActions,

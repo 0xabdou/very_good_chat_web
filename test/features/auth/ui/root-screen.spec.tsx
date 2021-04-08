@@ -1,5 +1,5 @@
 import React from 'react';
-import {AppState, AppStore} from "../../../../src/store/store";
+import {AppState, AppStore} from "../../../../src/core/redux/store";
 import {
   getMockStore,
   initialAuthState,

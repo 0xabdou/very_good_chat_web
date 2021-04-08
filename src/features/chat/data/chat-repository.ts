@@ -4,6 +4,7 @@ import {IChatAPI, SendMessageInput} from "./sources/chat-api";
 import {Either, left, right} from "fp-ts/Either";
 import ChatError from "../types/chat-error";
 import {isApolloError} from "@apollo/client";
+import {Observable} from "@apollo/client/utilities/observables/Observable";
 
 export interface IChatRepository {
   getConversations(): Promise<Either<ChatError, Conversation[]>>;
@@ -11,6 +12,8 @@ export interface IChatRepository {
   getOrCreateOTOConversation(userID: string): Promise<Either<ChatError, Conversation>>;
 
   sendMessage(input: SendMessageInput): Promise<Either<ChatError, Message>>;
+
+  subscribeToMessages(): Observable<Message>;
 }
 
 export default class ChatRepository implements IChatRepository {
@@ -30,6 +33,10 @@ export default class ChatRepository implements IChatRepository {
 
   sendMessage(input: SendMessageInput): Promise<Either<ChatError, Message>> {
     return this._leftOrRight(() => this._chatAPI.sendMessage(input));
+  }
+
+  subscribeToMessages(): Observable<Message> {
+    return this._chatAPI.subscribeToMessages();
   }
 
   async _leftOrRight<R>(work: () => Promise<R>): Promise<Either<ChatError, R>> {

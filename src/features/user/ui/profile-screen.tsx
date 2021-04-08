@@ -1,14 +1,14 @@
 import React, {useCallback, useContext} from "react";
 import {Icon, IconButton, makeStyles, Typography} from "@material-ui/core";
-import {centeredLayout} from "../../../styles/shared";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
-import FullscreenLoader from "../../../components/fullscreen-loader";
+import {centeredLayout} from "../../../shared/styles/shared";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
+import FullscreenLoader from "../../../shared/components/fullscreen-loader";
 import TopBar, {useTopBarStyles} from "./components/top-bar";
 import {useHistory} from "react-router-dom";
 import CommonProfileInfo from "./components/common-profile-info";
 import {MeActionsContext} from "../me-actions-context";
 import FriendsButton from "./components/friends-button";
-import RetryPage from "../../../components/retry-page";
+import RetryPage from "../../../shared/components/retry-page";
 import {stringifyUserError} from "../types/user-error";
 
 const ProfileScreen: React.FC = () => {

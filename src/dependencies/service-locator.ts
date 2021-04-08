@@ -1,13 +1,12 @@
-import createStore, {AppStore} from "../store/store";
+import createStore from "../core/redux/store";
 import TYPES from "./types";
 import GoogleAuth from "../features/auth/data/sources/google-auth";
 import IAuthRepository, {AuthRepository} from "../features/auth/data/auth-repository";
 import {IUserAPI, UserAPI} from "../features/user/data/sources/user-api";
 import {IMeRepository, MeRepository} from "../features/user/data/me-repository";
-import StoreExtraArg from "../store/store-extra-arg";
-import {ApolloClient, ApolloLink, InMemoryCache} from "@apollo/client";
+import StoreExtraArg from "../core/redux/store-extra-arg";
+import {ApolloClient} from "@apollo/client";
 import {AuthAPI, IAuthAPI} from "../features/auth/data/sources/auth-api";
-import {createUploadLink} from 'apollo-upload-client';
 import axios, {AxiosInstance} from "axios";
 import {
   ISearchRepository,
@@ -17,15 +16,14 @@ import FriendRepository, {IFriendRepository} from "../features/friend/data/frien
 import FriendAPI, {IFriendAPI} from "../features/friend/data/sources/friend-api";
 import BadgeAPI, {IBadgeAPI} from "../features/badge/data/sources/badge-api";
 import BadgeRepository, {IBadgeRepository} from "../features/badge/data/badge-repository";
-import {onError} from "@apollo/client/link/error";
 import NotificationAPI, {INotificationAPI} from "../features/notification/data/sources/notification-api";
 import NotificationRepository, {INotificationRepository} from "../features/notification/data/notification-repository";
 import BlockAPI, {IBlockAPI} from "../features/block/data/sources/block-api";
 import BlockRepository, {IBlockRepository} from "../features/block/data/block-respository";
-import {customFetch} from "../utils/custom-fetch";
 import ChatAPI, {IChatAPI} from "../features/chat/data/sources/chat-api";
 import ChatRepository, {IChatRepository} from "../features/chat/data/chat-repository";
-import {FileUtils, IFileUtils} from "../utils/file-utils";
+import {FileUtils, IFileUtils} from "../shared/utils/file-utils";
+import apolloClient from "../core/apollo/client";
 
 type Dependencies = { [key in TYPES]?: any };
 
@@ -50,53 +48,23 @@ class ServiceLocator {
   };
 }
 
-
 const sl = new ServiceLocator();
 const initDependencies = async () => {
-  const SERVER_URL = `${processEnv.VITE_BACKEND_URL}`;
   // Auth
   sl.register<GoogleAuth>(TYPES.GoogleAuth, new GoogleAuth());
-  const authMiddleware = new ApolloLink((operation, forward) => {
-    // add the authorization to the headers
-    const token = sl.get<AppStore>(TYPES.AppStore).getState().auth.accessToken;
-    operation.setContext({
-      headers: {
-        authorization: token ? `Bearer ${token}` : "",
-      }
-    });
-    return forward(operation);
-  });
-
-  const httpLink = createUploadLink({
-    uri: `${SERVER_URL}/graphql`,
-    credentials: 'include',
-    fetch: customFetch
-  });
-  const errorLink = onError(({graphQLErrors, networkError}) => {
-    if (graphQLErrors) {
-      console.log('graphQLErrors', JSON.stringify(graphQLErrors));
-    }
-    if (networkError) {
-      console.log('networkError', JSON.stringify(networkError));
-    }
-  });
-
-  const client = new ApolloClient({
-    cache: new InMemoryCache({}),
-    connectToDevTools: true,
-    link: ApolloLink.from([errorLink, authMiddleware, httpLink]),
-  });
-  sl.register<ApolloClient<any>>(TYPES.ApolloClient, client);
+  // Apollo
+  sl.register<ApolloClient<any>>(TYPES.ApolloClient, apolloClient);
+  // Axios
   sl.register<AxiosInstance>(
     TYPES.Axios,
     axios.create({
-      baseURL: SERVER_URL,
+      baseURL: `${processEnv.VITE_SERVER_URL_HTTP}`,
       withCredentials: true,
     }),
   );
-
+  // File utils
   sl.register<IFileUtils>(TYPES.IFileUtils, new FileUtils());
-
+  // Auth
   sl.register<IAuthAPI>(
     TYPES.IAuthApi,
     new AuthAPI(sl.get(TYPES.ApolloClient), sl.get(TYPES.Axios))

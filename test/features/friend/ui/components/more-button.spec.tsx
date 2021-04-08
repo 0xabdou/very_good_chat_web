@@ -5,7 +5,7 @@ import {
 } from "../../../../../src/features/friend/friend-profile-slice";
 import {getMockStore, mockUser} from "../../../../mock-objects";
 import {FriendshipStatus} from "../../../../../src/features/friend/types/friendship";
-import {AppState, AppStore} from "../../../../../src/store/store";
+import {AppState, AppStore} from "../../../../../src/core/redux/store";
 import {
   fireEvent,
   render,

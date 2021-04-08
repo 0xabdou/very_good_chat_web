@@ -1,7 +1,7 @@
 import React from 'react';
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
-import {AppState, AppStore} from "../../../../../src/store/store";
+import {AppState, AppStore} from "../../../../../src/core/redux/store";
 import {anything, instance, mock, reset, when} from "ts-mockito";
 import {badgeActions} from "../../../../../src/features/badge/badge-slice";
 import {BadgeActionsContext} from "../../../../../src/features/badge/badge-actions-context";

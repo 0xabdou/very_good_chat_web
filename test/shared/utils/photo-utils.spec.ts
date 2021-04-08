@@ -1,4 +1,4 @@
-import {FileUtils} from "../../src/utils/file-utils";
+import {FileUtils} from "../../../src/shared/utils/file-utils";
 
 const photo = {} as File;
 const url = 'photo url';

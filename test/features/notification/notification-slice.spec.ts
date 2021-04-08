@@ -1,5 +1,5 @@
 import {getMockStore, mockRANotification, mockUser} from "../../mock-objects";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import {anything, instance, mock, when} from "ts-mockito";
 import {INotificationRepository} from "../../../src/features/notification/data/notification-repository";
 import reducer, {

@@ -3,7 +3,7 @@ import {
   initialSearchState,
   searchActions
 } from "../../../../src/features/search/search-slice";
-import {AppState, AppStore} from "../../../../src/store/store";
+import {AppState, AppStore} from "../../../../src/core/redux/store";
 import {render, screen} from "@testing-library/react";
 import {Provider} from "react-redux";
 import {SearchActionsContext} from "../../../../src/features/search/search-actions-context";

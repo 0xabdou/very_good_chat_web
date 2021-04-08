@@ -3,15 +3,16 @@ import {
   configureStore,
   getDefaultMiddleware
 } from "@reduxjs/toolkit";
-import authReducer from '../features/auth/auth-slice';
-import meReducer from '../features/user/me-slice';
-import searchReducer from '../features/search/search-slice';
-import friendProfileReducer from '../features/friend/friend-profile-slice';
-import friendsReducer from '../features/friend/friends-slice';
-import badgeReducer from '../features/badge/badge-slice';
-import notificationReducer from '../features/notification/notification-slice';
-import blockReducer from '../features/block/block-slice';
-import chatReducer from '../features/chat/chat-slice';
+import authReducer from '../../features/auth/auth-slice';
+import meReducer from '../../features/user/me-slice';
+import searchReducer from '../../features/search/search-slice';
+import friendProfileReducer from '../../features/friend/friend-profile-slice';
+import friendsReducer from '../../features/friend/friends-slice';
+import badgeReducer from '../../features/badge/badge-slice';
+import notificationReducer
+  from '../../features/notification/notification-slice';
+import blockReducer from '../../features/block/block-slice';
+import chatReducer from '../../features/chat/chat-slice';
 
 import StoreExtraArg from "./store-extra-arg";
 

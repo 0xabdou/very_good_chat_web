@@ -1,4 +1,4 @@
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import {anything, instance, mock, reset, verify, when} from "ts-mockito";
 import {IBadgeRepository} from "../../../src/features/badge/data/badge-repository";
 import {getMockStore, mockBadge, mockTheDate} from "../../mock-objects";

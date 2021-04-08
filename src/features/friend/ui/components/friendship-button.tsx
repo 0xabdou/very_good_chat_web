@@ -1,5 +1,5 @@
 import React, {useCallback, useState} from 'react';
-import {useAppDispatch, useAppSelector} from "../../../../store/hooks";
+import {useAppDispatch, useAppSelector} from "../../../../core/redux/hooks";
 import {
   createStyles,
   Icon,
@@ -11,8 +11,8 @@ import {Friendship, FriendshipStatus} from "../../types/friendship";
 import {PulseLoader} from "react-spinners";
 import {useFriendProfileActions} from "../../friend-profile-actions-context";
 import FriendError from "../../types/friend-error";
-import AlertDialog from "../../../../components/alert-dialog";
-import GenericMenu from "../../../../components/generic-menu";
+import AlertDialog from "../../../../shared/components/alert-dialog";
+import GenericMenu from "../../../../shared/components/generic-menu";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useFriendProfileButtonStyles} from "../friend-profile-screen";
 

@@ -3,8 +3,8 @@ import {Icon, makeStyles,} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import CircleButton from "./circle-button";
 import MenuDialog from "./menu-dialog";
-import AlertDialog from "../../../../components/alert-dialog";
-import {nonDraggable} from "../../../../styles/shared";
+import AlertDialog from "../../../../shared/components/alert-dialog";
+import {nonDraggable} from "../../../../shared/styles/shared";
 import {useDropzone} from "react-dropzone";
 
 

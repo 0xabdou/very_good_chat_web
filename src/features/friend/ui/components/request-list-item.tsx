@@ -11,7 +11,7 @@ import {
   makeStyles
 } from "@material-ui/core";
 import {PulseLoader} from "react-spinners";
-import {formatDate} from "../../../../utils/date-utils";
+import {formatDate} from "../../../../shared/utils/date-utils";
 
 export type RequestListItemProps = {
   req: FriendRequest,

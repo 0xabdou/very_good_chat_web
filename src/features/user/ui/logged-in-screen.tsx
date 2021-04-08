@@ -4,9 +4,9 @@ import ProfileUpdatingScreen from "./profile-updating-screen";
 import {makeStyles} from "@material-ui/core";
 import UserError from "../types/user-error";
 import {useMeActions} from "../me-actions-context";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
-import RetryPage from "../../../components/retry-page";
-import FullscreenLoader from "../../../components/fullscreen-loader";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
+import RetryPage from "../../../shared/components/retry-page";
+import FullscreenLoader from "../../../shared/components/fullscreen-loader";
 import {Redirect, Route, Switch} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
 import FriendProfileScreen from "../../friend/ui/friend-profile-screen";
@@ -18,7 +18,7 @@ import {useNotificationActions} from "../../notification/notification-actions-co
 import FriendsScreen from "../../friend/ui/friends-screen";
 import BlockedUsersScreen from "../../block/ui/blocked-users-screen";
 import SettingsScreen from "../../settings/ui/settings-screen";
-import {startPolling} from "../../../utils/polling";
+import {startPolling} from "../../../shared/utils/polling";
 import useChatActions from "../../chat/chat-actions-provider";
 import ConversationScreen from "../../chat/ui/conversation-screen";
 
@@ -30,11 +30,12 @@ const LoggedInScreen = () => {
   const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();
-  const {getConversations} = useChatActions();
+  const {getConversations, subscribeToMessages} = useChatActions();
 
   useEffect(() => {
     dispatch(getMe());
     dispatch(getConversations());
+    dispatch(subscribeToMessages());
     dispatch(getBadges());
     startPolling(() => {
       dispatch(getFriendRequests());

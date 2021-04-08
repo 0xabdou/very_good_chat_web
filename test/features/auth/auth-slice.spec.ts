@@ -10,9 +10,9 @@ import {left, right} from "fp-ts/Either";
 import AuthError from "../../../src/features/auth/types/auth-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import {getMockStore, initialAuthState} from "../../mock-objects";
-import {AppStore} from "../../../src/store/store";
+import {AppStore} from "../../../src/core/redux/store";
 import IAuthRepository from "../../../src/features/auth/data/auth-repository";
-import StoreExtraArg from "../../../src/store/store-extra-arg";
+import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 
 
 const {

@@ -8,7 +8,8 @@ import {
 import {
   GET_CONVERSATIONS,
   GET_OR_CREATE_OTO_CONVERSATION,
-  SEND_MESSAGE
+  SEND_MESSAGE,
+  SUBSCRIBE_TO_MESSAGE
 } from "../graphql";
 import {UserAPI} from "../../../user/data/sources/user-api";
 import {ConversationType} from "../../../../_generated/globalTypes";
@@ -24,6 +25,8 @@ import {
   GetOrCreateOTOConversation,
   GetOrCreateOTOConversationVariables
 } from "../../../../_generated/GetOrCreateOTOConversation";
+import {SubscribeToMessages} from "../../../../_generated/SubscribeToMessages";
+import {Observable} from "@apollo/client/utilities/observables/Observable";
 
 export interface IChatAPI {
   getConversations(): Promise<Conversation[]>;
@@ -31,6 +34,8 @@ export interface IChatAPI {
   getOrCreateOTOConversation(userID: string): Promise<Conversation>;
 
   sendMessage(input: SendMessageInput): Promise<Message>;
+
+  subscribeToMessages(): Observable<Message>;
 }
 
 export default class ChatAPI implements IChatAPI {
@@ -61,6 +66,16 @@ export default class ChatAPI implements IChatAPI {
       variables: {message: input}
     });
     return ChatAPI.parseMessage(data?.sendMessage!);
+  }
+
+  subscribeToMessages(): Observable<Message> {
+    const sub = this._client.subscribe<SubscribeToMessages>({
+      query: SUBSCRIBE_TO_MESSAGE,
+      fetchPolicy: 'no-cache'
+    });
+    return sub
+      .filter(({data}) => Boolean(data?.subscribeToMessages))
+      .map(({data}) => ChatAPI.parseMessage(data!.subscribeToMessages));
   }
 
   static parseConversation(conv: GetConversations_getConversations): Conversation {

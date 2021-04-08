@@ -2,7 +2,7 @@ import React from "react";
 import {render, screen} from "@testing-library/react";
 import {mockFriend,} from "../../../../mock-objects";
 import User from "../../../../../src/features/user/types/user";
-import {formatDate} from "../../../../../src/utils/date-utils";
+import {formatDate} from "../../../../../src/shared/utils/date-utils";
 import FriendListItem, {FriendListItemProps} from "../../../../../src/features/friend/ui/components/friend-list-item";
 
 const renderIt = (props: FriendListItemProps) => {

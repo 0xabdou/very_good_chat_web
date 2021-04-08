@@ -3,7 +3,7 @@ import {Area, Point} from "react-easy-crop/types";
 import React, {useCallback, useContext, useEffect, useState} from "react";
 import CircleButton, {CircleButtonProps} from "./circle-button";
 import {makeStyles} from "@material-ui/core";
-import {FileUtilsContext} from "../../../../utils/file-utils";
+import {FileUtilsContext} from "../../../../shared/utils/file-utils";
 
 type PhotoCropperProps = {
   src: string,

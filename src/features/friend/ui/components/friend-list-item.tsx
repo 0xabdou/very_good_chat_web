@@ -8,7 +8,7 @@ import {
   ListItemText,
   makeStyles
 } from "@material-ui/core";
-import {formatDate} from "../../../../utils/date-utils";
+import {formatDate} from "../../../../shared/utils/date-utils";
 import Friend from "../../types/friend";
 
 export type FriendListItemProps = {

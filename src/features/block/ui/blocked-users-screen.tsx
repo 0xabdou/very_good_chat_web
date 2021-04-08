@@ -1,9 +1,9 @@
 import React, {useCallback, useEffect} from "react";
 import {makeStyles, Typography} from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
-import FullscreenLoader from "../../../components/fullscreen-loader";
-import RetryPage from "../../../components/retry-page";
+import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
+import FullscreenLoader from "../../../shared/components/fullscreen-loader";
+import RetryPage from "../../../shared/components/retry-page";
 import useBlockActions from "../block-actions-context";
 import {stringifyBlockError} from "../types/block-error";
 import AutoSizer from "react-virtualized-auto-sizer";
