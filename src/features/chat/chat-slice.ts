@@ -21,7 +21,10 @@ const getConversations = createAsyncThunk<Conversation[], void, ThunkAPI<ChatErr
   'chat/getConversations',
   async (_, thunkAPI) => {
     const result = await thunkAPI.extra.chatRepo.getConversations();
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      void thunkAPI.extra.chatRepo.messagesDelivered(result.right.map(c => c.id));
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -30,7 +33,10 @@ const getOrCreateOTOConversation = createAsyncThunk<Conversation, string, ThunkA
   'chat/getOrCreateOTOConversation',
   async (userID, thunkAPI) => {
     const result = await thunkAPI.extra.chatRepo.getOrCreateOTOConversation(userID);
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      void thunkAPI.extra.chatRepo.messagesDelivered([result.right.id]);
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -69,8 +75,13 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
 const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToMessages',
   async (_, thunkAPI) => {
-    thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((message) => {
-      thunkAPI.dispatch(chatActions.appendMessage(message));
+    thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((sub) => {
+      if (sub.update) {
+        thunkAPI.dispatch(chatActions.updateMessage(sub.message));
+      } else {
+        thunkAPI.dispatch(chatActions.appendMessage(sub.message));
+        thunkAPI.extra.chatRepo.messagesDelivered([sub.message.conversationID]);
+      }
     });
   }
 );
@@ -94,6 +105,13 @@ const chatSlice = createSlice({
       const conv = state.conversations!.splice(index, 1)[0];
       conv.messages.push(message);
       state.conversations?.unshift(conv);
+    },
+    updateMessage(state: ChatState, action: PayloadAction<Message>) {
+      const message = action.payload;
+      const conv = state.conversations!.find(c => c.id == message.conversationID);
+      if (!conv) return;
+      const mIndex = conv.messages.findIndex(m => m.id == message.id);
+      conv.messages.splice(mIndex, 1, message);
     },
   },
   extraReducers: builder => {

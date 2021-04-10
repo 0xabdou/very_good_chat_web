@@ -1,7 +1,8 @@
 import {anything, deepEqual, instance, mock, verify, when} from "ts-mockito";
-import {ApolloClient, ApolloQueryResult} from "@apollo/client";
+import {ApolloClient, ApolloQueryResult, FetchResult} from "@apollo/client";
 import ChatAPI from "../../../../../src/features/chat/data/sources/chat-api";
 import {GetConversations} from "../../../../../src/_generated/GetConversations";
+import Observable from "zen-observable";
 import {
   mockConversation,
   mockGQLConversation,
@@ -14,10 +15,18 @@ import {
 import {
   GET_CONVERSATIONS,
   GET_OR_CREATE_OTO_CONVERSATION,
-  SEND_MESSAGE
+  MESSAGES_DELIVERED,
+  SEND_MESSAGE,
+  SUBSCRIBE_TO_MESSAGE
 } from "../../../../../src/features/chat/data/graphql";
 import {GetOrCreateOTOConversation} from "../../../../../src/_generated/GetOrCreateOTOConversation";
 import {SendMessage} from "../../../../../src/_generated/SendMessage";
+import {
+  MessagesDelivered,
+  MessagesDeliveredVariables
+} from "../../../../../src/_generated/MessagesDelivered";
+import {SubscribeToMessages} from "../../../../../src/_generated/SubscribeToMessages";
+import {MessageSub} from "../../../../../src/features/chat/types/message";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 
@@ -91,6 +100,63 @@ describe('sendMessage', () => {
     verify(MockApolloClient.mutate(deepEqual({
       mutation: SEND_MESSAGE,
       variables: {message: mockSendMessageInput}
+    }))).once();
+  });
+});
+
+describe('messagesDelivered', () => {
+  it('should call the right api', async () => {
+    // arrange
+    const messagesDelivered = 123243;
+    const conversationIDs = [1, 2, 3];
+    when(MockApolloClient.mutate(anything())).thenResolve({
+      data: {messagesDelivered}
+    } as ApolloQueryResult<MessagesDelivered>);
+    // act
+    const result = await chatAPI.messagesDelivered(conversationIDs);
+    // assert
+    expect(result).toBe(messagesDelivered);
+    verify(MockApolloClient.mutate<MessagesDelivered, MessagesDeliveredVariables>(deepEqual({
+      mutation: MESSAGES_DELIVERED,
+      variables: {conversationIDs}
+    }))).once();
+  });
+});
+
+describe('subscribeToMessages', () => {
+  type STMFR = FetchResult<SubscribeToMessages>;
+  it('should subscribe to messages', () => {
+    // arrange
+    const r1 = {
+      data: {
+        messages: {
+          __typename: 'MessageSub',
+          message: mockGQLMessage,
+          update: true
+        }
+      }
+    } as STMFR;
+    const r2 = {
+      data: {messages: {__typename: 'MessageSub', message: mockGQLMessage}}
+    } as STMFR;
+    const values = [r1, r2];
+    const observable = Observable.of<STMFR>(...values);
+    when(MockApolloClient.subscribe(anything())).thenReturn(observable);
+    // act
+    const result = chatAPI.subscribeToMessages();
+    // assert
+    let i = 0;
+    result.forEach(m => {
+      const messageSub: MessageSub = {
+        message: ChatAPI.parseMessage(values[i].data!.messages.message),
+        update: values[i].data!.messages.update ?? undefined
+      };
+      expect(m).toStrictEqual(messageSub);
+      i++;
+    });
+    verify(MockApolloClient.subscribe(deepEqual({
+      query: SUBSCRIBE_TO_MESSAGE,
+      fetchPolicy: 'no-cache'
     }))).once();
   });
 });

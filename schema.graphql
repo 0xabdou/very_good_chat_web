@@ -85,6 +85,11 @@ type Message {
     text: String
 }
 
+type MessageSub {
+    message: Message!
+    update: Boolean
+}
+
 type Mutation {
     acceptFriendRequest(userID: String!): Friendship!
     block(blocked_id: String!): Block!
@@ -93,6 +98,7 @@ type Mutation {
     getOrCreateOneToOneConversation(userID: String!): Conversation!
     loginWithGoogle(input: LoginInput!): LoginResponse!
     markNotificationAsSeen(notificationID: Int!): Boolean!
+    messagesDelivered(conversationIDs: [Int!]!): Int!
     register(input: UserCreation!): Me!
     sendFriendRequest(userID: String!): Friendship!
     sendMessage(message: SendMessageInput!): Message!
@@ -126,7 +132,7 @@ type Query {
 }
 
 type Subscription {
-    subscribeToMessages: Message!
+    messages: MessageSub!
 }
 
 type User {

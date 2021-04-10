@@ -18,4 +18,9 @@ export type Delivery = {
   date: number
 }
 
+export type MessageSub = {
+  message: Message,
+  update?: boolean
+}
+
 export default Message;

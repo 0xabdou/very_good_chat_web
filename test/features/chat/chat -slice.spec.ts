@@ -1,4 +1,12 @@
-import {anything, instance, mock, reset, verify, when} from "ts-mockito";
+import {
+  anything,
+  deepEqual,
+  instance,
+  mock,
+  reset,
+  verify,
+  when
+} from "ts-mockito";
 import {IChatRepository} from "../../../src/features/chat/data/chat-repository";
 import {IFileUtils} from "../../../src/shared/utils/file-utils";
 import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
@@ -21,7 +29,9 @@ import ChatError from "../../../src/features/chat/types/chat-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import Conversation from "../../../src/features/chat/types/conversation";
 import {SendMessageInput} from "../../../src/features/chat/data/sources/chat-api";
-import Message from "../../../src/features/chat/types/message";
+import Message, {MessageSub} from "../../../src/features/chat/types/message";
+import Observable from "zen-observable";
+import {waitFor} from "@testing-library/react";
 
 const MockChatRepo = mock<IChatRepository>();
 const MockFileUtils = mock<IFileUtils>();
@@ -92,6 +102,7 @@ describe('getConversations', () => {
     expect(result.type).toBe(getConversations.fulfilled.type);
     expect(result.payload).toStrictEqual([mockConversation]);
     verify(MockChatRepo.getConversations()).once();
+    verify(MockChatRepo.messagesDelivered(deepEqual([mockConversation.id]))).once();
   });
 
   it('should return the right state when rejected', async () => {
@@ -157,6 +168,7 @@ describe('getOrCreateOTOConversation', () => {
     expect(result.type).toBe(getOrCreateOTOConversation.fulfilled.type);
     expect(result.payload).toStrictEqual(mockConversation);
     verify(MockChatRepo.getOrCreateOTOConversation(userID)).once();
+    verify(MockChatRepo.messagesDelivered(deepEqual([mockConversation.id]))).once();
   });
 
   it('should return the right state if rejected', async () => {
@@ -432,5 +444,136 @@ describe('sendMessage', () => {
       // assert
       expect(result).toStrictEqual(outputState);
     });
+  });
+});
+
+describe('subscribeToMessages', () => {
+  const act = (store: AppStore) => chatActions.subscribeToMessages()(
+    store.dispatch,
+    store.getState,
+    extra
+  );
+
+  it('should dispatch the right action every time there is a message', async () => {
+    // arrange
+    const conv: Conversation = {
+      ...mockConversation,
+      id: 1234,
+      messages: [
+        {...mockMessage, id: 12345}
+      ]
+    };
+    const state: ChatState = {
+      ...initialChatState,
+      conversations: [conv]
+    };
+    const store = MockStore({chat: state} as AppState);
+    const m1: MessageSub = {
+      message: {
+        ...mockMessage,
+        conversationID: conv.id,
+        id: conv.messages[0].id,
+        text: 'SSSSSSSSSSSSSSSSSSSSSSSSSS'
+      },
+      update: true,
+    };
+    const m2: MessageSub = {
+      message: {
+        ...mockMessage,
+        conversationID: conv.id,
+        id: 592827487,
+        text: 'ZBLBOLA'
+      },
+    };
+
+    const observable = Observable.of<MessageSub>(m1, m2);
+    when(MockChatRepo.subscribeToMessages()).thenReturn(observable);
+    // act
+    act(store);
+    // wait...
+    await waitFor(() => {
+      expect(
+        store.getActions().findIndex((action: PayloadAction) => {
+          return action.type == chatActions.appendMessage.type;
+        })).not.toBe(-1);
+    });
+    // assert
+    const action1 = store.getActions().find(action => action.type == chatActions.updateMessage.type);
+    const action2 = store.getActions().find(action => action.type == chatActions.appendMessage.type);
+    expect(action1.payload).toStrictEqual(m1.message);
+    expect(action2.payload).toStrictEqual(m2.message);
+    verify(MockChatRepo.subscribeToMessages()).once();
+  });
+});
+
+describe('reducers', () => {
+  const id1 = 1;
+  const msg1: Message = {
+    ...mockMessage,
+    conversationID: id1,
+    id: 11,
+  };
+  const conv1: Conversation = {
+    ...mockConversation,
+    id: id1,
+    messages: [msg1]
+  };
+  const id2 = 2;
+  const msg2: Message = {
+    ...mockMessage,
+    conversationID: id2,
+    id: 21,
+  };
+  const conv2: Conversation = {
+    ...mockConversation,
+    id: 2,
+    messages: [msg2]
+  };
+  const state: ChatState = {
+    ...initialChatState,
+    conversations: [conv1, conv2]
+  };
+
+  test('appendMessage', () => {
+    // arrange
+    const msg: Message = {
+      ...mockMessage,
+      conversationID: id2,
+      id: 22,
+    };
+    const action: PayloadAction<Message> = chatActions.appendMessage(msg);
+    const outputState: ChatState = {
+      ...state,
+      conversations: [
+        {...conv2, messages: [...conv2.messages, msg]},
+        conv1
+      ]
+    };
+    // act
+    const result = reducer(state, action);
+    // assert
+    expect(result).toStrictEqual(outputState);
+  });
+
+  test('updateMessage', () => {
+    // arrange
+    const msg: Message = {
+      ...mockMessage,
+      conversationID: id2,
+      text: "WAAAAAAAAAAA MIIIIIIII",
+      id: 21,
+    };
+    const action: PayloadAction<Message> = chatActions.updateMessage(msg);
+    const outputState: ChatState = {
+      ...state,
+      conversations: [
+        conv1,
+        {...conv2, messages: [msg]},
+      ]
+    };
+    // act
+    const result = reducer(state, action);
+    // assert
+    expect(result).toStrictEqual(outputState);
   });
 });

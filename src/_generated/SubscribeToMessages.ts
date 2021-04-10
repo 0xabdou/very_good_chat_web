@@ -9,36 +9,42 @@ import {MediaType} from "./globalTypes";
 // GraphQL subscription operation: SubscribeToMessages
 // ====================================================
 
-export interface SubscribeToMessages_subscribeToMessages_medias {
+export interface SubscribeToMessages_messages_message_medias {
   __typename: "Media";
   url: string;
   type: MediaType;
 }
 
-export interface SubscribeToMessages_subscribeToMessages_deliveredTo {
+export interface SubscribeToMessages_messages_message_deliveredTo {
   __typename: "Delivery";
   userID: string;
   date: any;
 }
 
-export interface SubscribeToMessages_subscribeToMessages_seenBy {
+export interface SubscribeToMessages_messages_message_seenBy {
   __typename: "Delivery";
   userID: string;
   date: any;
 }
 
-export interface SubscribeToMessages_subscribeToMessages {
+export interface SubscribeToMessages_messages_message {
   __typename: "Message";
   id: number;
   conversationID: number;
   senderID: string;
   text: string | null;
-  medias: SubscribeToMessages_subscribeToMessages_medias[] | null;
+  medias: SubscribeToMessages_messages_message_medias[] | null;
   sentAt: any;
-  deliveredTo: SubscribeToMessages_subscribeToMessages_deliveredTo[];
-  seenBy: SubscribeToMessages_subscribeToMessages_seenBy[];
+  deliveredTo: SubscribeToMessages_messages_message_deliveredTo[];
+  seenBy: SubscribeToMessages_messages_message_seenBy[];
+}
+
+export interface SubscribeToMessages_messages {
+  __typename: "MessageSub";
+  message: SubscribeToMessages_messages_message;
+  update: boolean | null;
 }
 
 export interface SubscribeToMessages {
-  subscribeToMessages: SubscribeToMessages_subscribeToMessages;
+  messages: SubscribeToMessages_messages;
 }

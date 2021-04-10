@@ -96,26 +96,35 @@ export const SEND_MESSAGE = gql`
     }
 `;
 
+export const MESSAGES_DELIVERED = gql`
+    mutation MessagesDelivered($conversationIDs: [Int!]!) {
+        messagesDelivered(conversationIDs: $conversationIDs)
+    }
+`;
+
 export const SUBSCRIBE_TO_MESSAGE = gql`
     subscription SubscribeToMessages {
-        subscribeToMessages {
-            id
-            conversationID
-            senderID
-            text
-            medias {
-                url
-                type
+        messages{
+            message {
+                id
+                conversationID
+                senderID
+                text
+                medias {
+                    url
+                    type
+                }
+                sentAt
+                deliveredTo {
+                    userID
+                    date
+                }
+                seenBy {
+                    userID
+                    date
+                }
             }
-            sentAt
-            deliveredTo {
-                userID
-                date
-            }
-            seenBy {
-                userID
-                date
-            }
+            update
         }
     }
 `;

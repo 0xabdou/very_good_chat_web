@@ -1,5 +1,5 @@
 import Conversation, {UsersLastSeen} from "../../types/conversation";
-import Message, {Delivery} from "../../types/message";
+import Message, {Delivery, MessageSub} from "../../types/message";
 import {ApolloClient} from "@apollo/client";
 import {
   GetConversations,
@@ -8,6 +8,7 @@ import {
 import {
   GET_CONVERSATIONS,
   GET_OR_CREATE_OTO_CONVERSATION,
+  MESSAGES_DELIVERED,
   SEND_MESSAGE,
   SUBSCRIBE_TO_MESSAGE
 } from "../graphql";
@@ -27,6 +28,10 @@ import {
 } from "../../../../_generated/GetOrCreateOTOConversation";
 import {SubscribeToMessages} from "../../../../_generated/SubscribeToMessages";
 import {Observable} from "@apollo/client/utilities/observables/Observable";
+import {
+  MessagesDelivered,
+  MessagesDeliveredVariables
+} from "../../../../_generated/MessagesDelivered";
 
 export interface IChatAPI {
   getConversations(): Promise<Conversation[]>;
@@ -35,7 +40,9 @@ export interface IChatAPI {
 
   sendMessage(input: SendMessageInput): Promise<Message>;
 
-  subscribeToMessages(): Observable<Message>;
+  messagesDelivered(conversationIDs: number[]): Promise<number>;
+
+  subscribeToMessages(): Observable<MessageSub>;
 }
 
 export default class ChatAPI implements IChatAPI {
@@ -68,14 +75,27 @@ export default class ChatAPI implements IChatAPI {
     return ChatAPI.parseMessage(data?.sendMessage!);
   }
 
-  subscribeToMessages(): Observable<Message> {
+  async messagesDelivered(conversationIDs: number[]): Promise<number> {
+    const {data} = await this._client.mutate<MessagesDelivered, MessagesDeliveredVariables>({
+      mutation: MESSAGES_DELIVERED,
+      variables: {conversationIDs}
+    });
+    return data?.messagesDelivered!;
+  }
+
+  subscribeToMessages(): Observable<MessageSub> {
     const sub = this._client.subscribe<SubscribeToMessages>({
       query: SUBSCRIBE_TO_MESSAGE,
       fetchPolicy: 'no-cache'
     });
     return sub
-      .filter(({data}) => Boolean(data?.subscribeToMessages))
-      .map(({data}) => ChatAPI.parseMessage(data!.subscribeToMessages));
+      .filter(({data}) => Boolean(data?.messages))
+      .map(({data}) => {
+        return {
+          message: ChatAPI.parseMessage(data!.messages.message),
+          update: data!.messages.update ?? undefined
+        };
+      });
   }
 
   static parseConversation(conv: GetConversations_getConversations): Conversation {

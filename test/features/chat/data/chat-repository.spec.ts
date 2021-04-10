@@ -10,6 +10,8 @@ import {
   mockMessage,
   mockSendMessageInput
 } from "../../../mock-objects";
+import Observable from "zen-observable";
+import {MessageSub} from "../../../../src/features/chat/types/message";
 
 const MockChatAPI = mock<IChatAPI>();
 
@@ -80,4 +82,29 @@ describe('sendMessage', () => {
     expect(result).toStrictEqual(right(mockMessage));
     verify(MockChatAPI.sendMessage(mockSendMessageInput)).once();
   });
+});
+
+describe('messagesDelivered', () => {
+  it('should return a number', async () => {
+    // arrange
+    const messagesDelivered = 12314;
+    const ids = [12312, 123, 123123];
+    when(MockChatAPI.messagesDelivered(anything())).thenResolve(messagesDelivered);
+    // act
+    const result = await chatRepo.messagesDelivered(ids);
+    // assert
+    expect(result).toStrictEqual(right(messagesDelivered));
+    verify(MockChatAPI.messagesDelivered(ids)).once();
+  });
+});
+
+describe('subscribeToMessages', () => {
+  // arrange
+  const observable = Observable.of<MessageSub>({message: mockMessage});
+  when(MockChatAPI.subscribeToMessages()).thenReturn(observable);
+  // act
+  const result = chatRepo.subscribeToMessages();
+  // assert
+  verify(MockChatAPI.subscribeToMessages()).once();
+  expect(result).toBe(observable);
 });

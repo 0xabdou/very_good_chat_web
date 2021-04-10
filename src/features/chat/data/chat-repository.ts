@@ -1,5 +1,5 @@
 import Conversation from "../types/conversation";
-import Message from "../types/message";
+import Message, {MessageSub} from "../types/message";
 import {IChatAPI, SendMessageInput} from "./sources/chat-api";
 import {Either, left, right} from "fp-ts/Either";
 import ChatError from "../types/chat-error";
@@ -13,7 +13,9 @@ export interface IChatRepository {
 
   sendMessage(input: SendMessageInput): Promise<Either<ChatError, Message>>;
 
-  subscribeToMessages(): Observable<Message>;
+  messagesDelivered(conversationIDs: number[]): Promise<Either<ChatError, number>>;
+
+  subscribeToMessages(): Observable<MessageSub>;
 }
 
 export default class ChatRepository implements IChatRepository {
@@ -35,7 +37,11 @@ export default class ChatRepository implements IChatRepository {
     return this._leftOrRight(() => this._chatAPI.sendMessage(input));
   }
 
-  subscribeToMessages(): Observable<Message> {
+  messagesDelivered(conversationIDs: number[]): Promise<Either<ChatError, number>> {
+    return this._leftOrRight(() => this._chatAPI.messagesDelivered(conversationIDs));
+  }
+
+  subscribeToMessages(): Observable<MessageSub> {
     return this._chatAPI.subscribeToMessages();
   }
 
