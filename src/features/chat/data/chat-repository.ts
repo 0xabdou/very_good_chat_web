@@ -15,6 +15,8 @@ export interface IChatRepository {
 
   messagesDelivered(conversationIDs: number[]): Promise<Either<ChatError, number>>;
 
+  messagesSeen(conversationID: number): Promise<Either<ChatError, number>>;
+
   subscribeToMessages(): Observable<MessageSub>;
 }
 
@@ -39,6 +41,10 @@ export default class ChatRepository implements IChatRepository {
 
   messagesDelivered(conversationIDs: number[]): Promise<Either<ChatError, number>> {
     return this._leftOrRight(() => this._chatAPI.messagesDelivered(conversationIDs));
+  }
+
+  messagesSeen(conversationID: number): Promise<Either<ChatError, number>> {
+    return this._leftOrRight(() => this._chatAPI.messagesSeen(conversationID));
   }
 
   subscribeToMessages(): Observable<MessageSub> {

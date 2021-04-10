@@ -52,7 +52,7 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
     }
     const pendingMessage: Message = {
       id: input.tempID,
-      senderID: 'pending',
+      senderID: thunkAPI.getState().me.me!.id,
       conversationID: input.conversationID,
       text: input.text,
       medias,
@@ -72,12 +72,20 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
   }
 );
 
+const messagesSeen = createAsyncThunk<void, number, ThunkAPI<ChatError>>(
+  'chat/messagesSeen',
+  (conversationID, thunkAPI) => {
+    void thunkAPI.extra.chatRepo.messagesSeen(conversationID);
+  }
+);
+
 const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToMessages',
   async (_, thunkAPI) => {
     thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((sub) => {
       if (sub.update) {
-        thunkAPI.dispatch(chatActions.updateMessage(sub.message));
+        const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
+        thunkAPI.dispatch(chatActions.updateMessage({...sub.message, mine}));
       } else {
         thunkAPI.dispatch(chatActions.appendMessage(sub.message));
         thunkAPI.extra.chatRepo.messagesDelivered([sub.message.conversationID]);
@@ -106,12 +114,16 @@ const chatSlice = createSlice({
       conv.messages.push(message);
       state.conversations?.unshift(conv);
     },
-    updateMessage(state: ChatState, action: PayloadAction<Message>) {
+    updateMessage(state: ChatState, action: PayloadAction<Message & { mine?: boolean }>) {
       const message = action.payload;
       const conv = state.conversations!.find(c => c.id == message.conversationID);
       if (!conv) return;
       const mIndex = conv.messages.findIndex(m => m.id == message.id);
       conv.messages.splice(mIndex, 1, message);
+      if (message.mine && message.seenBy[0]) {
+        const sb = message.seenBy[0];
+        if (conv.seenDates[sb.userID] < sb.date) conv.seenDates[sb.userID] = sb.date;
+      }
     },
   },
   extraReducers: builder => {
@@ -152,8 +164,6 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.rejected, (state, action) => {
         const {conversationID, tempID} = action.meta.arg;
-        console.log(conversationID);
-        console.log(state.conversations);
         const conv = state.conversations!.find(c => c.id == conversationID)!;
         const messageIndex = conv.messages.findIndex(m => m.id == tempID);
         conv.messages[messageIndex].error = true;
@@ -167,6 +177,7 @@ export const chatActions = {
   getConversations,
   getOrCreateOTOConversation,
   sendMessage,
+  messagesSeen,
   subscribeToMessages,
   ...chatSlice.actions
 };

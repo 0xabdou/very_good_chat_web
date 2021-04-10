@@ -51,9 +51,15 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     deliveryStatusType = DeliveryStatusType.SENDING;
     date = message.sentAt;
   } else if (message.seenBy[0]) {
-    const lastSeen = props.conversation.seenDates[message.seenBy[0].userID] ?? 0;
-    if (message.sentAt == lastSeen) deliveryStatusType = DeliveryStatusType.SEEN;
-    else deliveryStatusType = DeliveryStatusType.NONE;
+    const sb = message.seenBy[0];
+    const lastSeen = props.conversation.seenDates[sb.userID] ?? 0;
+    if (sb.date == lastSeen) {
+      if (after && _sameSender(message, after) && after.seenBy[0]) {
+        deliveryStatusType = DeliveryStatusType.NONE;
+      } else {
+        deliveryStatusType = DeliveryStatusType.SEEN;
+      }
+    } else deliveryStatusType = DeliveryStatusType.NONE;
     date = message.seenBy[0].date;
   } else if (message.deliveredTo[0]) {
     deliveryStatusType = DeliveryStatusType.DELIVERED;

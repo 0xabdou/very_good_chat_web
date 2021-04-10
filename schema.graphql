@@ -99,6 +99,7 @@ type Mutation {
     loginWithGoogle(input: LoginInput!): LoginResponse!
     markNotificationAsSeen(notificationID: Int!): Boolean!
     messagesDelivered(conversationIDs: [Int!]!): Int!
+    messagesSeen(conversationID: Int!): Int!
     register(input: UserCreation!): Me!
     sendFriendRequest(userID: String!): Friendship!
     sendMessage(message: SendMessageInput!): Message!

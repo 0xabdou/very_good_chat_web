@@ -9,6 +9,7 @@ import {
   GET_CONVERSATIONS,
   GET_OR_CREATE_OTO_CONVERSATION,
   MESSAGES_DELIVERED,
+  MESSAGES_SEEN,
   SEND_MESSAGE,
   SUBSCRIBE_TO_MESSAGE
 } from "../graphql";
@@ -32,6 +33,10 @@ import {
   MessagesDelivered,
   MessagesDeliveredVariables
 } from "../../../../_generated/MessagesDelivered";
+import {
+  MessagesSeen,
+  MessagesSeenVariables
+} from "../../../../_generated/MessagesSeen";
 
 export interface IChatAPI {
   getConversations(): Promise<Conversation[]>;
@@ -41,6 +46,8 @@ export interface IChatAPI {
   sendMessage(input: SendMessageInput): Promise<Message>;
 
   messagesDelivered(conversationIDs: number[]): Promise<number>;
+
+  messagesSeen(conversationID: number): Promise<number>;
 
   subscribeToMessages(): Observable<MessageSub>;
 }
@@ -83,6 +90,33 @@ export default class ChatAPI implements IChatAPI {
     return data?.messagesDelivered!;
   }
 
+  static parseConversation(conv: GetConversations_getConversations): Conversation {
+    const seenDates: UsersLastSeen = {};
+    let pIDs: string[] = [];
+    conv.participants.forEach(p => {
+      seenDates[p.id] = 0;
+      pIDs.push(p.id);
+    });
+    let mIdx = conv.messages.length - 1;
+    while (mIdx >= 0 && pIDs.length) {
+      const message = conv.messages[mIdx];
+      for (let seenBy of message.seenBy) {
+        if (pIDs.indexOf(seenBy.userID) != -1) {
+          seenDates[seenBy.userID] = seenBy.date;
+          pIDs = pIDs.filter(id => id != seenBy.userID);
+        }
+      }
+      mIdx--;
+    }
+    return {
+      id: conv.id,
+      participants: conv.participants.map(UserAPI.parseUser),
+      messages: conv.messages.map(ChatAPI.parseMessage),
+      type: ConversationType[conv.type],
+      seenDates
+    };
+  }
+
   subscribeToMessages(): Observable<MessageSub> {
     const sub = this._client.subscribe<SubscribeToMessages>({
       query: SUBSCRIBE_TO_MESSAGE,
@@ -98,31 +132,12 @@ export default class ChatAPI implements IChatAPI {
       });
   }
 
-  static parseConversation(conv: GetConversations_getConversations): Conversation {
-    const seenDates: UsersLastSeen = {};
-    let pIDs: string[] = [];
-    conv.participants.forEach(p => {
-      seenDates[p.id] = 0;
-      pIDs.push(p.id);
+  async messagesSeen(conversationID: number): Promise<number> {
+    const {data} = await this._client.mutate<MessagesSeen, MessagesSeenVariables>({
+      mutation: MESSAGES_SEEN,
+      variables: {conversationID}
     });
-    let mIdx = conv.messages.length - 1;
-    while (mIdx >= 0 && pIDs.length) {
-      const message = conv.messages[mIdx];
-      for (let seenBy of message.seenBy) {
-        if (pIDs.indexOf(seenBy.userID) != -1) {
-          seenDates[seenBy.userID] = message.sentAt;
-          pIDs = pIDs.filter(id => id != seenBy.userID);
-        }
-      }
-      mIdx--;
-    }
-    return {
-      id: conv.id,
-      participants: conv.participants.map(UserAPI.parseUser),
-      messages: conv.messages.map(ChatAPI.parseMessage),
-      type: ConversationType[conv.type],
-      seenDates
-    };
+    return data?.messagesSeen!;
   }
 
   static parseMessage(message: SendMessage_sendMessage): Message {

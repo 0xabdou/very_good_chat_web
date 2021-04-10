@@ -12,7 +12,9 @@ import {IFileUtils} from "../../../src/shared/utils/file-utils";
 import StoreExtraArg from "../../../src/core/redux/store-extra-arg";
 import {
   getMockStore,
+  initialMeState,
   mockConversation,
+  mockMe,
   mockMedia,
   mockMessage,
   mockTheDate
@@ -36,7 +38,10 @@ import {waitFor} from "@testing-library/react";
 const MockChatRepo = mock<IChatRepository>();
 const MockFileUtils = mock<IFileUtils>();
 const MockStore = getMockStore();
-let mockStore = MockStore({chat: initialChatState} as AppState);
+let mockStore = MockStore({
+  chat: initialChatState,
+  me: {...initialMeState, me: mockMe}
+} as AppState);
 const extra = {
   chatRepo: instance(MockChatRepo),
   fileUtils: instance(MockFileUtils),
@@ -47,7 +52,10 @@ const [spy, mockDate] = mockTheDate();
 beforeEach(() => {
   reset(MockChatRepo);
   reset(MockFileUtils);
-  mockStore = MockStore({chat: initialChatState} as AppState);
+  mockStore = MockStore({
+    chat: initialChatState,
+    me: {...initialMeState, me: mockMe}
+  } as AppState);
 });
 
 afterAll(() => {
@@ -265,7 +273,7 @@ describe('sendMessage', () => {
   const pendingMessage: Message = {
     id: input.tempID,
     conversationID: input.conversationID,
-    senderID: 'pending',
+    senderID: mockMe.id,
     text: input.text,
     medias: [mockMedia],
     sentAt: mockDate.getTime(),
@@ -467,7 +475,10 @@ describe('subscribeToMessages', () => {
       ...initialChatState,
       conversations: [conv]
     };
-    const store = MockStore({chat: state} as AppState);
+    const store = MockStore({
+      chat: state,
+      me: {...initialMeState, me: mockMe}
+    } as AppState);
     const m1: MessageSub = {
       message: {
         ...mockMessage,
@@ -481,12 +492,21 @@ describe('subscribeToMessages', () => {
       message: {
         ...mockMessage,
         conversationID: conv.id,
+        senderID: mockMe.id,
+        id: conv.messages[0].id,
+        text: 'SSSSSSSSSSSSSSSSSSSSSSSSSS'
+      },
+      update: true,
+    };
+    const m3: MessageSub = {
+      message: {
+        ...mockMessage,
+        conversationID: conv.id,
         id: 592827487,
         text: 'ZBLBOLA'
       },
     };
-
-    const observable = Observable.of<MessageSub>(m1, m2);
+    const observable = Observable.of<MessageSub>(m1, m2, m3);
     when(MockChatRepo.subscribeToMessages()).thenReturn(observable);
     // act
     act(store);
@@ -498,10 +518,14 @@ describe('subscribeToMessages', () => {
         })).not.toBe(-1);
     });
     // assert
-    const action1 = store.getActions().find(action => action.type == chatActions.updateMessage.type);
-    const action2 = store.getActions().find(action => action.type == chatActions.appendMessage.type);
-    expect(action1.payload).toStrictEqual(m1.message);
-    expect(action2.payload).toStrictEqual(m2.message);
+    const acts = store.getActions();
+    const idx = acts.findIndex(action => action.type == chatActions.updateMessage.type);
+    expect(acts[idx].type).toBe(chatActions.updateMessage.type);
+    expect(acts[idx].payload).toStrictEqual({...m1.message, mine: false});
+    expect(acts[idx + 1].type).toBe(chatActions.updateMessage.type);
+    expect(acts[idx + 1].payload).toStrictEqual({...m2.message, mine: true});
+    expect(acts[idx + 2].type).toBe(chatActions.appendMessage.type);
+    expect(acts[idx + 2].payload).toStrictEqual(m3.message);
     verify(MockChatRepo.subscribeToMessages()).once();
   });
 });
@@ -510,6 +534,7 @@ describe('reducers', () => {
   const id1 = 1;
   const msg1: Message = {
     ...mockMessage,
+    senderID: 'senderID1',
     conversationID: id1,
     id: 11,
   };
@@ -521,13 +546,15 @@ describe('reducers', () => {
   const id2 = 2;
   const msg2: Message = {
     ...mockMessage,
+    senderID: 'senderID2',
     conversationID: id2,
     id: 21,
   };
   const conv2: Conversation = {
     ...mockConversation,
     id: 2,
-    messages: [msg2]
+    messages: [msg2],
+    seenDates: {[msg1.senderID]: 0},
   };
   const state: ChatState = {
     ...initialChatState,
@@ -539,6 +566,7 @@ describe('reducers', () => {
     const msg: Message = {
       ...mockMessage,
       conversationID: id2,
+      senderID: msg1.senderID,
       id: 22,
     };
     const action: PayloadAction<Message> = chatActions.appendMessage(msg);
@@ -555,25 +583,62 @@ describe('reducers', () => {
     expect(result).toStrictEqual(outputState);
   });
 
-  test('updateMessage', () => {
-    // arrange
-    const msg: Message = {
-      ...mockMessage,
-      conversationID: id2,
-      text: "WAAAAAAAAAAA MIIIIIIII",
-      id: 21,
-    };
-    const action: PayloadAction<Message> = chatActions.updateMessage(msg);
-    const outputState: ChatState = {
-      ...state,
-      conversations: [
-        conv1,
-        {...conv2, messages: [msg]},
-      ]
-    };
-    // act
-    const result = reducer(state, action);
-    // assert
-    expect(result).toStrictEqual(outputState);
+  describe('updateMessage', () => {
+    test('mine', () => {
+      // arrange
+      const date = new Date().getTime() + 10000;
+      const msg: Message & { mine?: boolean } = {
+        ...mockMessage,
+        conversationID: id2,
+        text: "WAAAAAAAAAAA MIIIIIIII",
+        seenBy: [
+          {userID: msg1.senderID, date}
+        ],
+        id: 21,
+        mine: true,
+      };
+      const action: PayloadAction<Message> = chatActions.updateMessage(msg);
+      const outputState: ChatState = {
+        ...state,
+        conversations: [
+          conv1,
+          {
+            ...conv2,
+            seenDates: {
+              ...conv2.seenDates,
+              [msg.seenBy[0].userID]: msg.seenBy[0].date
+            },
+            messages: [msg]
+          },
+        ]
+      };
+      // act
+      const result = reducer(state, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
+    test('not mine', () => {
+      // arrange
+      const msg: Message = {
+        ...mockMessage,
+        conversationID: id2,
+        text: "WAAAAAAAAAAA MIIIIIIII",
+        id: 21,
+      };
+      const action: PayloadAction<Message> = chatActions.updateMessage(msg);
+      const outputState: ChatState = {
+        ...state,
+        conversations: [
+          conv1,
+          {...conv2, messages: [msg]},
+        ]
+      };
+      // act
+      const result = reducer(state, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
   });
+
 });

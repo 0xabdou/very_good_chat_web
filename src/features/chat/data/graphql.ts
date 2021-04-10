@@ -102,6 +102,12 @@ export const MESSAGES_DELIVERED = gql`
     }
 `;
 
+export const MESSAGES_SEEN = gql`
+    mutation MessagesSeen($conversationID: Int!) {
+        messagesSeen(conversationID: $conversationID)
+    }
+`;
+
 export const SUBSCRIBE_TO_MESSAGE = gql`
     subscription SubscribeToMessages {
         messages{
