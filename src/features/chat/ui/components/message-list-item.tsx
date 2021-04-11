@@ -83,20 +83,21 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
       <div className={classes.wrapper} ref={ref}>
         <div className={classes.incomingAvatarWrapper}>
           {showIncomingAvatar &&
-          <Avatar className={classes.incomingAvatar}
-                  src={otherUser.photo?.small}/>}
+          <Avatar
+            className={classes.incomingAvatar}
+            src={otherUser.photo?.small}
+          />}
         </div>
-        <div className={classes.bubble}>
+        <span className={classes.bubble}>
           {message.text}
-        </div>
+        </span>
         <div className={classes.status}>
           {showDeliveryStatus &&
           <DeliveryStatus
             type={deliveryStatusType}
             date={date}
             photoURL={otherUser.photo?.small}
-          />
-          }
+          />}
         </div>
       </div>
     </div>
@@ -153,6 +154,7 @@ const useStyles = makeStyles<Theme, messageListItemProps>({
       padding: '8px 12px',
       maxWidth: '70%',
       overflowWrap: 'break-word',
+      whiteSpace: 'pre-wrap',
       borderRadius: `${tl} ${tr} ${br} ${bl}`,
       background,
       color

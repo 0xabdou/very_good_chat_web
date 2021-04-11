@@ -13,13 +13,14 @@ export type CircleButtonStyle = {
   size?: number,
   bgColor?: string,
   iconColor?: string,
-  margin?: string,
+  disableElevation?: boolean,
 };
 
 
 export type CircleButtonProps = {
   icon: string,
   onClick: () => void,
+  className?: string,
   'data-testid'?: string,
 } & CircleButtonStyle;
 
@@ -27,10 +28,11 @@ const CircleButton = (props: CircleButtonProps) => {
   const classes = useStyles(props);
   return (
     <Button
-      className={classes.button}
+      className={`${classes.button} ${props.className ?? ''}`}
       onClick={props.onClick}
       variant='contained'
       data-testid={props["data-testid"]}
+      disableElevation={props.disableElevation}
     >
       <Icon>{props.icon}</Icon>
     </Button>
@@ -52,7 +54,6 @@ const useStyles = makeStyles<Theme, CircleButtonStyle>({
     const iconColor = props.iconColor || defaultIconColor;
     const l = getLuminance(bgColor.main);
     const color = l > 0.5 ? '#000000' : '#ffffff';
-    const margin = props.margin ?? '0';
     return ({
       minWidth: `${size}px`,
       minHeight: `${size}px`,
@@ -60,14 +61,15 @@ const useStyles = makeStyles<Theme, CircleButtonStyle>({
       maxHeight: `${size}px`,
       backgroundColor: `${bgColor.main}`,
       color: color,
-      margin: margin,
       borderRadius: '50%',
+      padding: 0,
       '&:hover': {
         backgroundColor: `${bgColor.dark}`,
       },
       '& .MuiButton-label span': {
-        fontSize: `${size / 2}px`,
+        fontSize: `${size * 0.6}px`,
         color: iconColor,
+        margin: 'auto',
       }
     });
   }
