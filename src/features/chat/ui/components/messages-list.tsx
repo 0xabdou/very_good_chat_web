@@ -35,6 +35,7 @@ const MessagesList = (props: MessagesListProps) => {
               itemContent={itemContent}
               followOutput="smooth"
               initialTopMostItemIndex={props.conversation.messages.length - 1}
+              overscan={600}
             />
           );
         }}

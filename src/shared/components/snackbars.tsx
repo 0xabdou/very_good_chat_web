@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import MuiAlert, {Color} from "@material-ui/lab/Alert";
 import {Snackbar} from "@material-ui/core";
 
@@ -28,7 +28,7 @@ export const AlertSnackbar = (props: AlertSnackbarProps) => {
 type ErrorSnackbarProps<ErrorType> = {
   currentError: ErrorType | null,
   stringify: (e: ErrorType | null) => string,
-  exclude: ErrorType[],
+  exclude?: ErrorType[],
 };
 
 export function ErrorSnackbar<ErrorType>(props: ErrorSnackbarProps<ErrorType>) {
@@ -37,17 +37,18 @@ export function ErrorSnackbar<ErrorType>(props: ErrorSnackbarProps<ErrorType>) {
 
   // Show the snackbar if there was an error (must not be excluded)
   useEffect(() => {
-    if (props.currentError != null && props.exclude.indexOf(props.currentError) == -1) {
+    if (props.currentError != null
+      && (!props.exclude || props.exclude.indexOf(props.currentError) == -1)) {
       setError(props.currentError);
       setSnackbarVisible(true);
     }
   }, [props.currentError]);
 
-  const closeSnackbar = (event?: React.SyntheticEvent, reason?: string) => {
+  const closeSnackbar = useCallback((event?: React.SyntheticEvent, reason?: string) => {
     // Don't dismiss the alert if the user clicks out of it
     if (reason == 'clickaway') return;
     setSnackbarVisible(false);
-  };
+  }, [setSnackbarVisible]);
 
   return (
     <AlertSnackbar

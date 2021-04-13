@@ -9,6 +9,7 @@ import ChatTextField from "./components/chat-text-field";
 import MessagesList from "./components/messages-list";
 import {useDropzone} from "react-dropzone";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import {ErrorSnackbar} from "../../../shared/components/snackbars";
 
 const ConversationScreen = () => {
   // redux
@@ -20,6 +21,8 @@ const ConversationScreen = () => {
   const [isActive, setIsActive] = useState(document.hasFocus());
   // Files picked to be sent in the chat
   const [files, setFiles] = useState<File[]>([]);
+  // File errors
+  const [fileError, setFileError] = useState<CustomError | null>(null);
   // The current conversation
   // we get the id from the url params and get the actual conversation from the state
   const conversationID = useParams<{ id: string }>().id;
@@ -45,6 +48,31 @@ const ConversationScreen = () => {
     setFiles(files => files.filter((_, i) => i != index));
   }, []);
 
+  // Callback for when a file is picked
+  const onDrop = useCallback((newFiles: File[]) => {
+    if (newFiles.length) {
+      setFiles(files => {
+        const allFiles = [...files, ...newFiles];
+        if (allFiles.length > 10) {
+          setFileError(error => ({
+            message: "You can't send more than 10 files",
+            pleaseRerender: (error?.pleaseRerender ?? 0) + 1,
+          }));
+          return files;
+        }
+        const totalSize = allFiles.reduce((size: number, file) => size + file.size, 0);
+        if (totalSize > 25000000) {
+          setFileError(error => ({
+            message: "You can't send more than 25mb",
+            pleaseRerender: (error?.pleaseRerender ?? 0) + 1,
+          }));
+          return files;
+        }
+        return allFiles;
+      });
+    }
+  }, []);
+
   // Callback for when the user sends the message
   const submit = useCallback((text: string) => {
     // Remove leading/trailing whitespaces from the message text
@@ -61,13 +89,10 @@ const ConversationScreen = () => {
     setFiles([]);
   }, [conversationID, files]);
 
-  // Callback for when a file is picked
-  const onDrop = useCallback((newFiles: File[]) => {
-    if (newFiles.length) {
-      setFiles(files => [...files, ...newFiles]);
-    }
-  }, []);
-
+  // Identity function for error snackbar
+  const stringifyCustomError = useCallback(
+    (error: CustomError | null) => error?.message ?? '', []
+  );
   // React dropzone stuff
   const {getRootProps, getInputProps, isDragActive, open} = useDropzone({
     onDrop,
@@ -111,9 +136,15 @@ const ConversationScreen = () => {
         Drop files here
       </div>
       <input {...inputProps}/>
+      <ErrorSnackbar<CustomError>
+        currentError={fileError}
+        stringify={stringifyCustomError}
+      />
     </div>
   );
 };
+
+type CustomError = { message: string, pleaseRerender: number }
 
 const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
   outer: {
