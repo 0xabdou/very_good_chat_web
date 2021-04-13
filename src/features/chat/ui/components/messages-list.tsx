@@ -1,7 +1,7 @@
 import React, {useCallback} from "react";
 import {makeStyles} from "@material-ui/core";
 import Message from "../../types/message";
-import MessageListItem from "./message-list-item";
+import MessageListItem from "./message-list-item/message-list-item";
 import {ItemContent, Virtuoso} from "react-virtuoso";
 import AutoSizer from "react-virtualized-auto-sizer";
 import Conversation from "../../types/conversation";

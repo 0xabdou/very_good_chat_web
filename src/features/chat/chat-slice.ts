@@ -67,7 +67,12 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
       text: input.text,
       medias: input.medias
     });
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      setTimeout(() => {
+        pendingMessage.medias?.forEach(thunkAPI.extra.fileUtils.freeMedia);
+      }, 2000);
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );

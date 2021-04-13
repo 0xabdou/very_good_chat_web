@@ -1,10 +1,10 @@
 import React, {useRef} from "react";
 import {Avatar, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import Message from "../../types/message";
-import Conversation from "../../types/conversation";
-import DeliveryStatus, {DeliveryStatusType} from "./delivery-status";
-import BubbleMedias from "./bubble-medias";
+import Message from "../../../types/message";
+import Conversation from "../../../types/conversation";
+import DeliveryStatus, {DeliveryStatusType} from "../delivery-status";
+import MessageMediaGrid from "./message-media-grid";
 
 export type MessageListItemProps = {
   conversation: Conversation,
@@ -94,7 +94,7 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
         <span className={classes.bubble}>
           {
             hasMedia &&
-            <BubbleMedias medias={message.medias!} messageID={message.id}/>
+            <MessageMediaGrid medias={message.medias!} messageID={message.id}/>
           }
           {message.text &&
           <div className={classes.bubbleText}>{message.text}</div>}

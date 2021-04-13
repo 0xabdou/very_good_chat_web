@@ -1,5 +1,5 @@
 import React from "react";
-import {Dialog, Slide} from "@material-ui/core";
+import {Dialog, makeStyles, Slide} from "@material-ui/core";
 import {TransitionProps} from "@material-ui/core/transitions";
 
 const Transition = React.forwardRef(function Transition(
@@ -16,13 +16,23 @@ type FullScreenDialogProps = {
 };
 
 const FullScreenDialog = (props: FullScreenDialogProps) => {
-
+  const classes = useStyles();
   return (
-    <Dialog fullScreen open={props.visible} onClose={props.onClose}
-            TransitionComponent={Transition}>
+    <Dialog
+      className={classes.root}
+      fullScreen
+      open={props.visible} onClose={props.onClose}
+      TransitionComponent={Transition}
+    >
       {props.children}
     </Dialog>
   );
 };
+
+const useStyles = makeStyles({
+  root: {
+    position: 'relative',
+  }
+});
 
 export default FullScreenDialog;

@@ -6,6 +6,7 @@ export interface IFileUtils {
   fileToURL: (photo: File) => Promise<string>;
   urlToFile: (url: string, name: string) => Promise<File>;
   getMedia: (file: File) => Promise<Media>;
+  freeMedia: (media: Media) => Promise<void>;
   cropPhoto: (photoURL: string, cropArea: Area) => Promise<string>;
   getPhotoDimensions: (photoURL: string) => Promise<{ height: number, width: number }>,
 }
@@ -29,7 +30,12 @@ export class FileUtils implements IFileUtils {
     else if (ext == 'mp4') type = MediaType.VIDEO;
     else throw new Error('Unsupported media type');
     const url = await this.fileToURL(file);
-    return {url, type};
+    return {url, thumbUrl: url, type};
+  }
+
+  async freeMedia(media: Media) {
+    URL.revokeObjectURL(media.url);
+    if (media.thumbUrl) URL.revokeObjectURL(media.thumbUrl);
   }
 
   async cropPhoto(photoURL: string, cropArea: Area): Promise<string> {
