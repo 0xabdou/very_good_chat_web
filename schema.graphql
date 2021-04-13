@@ -70,6 +70,7 @@ type Me {
 }
 
 type Media {
+    thumbUrl: String
     type: MediaType!
     url: String!
 }

@@ -211,11 +211,13 @@ export const mockBlock: Block = {
 export const mockGQLMedia: SendMessage_sendMessage_medias = {
   __typename: 'Media',
   url: 'media url',
+  thumbUrl: 'thumb media url',
   type: GQLMediaType.IMAGE
 };
 
 export const mockMedia: Media = {
   url: mockGQLMedia.url,
+  thumbUrl: mockGQLMedia.thumbUrl ?? undefined,
   type: MediaType[mockGQLMedia.type]
 };
 

@@ -85,7 +85,7 @@ const PhotoCropper = (props: PhotoCropperProps) => {
 
 const Action = (props: CircleButtonProps) => {
   return (
-    <CircleButton {...props} size={40} margin='auto 5px'/>
+    <CircleButton {...props} size={40}/>
   );
 };
 

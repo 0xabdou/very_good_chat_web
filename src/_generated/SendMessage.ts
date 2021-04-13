@@ -3,7 +3,7 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
-import { SendMessageInput, MediaType } from "./globalTypes";
+import {MediaType, SendMessageInput} from "./globalTypes";
 
 // ====================================================
 // GraphQL mutation operation: SendMessage
@@ -12,6 +12,7 @@ import { SendMessageInput, MediaType } from "./globalTypes";
 export interface SendMessage_sendMessage_medias {
   __typename: "Media";
   url: string;
+  thumbUrl: string | null;
   type: MediaType;
 }
 

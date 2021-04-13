@@ -3,7 +3,7 @@
 // @generated
 // This file was automatically generated and should not be edited.
 
-import { MediaType, ConversationType } from "./globalTypes";
+import {ConversationType, MediaType} from "./globalTypes";
 
 // ====================================================
 // GraphQL mutation operation: GetOrCreateOTOConversation
@@ -22,6 +22,7 @@ export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_part
 export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages_medias {
   __typename: "Media";
   url: string;
+  thumbUrl: string | null;
   type: MediaType;
 }
 

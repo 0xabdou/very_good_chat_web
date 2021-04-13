@@ -12,6 +12,7 @@ import {MediaType} from "./globalTypes";
 export interface SubscribeToMessages_messages_message_medias {
   __typename: "Media";
   url: string;
+  thumbUrl: string | null;
   type: MediaType;
 }
 

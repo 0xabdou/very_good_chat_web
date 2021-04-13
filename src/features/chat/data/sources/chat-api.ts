@@ -157,6 +157,7 @@ export default class ChatAPI implements IChatAPI {
   static parseMedia(media: SendMessage_sendMessage_medias): Media {
     return {
       url: media.url,
+      thumbUrl: media.thumbUrl ?? undefined,
       type: MediaType[media.type]
     };
   }

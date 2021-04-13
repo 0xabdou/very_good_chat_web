@@ -19,6 +19,7 @@ export const GET_CONVERSATIONS = gql`
                 text
                 medias {
                     url
+                    thumbUrl
                     type
                 }
                 sentAt
@@ -55,6 +56,7 @@ export const GET_OR_CREATE_OTO_CONVERSATION = gql`
                 text
                 medias {
                     url
+                    thumbUrl
                     type
                 }
                 sentAt
@@ -81,6 +83,7 @@ export const SEND_MESSAGE = gql`
             text
             medias {
                 url
+                thumbUrl
                 type
             }
             sentAt
@@ -118,6 +121,7 @@ export const SUBSCRIBE_TO_MESSAGE = gql`
                 text
                 medias {
                     url
+                    thumbUrl
                     type
                 }
                 sentAt

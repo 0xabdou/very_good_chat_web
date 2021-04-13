@@ -50,15 +50,16 @@ const ConversationScreen = () => {
     // Remove leading/trailing whitespaces from the message text
     const msgText = text.trim();
     // Don't send the message if the text is empty after trimming it
-    // TODO: The message can be sent if there are files, even if the text is empty
-    if (!msgText) return;
+    if (!msgText && !files.length) return;
     // Send a message if the text is not empty
     dispatch(chatActions.sendMessage({
       conversationID: Number(conversationID),
       tempID: new Date().getTime(),
-      text: msgText,
+      text: msgText ?? undefined,
+      medias: files.length ? files : undefined
     }));
-  }, [conversationID]);
+    setFiles([]);
+  }, [conversationID, files]);
 
   // Callback for when a file is picked
   const onDrop = useCallback((newFiles: File[]) => {

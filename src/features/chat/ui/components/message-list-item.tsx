@@ -4,6 +4,7 @@ import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import Message from "../../types/message";
 import Conversation from "../../types/conversation";
 import DeliveryStatus, {DeliveryStatusType} from "./delivery-status";
+import BubbleMedias from "./bubble-medias";
 
 export type MessageListItemProps = {
   conversation: Conversation,
@@ -71,11 +72,13 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
   const showIncomingAvatar = incoming
     && (!after || (after && !_sameSender(message, after)));
   const showDeliveryStatus = !incoming || (incoming && !after);
+  const hasMedia = Boolean(message.medias && message.medias.length);
 
   const classes = useStyles({
     incoming,
     bubbleType,
-    deliveryStatus: deliveryStatusType
+    deliveryStatus: deliveryStatusType,
+    hasMedia,
   });
 
   return (
@@ -89,7 +92,12 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
           />}
         </div>
         <span className={classes.bubble}>
-          {message.text}
+          {
+            hasMedia &&
+            <BubbleMedias medias={message.medias!} messageID={message.id}/>
+          }
+          {message.text &&
+          <div className={classes.bubbleText}>{message.text}</div>}
         </span>
         <div className={classes.status}>
           {showDeliveryStatus &&
@@ -115,6 +123,7 @@ type messageListItemProps = {
   incoming: boolean,
   bubbleType: BubbleType,
   deliveryStatus: DeliveryStatusType,
+  hasMedia: boolean
 }
 
 const _getBorderRadius = (type: BubbleType): [string, string] => {
@@ -151,7 +160,7 @@ const useStyles = makeStyles<Theme, messageListItemProps>({
     }
     return {
       margin: '1px',
-      padding: '8px 12px',
+      padding: '2px',
       maxWidth: '70%',
       overflowWrap: 'break-word',
       whiteSpace: 'pre-wrap',
@@ -159,6 +168,9 @@ const useStyles = makeStyles<Theme, messageListItemProps>({
       background,
       color
     };
+  },
+  bubbleText: {
+    margin: '8px 12px',
   },
   status: {
     marginLeft: props => props.incoming ? 'auto' : '4px',
