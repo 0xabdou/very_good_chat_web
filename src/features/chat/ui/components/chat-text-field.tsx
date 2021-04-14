@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 import {BaseEmoji, Picker} from "emoji-mart";
 import MediaPreview from "./media-preview";
+import {Theme} from "@material-ui/core/styles/createMuiTheme";
 
 export type ChatTextFieldProps = {
   files: File[],
@@ -26,7 +27,12 @@ export type ChatTextFieldProps = {
 const ChatTextField = (props: ChatTextFieldProps) => {
   const [text, setText] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const classes = useStyles();
+  const classes = useStyles({typing: text.length > 0 || props.files.length > 0});
+
+  const submit = useCallback(() => {
+    props.submit(text);
+    setText('');
+  }, [text, props.submit]);
 
   // text input stuff
   const onChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -35,8 +41,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   const onKeyPress: KeyboardEventHandler = useCallback((e) => {
     if (e.code == 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      props.submit(text);
-      setText('');
+      submit();
     }
   }, [text, props.submit]);
 
@@ -65,7 +70,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
     <div className={classes.wrapper} data-testid='chat-text-field'>
       {/* The add button at the right of the text field (for picking files) */}
       <IconButton
-        className={`${classes.button} ${classes.addButton}`}
+        className={`${classes.button} ${classes.leftButton}`}
         onClick={props.addFileClicked}
       >
         <Icon className={classes.buttonIcon}>add_circle</Icon>
@@ -88,7 +93,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
             placeholder='Aa'
           />
           <IconButton
-            className={`${classes.button} ${classes.smileButton}`}
+            className={`${classes.button} ${classes.rightButton}`}
             aria-controls="emojis"
             aria-haspopup="true"
             onClick={handleClick}
@@ -97,6 +102,14 @@ const ChatTextField = (props: ChatTextFieldProps) => {
           </IconButton>
         </div>
       </div>
+      <IconButton
+        className={`${classes.button} ${classes.rightButton} ${classes.sendButton}`}
+        aria-controls="emojis"
+        aria-haspopup="true"
+        onClick={submit}
+      >
+        <Icon className={classes.buttonIcon}>send</Icon>
+      </IconButton>
       {/* This is a popover that contains the emoji picker, shown when the user
       clicks on the emoji button*/}
       <Popover
@@ -126,7 +139,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   );
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme, { typing: boolean }>({
   wrapper: {
     display: 'flex',
     width: '100%',
@@ -163,11 +176,22 @@ const useStyles = makeStyles({
     lineHeight: '1',
     flexGrow: 1,
   },
-  addButton: {
+  leftButton: {
     marginRight: '0.5rem'
   },
-  smileButton: {
+  rightButton: {
     margin: '5px',
+  },
+  sendButton: props => {
+    const value = props.typing ? undefined : 0;
+    return ({
+      width: value,
+      height: value,
+      padding: value,
+      margin: value,
+      transform: props.typing ? "scale(1)" : "scale(0)",
+      transition: "200ms",
+    });
   },
   button: {
     height: '25px',
