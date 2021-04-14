@@ -182,7 +182,7 @@ const chatSlice = createSlice({
         const convID = action.meta.arg;
         const conv = state.conversations!.find(c => c.id == convID)!;
         const newMessages = action.payload;
-        if (newMessages.length < 30) conv.hasMore = false;
+        conv.hasMore = newMessages.length >= 30;
         conv.messages = [...newMessages, ...conv.messages];
         conv.fetchingMore = false;
       })

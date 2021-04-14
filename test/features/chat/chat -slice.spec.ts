@@ -259,6 +259,153 @@ describe('getOrCreateOTOConversation', () => {
   });
 });
 
+describe('getMoteMessages', () => {
+  const convID = 1223;
+  const msgID = 77777;
+  const conv: Conversation = {
+    ...mockConversation,
+    id: convID,
+    messages: [
+      {...mockMessage, id: msgID},
+      {...mockMessage, id: 88888},
+    ]
+  };
+
+  const testInputState: ChatState = {
+    ...initialChatState,
+    conversations: [conv]
+  };
+
+  const act = (store: AppStore = mockStore) => chatActions.getMoreMessages(convID)(
+    store.dispatch,
+    store.getState,
+    extra
+  );
+
+  it('should return the right action when fulfilled', async () => {
+    // arrange
+    const store = MockStore({chat: testInputState} as AppState);
+    when(MockChatRepo.getMoreMessages(anything(), anything())).thenResolve(right([mockMessage]));
+    // act
+    const result = await act(store);
+    // assert
+    expect(result.type).toBe(chatActions.getMoreMessages.fulfilled.type);
+    expect(result.payload).toStrictEqual([mockMessage]);
+    verify(MockChatRepo.getMoreMessages(convID, msgID)).once();
+  });
+
+  it('should return the right action when rejected', async () => {
+    // arrange
+    const store = MockStore({chat: testInputState} as AppState);
+    when(MockChatRepo.getMoreMessages(anything(), anything())).thenResolve(left(chatError));
+    // act
+    const result = await act(store);
+    // assert
+    expect(result.type).toBe(chatActions.getMoreMessages.rejected.type);
+    expect(result.payload).toBe(chatError);
+    verify(MockChatRepo.getMoreMessages(convID, msgID)).once();
+  });
+
+  describe('reducers', () => {
+    const loadingState: ChatState = {
+      ...testInputState,
+      conversations: [{...conv, fetchingMore: true}]
+    };
+
+    it('should return the right state when pending', () => {
+      // arrange
+      const inputState: ChatState = {...testInputState};
+      const outputState: ChatState = {...loadingState};
+      const action: PayloadAction<void, string, { arg: number }> = {
+        type: chatActions.getMoreMessages.pending.type,
+        payload: undefined,
+        meta: {arg: convID}
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
+    it('should return the right state when rejected', () => {
+      // arrange
+      const inputState: ChatState = {...loadingState};
+      const outputState: ChatState = {
+        ...testInputState,
+        conversations: [{...conv, fetchingMore: false}]
+      };
+      const action: PayloadAction<ChatError, string, { arg: number }> = {
+        type: chatActions.getMoreMessages.rejected.type,
+        payload: chatError,
+        meta: {arg: convID}
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
+    describe('fulfilled', () => {
+      it('should return the right state if the number of messages >= 30', async () => {
+        // arrange
+        const messages = Array.from(
+          {length: 30},
+          (_, idx): Message => ({...mockMessage, id: idx})
+        );
+        const inputState: ChatState = {...loadingState};
+        const outputState: ChatState = {
+          ...inputState,
+          conversations: [
+            {
+              ...conv,
+              messages: [...messages, ...conv.messages],
+              hasMore: true,
+              fetchingMore: false,
+            }
+          ],
+        };
+        const action: PayloadAction<Message[], string, { arg: number }> = {
+          type: chatActions.getMoreMessages.fulfilled.type,
+          payload: messages,
+          meta: {arg: convID}
+        };
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+
+      it('should return the right state if the number of messages < 30', async () => {
+        // arrange
+        const messages = Array.from(
+          {length: 29},
+          (_, idx): Message => ({...mockMessage, id: idx})
+        );
+        const inputState: ChatState = {...loadingState};
+        const outputState: ChatState = {
+          ...inputState,
+          conversations: [
+            {
+              ...conv,
+              messages: [...messages, ...conv.messages],
+              hasMore: false,
+              fetchingMore: false,
+            }
+          ],
+        };
+        const action: PayloadAction<Message[], string, { arg: number }> = {
+          type: chatActions.getMoreMessages.fulfilled.type,
+          payload: messages,
+          meta: {arg: convID}
+        };
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+    });
+  });
+});
 
 describe('sendMessage', () => {
   const {sendMessage, appendMessage} = chatActions;

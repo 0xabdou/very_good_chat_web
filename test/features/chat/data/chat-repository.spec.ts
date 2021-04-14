@@ -72,6 +72,19 @@ describe('getOrCreateOTOConversation', () => {
   });
 });
 
+describe('getMoreMessages', () => {
+  it('should get more messages', async () => {
+    // arrange
+    const convID = 123, msgID = 3265;
+    when(MockChatAPI.getMoreMessages(anything(), anything())).thenResolve([mockMessage]);
+    // act
+    const result = await chatRepo.getMoreMessages(convID, msgID);
+    // assert
+    expect(result).toStrictEqual(right([mockMessage]));
+    verify(MockChatAPI.getMoreMessages(convID, msgID)).once();
+  });
+});
+
 describe('sendMessage', () => {
   it('should return a message', async () => {
     // arrange

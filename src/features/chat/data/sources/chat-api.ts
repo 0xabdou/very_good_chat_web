@@ -125,14 +125,6 @@ export default class ChatAPI implements IChatAPI {
     return data?.messagesDelivered!;
   }
 
-  async getMoreMessages(conversationID: number, messageID: number): Promise<Message[]> {
-    const {data} = await this._client.mutate<GetMoreMessages, GetMoreMessagesVariables>({
-      mutation: GET_MORE_MESSAGES,
-      variables: {conversationID, messageID}
-    });
-    return data!.getMoreMessages!.map(ChatAPI.parseMessage);
-  }
-
   subscribeToMessages(): Observable<MessageSub> {
     const sub = this._client.subscribe<SubscribeToMessages>({
       query: SUBSCRIBE_TO_MESSAGES,
@@ -154,6 +146,15 @@ export default class ChatAPI implements IChatAPI {
       variables: {conversationID}
     });
     return data?.messagesSeen!;
+  }
+
+  async getMoreMessages(conversationID: number, messageID: number): Promise<Message[]> {
+    const {data} = await this._client.query<GetMoreMessages, GetMoreMessagesVariables>({
+      query: GET_MORE_MESSAGES,
+      variables: {conversationID, messageID},
+      fetchPolicy: "no-cache"
+    });
+    return data!.getMoreMessages!.map(ChatAPI.parseMessage);
   }
 
   static parseMessage(message: SendMessage_sendMessage): Message {

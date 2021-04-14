@@ -14,6 +14,7 @@ import {
 } from "../../../../mock-objects";
 import {
   GET_CONVERSATIONS,
+  GET_MORE_MESSAGES,
   GET_OR_CREATE_OTO_CONVERSATION,
   MESSAGES_DELIVERED,
   SEND_MESSAGE,
@@ -27,6 +28,10 @@ import {
 } from "../../../../../src/_generated/MessagesDelivered";
 import {SubscribeToMessages} from "../../../../../src/_generated/SubscribeToMessages";
 import {MessageSub} from "../../../../../src/features/chat/types/message";
+import {
+  GetMoreMessages,
+  GetMoreMessagesVariables
+} from "../../../../../src/_generated/GetMoreMessages";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 
@@ -82,6 +87,25 @@ describe('getOrCreateOTOConversation', () => {
     verify(MockApolloClient.mutate(deepEqual({
       mutation: GET_OR_CREATE_OTO_CONVERSATION,
       variables: {userID}
+    }))).once();
+  });
+});
+
+describe("getMoreMessages", () => {
+  it('should get more messages', async () => {
+    // arrange
+    when(MockApolloClient.query(anything())).thenResolve({
+      data: {getMoreMessages: [mockGQLMessage]}
+    } as ApolloQueryResult<GetMoreMessages>);
+    const convID = 1, msgID = 2;
+    // act
+    const result = await chatAPI.getMoreMessages(convID, msgID);
+    // assert
+    expect(result).toStrictEqual([mockMessage]);
+    verify(MockApolloClient.query<GetMoreMessages, GetMoreMessagesVariables>(deepEqual({
+      query: GET_MORE_MESSAGES,
+      variables: {conversationID: convID, messageID: msgID},
+      fetchPolicy: "no-cache"
     }))).once();
   });
 });
