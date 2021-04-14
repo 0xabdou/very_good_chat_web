@@ -30,7 +30,10 @@ import {left, right} from "fp-ts/Either";
 import ChatError from "../../../src/features/chat/types/chat-error";
 import {PayloadAction} from "@reduxjs/toolkit";
 import Conversation from "../../../src/features/chat/types/conversation";
-import {SendMessageInput} from "../../../src/features/chat/data/sources/chat-api";
+import {
+  MESSAGES_PER_FETCH,
+  SendMessageInput
+} from "../../../src/features/chat/data/sources/chat-api";
 import Message, {MessageSub} from "../../../src/features/chat/types/message";
 import Observable from "zen-observable";
 import {waitFor} from "@testing-library/react";
@@ -346,63 +349,69 @@ describe('getMoteMessages', () => {
     });
 
     describe('fulfilled', () => {
-      it('should return the right state if the number of messages >= 30', async () => {
-        // arrange
-        const messages = Array.from(
-          {length: 30},
-          (_, idx): Message => ({...mockMessage, id: idx})
-        );
-        const inputState: ChatState = {...loadingState};
-        const outputState: ChatState = {
-          ...inputState,
-          conversations: [
-            {
+      it(
+        `should return the right state if the number of messages >= ${MESSAGES_PER_FETCH}`,
+        async () => {
+          // arrange
+          const messages = Array.from(
+            {length: MESSAGES_PER_FETCH},
+            (_, idx): Message => ({...mockMessage, id: idx})
+          );
+          const inputState: ChatState = {...loadingState};
+          const outputState: ChatState = {
+            ...inputState,
+            conversations: [
+              {
               ...conv,
               messages: [...messages, ...conv.messages],
               hasMore: true,
               fetchingMore: false,
             }
           ],
-        };
-        const action: PayloadAction<Message[], string, { arg: number }> = {
-          type: chatActions.getMoreMessages.fulfilled.type,
-          payload: messages,
-          meta: {arg: convID}
-        };
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
-      });
+          };
+          const action: PayloadAction<Message[], string, { arg: number }> = {
+            type: chatActions.getMoreMessages.fulfilled.type,
+            payload: messages,
+            meta: {arg: convID}
+          };
+          // act
+          const result = reducer(inputState, action);
+          // assert
+          expect(result).toStrictEqual(outputState);
+        }
+      );
 
-      it('should return the right state if the number of messages < 30', async () => {
-        // arrange
-        const messages = Array.from(
-          {length: 29},
-          (_, idx): Message => ({...mockMessage, id: idx})
-        );
-        const inputState: ChatState = {...loadingState};
-        const outputState: ChatState = {
-          ...inputState,
-          conversations: [
-            {
+      it(
+        `should return the right state if the number of messages < ${MESSAGES_PER_FETCH}`,
+        async () => {
+          // arrange
+          const messages = Array.from(
+            {length: 29},
+            (_, idx): Message => ({...mockMessage, id: idx})
+          );
+          const inputState: ChatState = {...loadingState};
+          const outputState: ChatState = {
+            ...inputState,
+            conversations: [
+              {
               ...conv,
               messages: [...messages, ...conv.messages],
               hasMore: false,
               fetchingMore: false,
             }
           ],
-        };
-        const action: PayloadAction<Message[], string, { arg: number }> = {
-          type: chatActions.getMoreMessages.fulfilled.type,
-          payload: messages,
-          meta: {arg: convID}
-        };
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
-      });
+          };
+          const action: PayloadAction<Message[], string, { arg: number }> = {
+            type: chatActions.getMoreMessages.fulfilled.type,
+            payload: messages,
+            meta: {arg: convID}
+          };
+          // act
+          const result = reducer(inputState, action);
+          // assert
+          expect(result).toStrictEqual(outputState);
+        }
+      );
     });
   });
 });

@@ -59,6 +59,8 @@ export interface IChatAPI {
   subscribeToMessages(): Observable<MessageSub>;
 }
 
+export const MESSAGES_PER_FETCH = 30;
+
 export default class ChatAPI implements IChatAPI {
   private readonly _client: ApolloClient<any>;
 
@@ -81,33 +83,7 @@ export default class ChatAPI implements IChatAPI {
     return ChatAPI.parseConversation(data?.getOrCreateOneToOneConversation!);
   }
 
-  static parseConversation(conv: GetConversations_getConversations): Conversation {
-    const seenDates: UsersLastSeen = {};
-    let pIDs: string[] = [];
-    conv.participants.forEach(p => {
-      seenDates[p.id] = 0;
-      pIDs.push(p.id);
-    });
-    let mIdx = conv.messages.length - 1;
-    while (mIdx >= 0 && pIDs.length) {
-      const message = conv.messages[mIdx];
-      for (let seenBy of message.seenBy) {
-        if (pIDs.indexOf(seenBy.userID) != -1) {
-          seenDates[seenBy.userID] = seenBy.date;
-          pIDs = pIDs.filter(id => id != seenBy.userID);
-        }
-      }
-      mIdx--;
-    }
-    return {
-      id: conv.id,
-      participants: conv.participants.map(UserAPI.parseUser),
-      messages: conv.messages.map(ChatAPI.parseMessage),
-      type: ConversationType[conv.type],
-      seenDates,
-      hasMore: conv.messages.length == 30,
-    };
-  }
+
 
   async sendMessage(input: SendMessageInput): Promise<Message> {
     const {data} = await this._client.mutate<SendMessage, SendMessageVariables>({
@@ -155,6 +131,34 @@ export default class ChatAPI implements IChatAPI {
       fetchPolicy: "no-cache"
     });
     return data!.getMoreMessages!.map(ChatAPI.parseMessage);
+  }
+
+  static parseConversation(conv: GetConversations_getConversations): Conversation {
+    const seenDates: UsersLastSeen = {};
+    let pIDs: string[] = [];
+    conv.participants.forEach(p => {
+      seenDates[p.id] = 0;
+      pIDs.push(p.id);
+    });
+    let mIdx = conv.messages.length - 1;
+    while (mIdx >= 0 && pIDs.length) {
+      const message = conv.messages[mIdx];
+      for (let seenBy of message.seenBy) {
+        if (pIDs.indexOf(seenBy.userID) != -1) {
+          seenDates[seenBy.userID] = seenBy.date;
+          pIDs = pIDs.filter(id => id != seenBy.userID);
+        }
+      }
+      mIdx--;
+    }
+    return {
+      id: conv.id,
+      participants: conv.participants.map(UserAPI.parseUser),
+      messages: conv.messages.map(ChatAPI.parseMessage),
+      type: ConversationType[conv.type],
+      seenDates,
+      hasMore: conv.messages.length >= MESSAGES_PER_FETCH,
+    };
   }
 
   static parseMessage(message: SendMessage_sendMessage): Message {

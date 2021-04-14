@@ -1,7 +1,11 @@
 import {anything, deepEqual, instance, mock, verify, when} from "ts-mockito";
 import {ApolloClient, ApolloQueryResult, FetchResult} from "@apollo/client";
-import ChatAPI from "../../../../../src/features/chat/data/sources/chat-api";
-import {GetConversations} from "../../../../../src/_generated/GetConversations";
+import ChatAPI, {MESSAGES_PER_FETCH} from "../../../../../src/features/chat/data/sources/chat-api";
+import {
+  GetConversations,
+  GetConversations_getConversations,
+  GetConversations_getConversations_messages
+} from "../../../../../src/_generated/GetConversations";
 import Observable from "zen-observable";
 import {
   mockConversation,
@@ -32,18 +36,49 @@ import {
   GetMoreMessages,
   GetMoreMessagesVariables
 } from "../../../../../src/_generated/GetMoreMessages";
+import Conversation, {UsersLastSeen} from "../../../../../src/features/chat/types/conversation";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 
 const chatAPI = new ChatAPI(instance(MockApolloClient));
 
 describe('parsing', () => {
-  test('parseConversation', () => {
-    // act
-    const result = ChatAPI.parseConversation(mockGQLConversation);
-    // assert
-    expect(result).toStrictEqual(mockConversation);
+  describe('parseConversation', () => {
+    test(`with less that ${MESSAGES_PER_FETCH} messages`, () => {
+      // act
+      const result = ChatAPI.parseConversation(mockGQLConversation);
+      // assert
+      expect(result).toStrictEqual(mockConversation);
+    });
+
+    test(`with more that ${MESSAGES_PER_FETCH} messages`, () => {
+      // act
+      const input: GetConversations_getConversations = {
+        ...mockGQLConversation,
+        messages: Array.from(
+          {length: MESSAGES_PER_FETCH},
+          (_, idx): GetConversations_getConversations_messages => ({
+            ...mockGQLMessage,
+            id: idx
+          })
+        )
+      };
+      const seenDates: UsersLastSeen = {};
+      mockGQLConversation.participants.forEach(p => {
+        seenDates[p.id] = 0;
+      });
+      const output: Conversation = {
+        ...mockConversation,
+        messages: input.messages.map(ChatAPI.parseMessage),
+        hasMore: true,
+        seenDates,
+      };
+      const result = ChatAPI.parseConversation(input);
+      // assert
+      expect(result).toStrictEqual(output);
+    });
   });
+
 
   test('parseMessage', () => {
     // act

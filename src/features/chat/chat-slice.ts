@@ -3,7 +3,7 @@ import ChatError from "./types/chat-error";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ThunkAPI} from "../../core/redux/store";
 import {isRight} from "fp-ts/Either";
-import {SendMessageInput} from "./data/sources/chat-api";
+import {MESSAGES_PER_FETCH, SendMessageInput} from "./data/sources/chat-api";
 import Message from "./types/message";
 import {Media} from "./types/media";
 
@@ -182,7 +182,7 @@ const chatSlice = createSlice({
         const convID = action.meta.arg;
         const conv = state.conversations!.find(c => c.id == convID)!;
         const newMessages = action.payload;
-        conv.hasMore = newMessages.length >= 30;
+        conv.hasMore = newMessages.length >= MESSAGES_PER_FETCH;
         conv.messages = [...newMessages, ...conv.messages];
         conv.fetchingMore = false;
       })
