@@ -1,15 +1,8 @@
 import React, {useCallback} from "react";
 import User from "../../../user/types/user";
-import {
-  Avatar,
-  Badge,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  makeStyles
-} from "@material-ui/core";
-import {formatDate} from "../../../../shared/utils/date-utils";
+import {ListItem, ListItemText, makeStyles} from "@material-ui/core";
 import Friend from "../../types/friend";
+import FriendAvatar from "./friend-avatar";
 
 export type FriendListItemProps = {
   friend: Friend,
@@ -26,29 +19,16 @@ const FriendListItem = (props: FriendListItemProps) => {
   }, [props.onClick]);
 
   const classes = useStyles();
-  let online = false;
-  let lastSeen: string | undefined;
-  if (friend.lastSeen) {
-    online = new Date().getTime() - friend.lastSeen <= 6000;
-    lastSeen = formatDate(friend.lastSeen, 'mini');
-  }
   return (
     <div style={props.style} data-testid='friend-list-item'>
       <ListItem
         className={classes.item}
         onClick={onClick}
         button>
-        <ListItemAvatar>
-          <Badge
-            variant={online ? 'dot' : 'standard'}
-            badgeContent={lastSeen}
-            invisible={!online && !lastSeen}
-            anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
-            className={online ? classes.dot : classes.badge}
-          >
-            <Avatar src={user.photo?.small} alt='friend-avatar'/>
-          </Badge>
-        </ListItemAvatar>
+        <FriendAvatar
+          src={friend.user.photo?.small}
+          lastSeen={friend.lastSeen}
+        />
         <ListItemText
           primary={user.username}
           secondary={user.name}
@@ -75,28 +55,6 @@ const useStyles = makeStyles({
   check: {
     color: 'green'
   },
-  dot: {
-    '& .MuiBadge-badge': {
-      background: '#5dda4e',
-      color: 'white',
-    },
-    '& .MuiBadge-dot': {
-      border: '1px solid white',
-      borderRadius: '50%',
-      height: '14px',
-      width: '14px',
-      margin: '5px',
-    },
-  },
-  badge: {
-    '& .MuiBadge-badge': {
-      background: '#317529',
-      color: 'white',
-      fontSize: '0.5rem',
-      border: '1px solid white',
-      margin: '2px',
-    }
-  }
 });
 
 export default FriendListItem;

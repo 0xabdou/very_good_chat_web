@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {Avatar, makeStyles, Typography} from "@material-ui/core";
+import {makeStyles, Typography} from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
 import {useParams} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
@@ -10,6 +10,8 @@ import MessagesList from "./components/messages-list";
 import {useDropzone} from "react-dropzone";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
+import {formatDate} from "../../../shared/utils/date-utils";
+import FriendAvatar from "../../friend/ui/components/friend-avatar";
 
 const ConversationScreen = () => {
   // redux
@@ -29,6 +31,10 @@ const ConversationScreen = () => {
   const conversation = useAppSelector(
     state => state.chat.conversations?.find(c => `${c.id}` == conversationID)
   );
+  const friend = useAppSelector(
+    state => state.friends.friends?.find(f => f.user.id == conversation?.participants[0].id)
+  );
+  console.log(friend);
 
   // Update [isActive] when needed
   useEffect(() => {
@@ -116,14 +122,19 @@ const ConversationScreen = () => {
   return (
     <div {...rootProps} >
       <TopBar>
-        <Avatar
-          src={otherUser?.photo?.small}
-          alt='conversation-avatar'
-          className={topBarClasses.leading}
-        />
-        <Typography variant='h6' className={topBarClasses.title}>
-          {otherUser?.name ?? otherUser?.username}
-        </Typography>
+        <FriendAvatar src={otherUser.photo?.small} lastSeen={friend?.lastSeen}/>
+        <div className={classes.title}>
+          <Typography variant='h6' className={topBarClasses.title}>
+            {otherUser?.name ?? otherUser?.username}
+          </Typography>
+          {
+            // TODO: IMPLEMENT TYPING...
+            friend && friend.lastSeen &&
+            <span className={classes.lastSeen}>
+              seen {formatDate(friend.lastSeen)}
+            </span>
+          }
+        </div>
       </TopBar>
       <MessagesList conversation={conversation} currentUserID={me?.id ?? ''}/>
       <ChatTextField
@@ -154,6 +165,16 @@ const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
     width: '100%',
     height: '100%',
     paddingTop: '56px',
+  },
+  title: {
+    display: 'flex',
+    flexDirection: 'column',
+    width: '100%',
+  },
+  lastSeen: {
+    color: "black",
+    fontSize: '0.8rem',
+    textTransform: "uppercase"
   },
   dragIndicator: props => {
     let opacity: number;
