@@ -17,7 +17,7 @@ import {
   GET_OR_CREATE_OTO_CONVERSATION,
   MESSAGES_DELIVERED,
   SEND_MESSAGE,
-  SUBSCRIBE_TO_MESSAGE
+  SUBSCRIBE_TO_MESSAGES
 } from "../../../../../src/features/chat/data/graphql";
 import {GetOrCreateOTOConversation} from "../../../../../src/_generated/GetOrCreateOTOConversation";
 import {SendMessage} from "../../../../../src/_generated/SendMessage";
@@ -155,7 +155,7 @@ describe('subscribeToMessages', () => {
       i++;
     });
     verify(MockApolloClient.subscribe(deepEqual({
-      query: SUBSCRIBE_TO_MESSAGE,
+      query: SUBSCRIBE_TO_MESSAGES,
       fetchPolicy: 'no-cache'
     }))).once();
   });

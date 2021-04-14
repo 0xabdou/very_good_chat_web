@@ -281,14 +281,14 @@ const getConvs = (): [GQLConversation, Conversation] => {
       date: new Date().getTime() + 10000
     }]
   };
-  const GQLConv = {
+  const GQLConv: GQLConversation = {
     __typename: 'Conversation' as 'Conversation',
     id: 546576879,
     type: GQLConversationType.ONE_TO_ONE,
     participants: [user1, user2],
     messages: [message1, message2]
   };
-  const conv = {
+  const conv: Conversation = {
     id: GQLConv.id,
     type: ConversationType[GQLConv.type],
     participants: GQLConv.participants.map(UserAPI.parseUser),
@@ -296,7 +296,8 @@ const getConvs = (): [GQLConversation, Conversation] => {
     seenDates: {
       [`${user1.id}`]: message1.sentAt,
       [`${user2.id}`]: message2.sentAt,
-    }
+    },
+    hasMore: true,
   };
   return [GQLConv, conv];
 };

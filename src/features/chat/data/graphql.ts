@@ -111,7 +111,7 @@ export const MESSAGES_SEEN = gql`
     }
 `;
 
-export const SUBSCRIBE_TO_MESSAGE = gql`
+export const SUBSCRIBE_TO_MESSAGES = gql`
     subscription SubscribeToMessages {
         messages{
             message {
@@ -135,6 +135,31 @@ export const SUBSCRIBE_TO_MESSAGE = gql`
                 }
             }
             update
+        }
+    }
+`;
+
+export const GET_MORE_MESSAGES = gql`
+    query GetMoreMessages($conversationID: Int!, $messageID: Int!) {
+        getMoreMessages(conversationID: $conversationID, messageID: $messageID){
+            id
+            conversationID
+            senderID
+            text
+            medias {
+                url
+                thumbUrl
+                type
+            }
+            sentAt
+            deliveredTo {
+                userID
+                date
+            }
+            seenBy {
+                userID
+                date
+            }
         }
     }
 `;

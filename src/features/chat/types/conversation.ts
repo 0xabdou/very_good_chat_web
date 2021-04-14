@@ -7,6 +7,8 @@ type Conversation = {
   messages: Message[]
   type: ConversationType
   seenDates: UsersLastSeen,
+  hasMore: boolean,
+  fetchingMore?: boolean,
 };
 
 enum ConversationType {

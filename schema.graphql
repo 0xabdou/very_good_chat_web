@@ -129,6 +129,7 @@ type Query {
     getFriendRequests: FriendRequests!
     getFriends: [Friend!]!
     getFriendshipInfo(id: String, username: String): FriendshipInfo!
+    getMoreMessages(conversationID: Int!, messageID: Int!): [Message!]!
     getNotifications: [Notification!]!
     me: Me!
 }

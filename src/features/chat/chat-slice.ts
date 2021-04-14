@@ -41,6 +41,18 @@ const getOrCreateOTOConversation = createAsyncThunk<Conversation, string, ThunkA
   }
 );
 
+const getMoreMessages = createAsyncThunk<Message[], number, ThunkAPI<ChatError>>(
+  'chat/getMoreMessages',
+  async (conversationID, thunkAPI) => {
+    const conv = thunkAPI.getState().chat.conversations?.find(c => c.id == conversationID);
+    if (!conv) return [];
+    const firstMsgID = conv.messages[0].id;
+    const result = await thunkAPI.extra.chatRepo.getMoreMessages(conversationID, firstMsgID);
+    if (isRight(result)) return result.right;
+    return thunkAPI.rejectWithValue(result.left);
+  }
+);
+
 const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: number }, ThunkAPI<ChatError>>(
   'chat/sendMessage',
   async (input, thunkAPI) => {
@@ -159,6 +171,26 @@ const chatSlice = createSlice({
         }
       })
       .addCase(getOrCreateOTOConversation.rejected, _handleRejected);
+    // getMoreMessages
+    builder
+      .addCase(getMoreMessages.pending, (state, action) => {
+        const convID = action.meta.arg;
+        const conv = state.conversations!.find(c => c.id == convID)!;
+        conv.fetchingMore = true;
+      })
+      .addCase(getMoreMessages.fulfilled, (state, action) => {
+        const convID = action.meta.arg;
+        const conv = state.conversations!.find(c => c.id == convID)!;
+        const newMessages = action.payload;
+        if (newMessages.length < 30) conv.hasMore = false;
+        conv.messages = [...newMessages, ...conv.messages];
+        conv.fetchingMore = false;
+      })
+      .addCase(getMoreMessages.rejected, (state, action) => {
+        const convID = action.meta.arg;
+        const conv = state.conversations!.find(c => c.id == convID)!;
+        conv.fetchingMore = false;
+      });
     // sendMessage
     builder
       .addCase(sendMessage.fulfilled, (state, action) => {
@@ -181,6 +213,7 @@ export default chatSlice.reducer;
 export const chatActions = {
   getConversations,
   getOrCreateOTOConversation,
+  getMoreMessages,
   sendMessage,
   messagesSeen,
   subscribeToMessages,

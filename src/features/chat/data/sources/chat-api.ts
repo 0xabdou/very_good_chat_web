@@ -7,11 +7,12 @@ import {
 } from "../../../../_generated/GetConversations";
 import {
   GET_CONVERSATIONS,
+  GET_MORE_MESSAGES,
   GET_OR_CREATE_OTO_CONVERSATION,
   MESSAGES_DELIVERED,
   MESSAGES_SEEN,
   SEND_MESSAGE,
-  SUBSCRIBE_TO_MESSAGE
+  SUBSCRIBE_TO_MESSAGES
 } from "../graphql";
 import {UserAPI} from "../../../user/data/sources/user-api";
 import {ConversationType} from "../../../../_generated/globalTypes";
@@ -37,11 +38,17 @@ import {
   MessagesSeen,
   MessagesSeenVariables
 } from "../../../../_generated/MessagesSeen";
+import {
+  GetMoreMessages,
+  GetMoreMessagesVariables
+} from "../../../../_generated/GetMoreMessages";
 
 export interface IChatAPI {
   getConversations(): Promise<Conversation[]>;
 
   getOrCreateOTOConversation(userID: string): Promise<Conversation>;
+
+  getMoreMessages(conversationID: number, messageID: number): Promise<Message[]>;
 
   sendMessage(input: SendMessageInput): Promise<Message>;
 
@@ -74,22 +81,6 @@ export default class ChatAPI implements IChatAPI {
     return ChatAPI.parseConversation(data?.getOrCreateOneToOneConversation!);
   }
 
-  async sendMessage(input: SendMessageInput): Promise<Message> {
-    const {data} = await this._client.mutate<SendMessage, SendMessageVariables>({
-      mutation: SEND_MESSAGE,
-      variables: {message: input}
-    });
-    return ChatAPI.parseMessage(data?.sendMessage!);
-  }
-
-  async messagesDelivered(conversationIDs: number[]): Promise<number> {
-    const {data} = await this._client.mutate<MessagesDelivered, MessagesDeliveredVariables>({
-      mutation: MESSAGES_DELIVERED,
-      variables: {conversationIDs}
-    });
-    return data?.messagesDelivered!;
-  }
-
   static parseConversation(conv: GetConversations_getConversations): Conversation {
     const seenDates: UsersLastSeen = {};
     let pIDs: string[] = [];
@@ -113,13 +104,38 @@ export default class ChatAPI implements IChatAPI {
       participants: conv.participants.map(UserAPI.parseUser),
       messages: conv.messages.map(ChatAPI.parseMessage),
       type: ConversationType[conv.type],
-      seenDates
+      seenDates,
+      hasMore: conv.messages.length == 30,
     };
+  }
+
+  async sendMessage(input: SendMessageInput): Promise<Message> {
+    const {data} = await this._client.mutate<SendMessage, SendMessageVariables>({
+      mutation: SEND_MESSAGE,
+      variables: {message: input}
+    });
+    return ChatAPI.parseMessage(data?.sendMessage!);
+  }
+
+  async messagesDelivered(conversationIDs: number[]): Promise<number> {
+    const {data} = await this._client.mutate<MessagesDelivered, MessagesDeliveredVariables>({
+      mutation: MESSAGES_DELIVERED,
+      variables: {conversationIDs}
+    });
+    return data?.messagesDelivered!;
+  }
+
+  async getMoreMessages(conversationID: number, messageID: number): Promise<Message[]> {
+    const {data} = await this._client.mutate<GetMoreMessages, GetMoreMessagesVariables>({
+      mutation: GET_MORE_MESSAGES,
+      variables: {conversationID, messageID}
+    });
+    return data!.getMoreMessages!.map(ChatAPI.parseMessage);
   }
 
   subscribeToMessages(): Observable<MessageSub> {
     const sub = this._client.subscribe<SubscribeToMessages>({
-      query: SUBSCRIBE_TO_MESSAGE,
+      query: SUBSCRIBE_TO_MESSAGES,
       fetchPolicy: 'no-cache'
     });
     return sub

@@ -11,6 +11,8 @@ export interface IChatRepository {
 
   getOrCreateOTOConversation(userID: string): Promise<Either<ChatError, Conversation>>;
 
+  getMoreMessages(conversationID: number, messageID: number): Promise<Either<ChatError, Message[]>>;
+
   sendMessage(input: SendMessageInput): Promise<Either<ChatError, Message>>;
 
   messagesDelivered(conversationIDs: number[]): Promise<Either<ChatError, number>>;
@@ -33,6 +35,10 @@ export default class ChatRepository implements IChatRepository {
 
   getOrCreateOTOConversation(userID: string): Promise<Either<ChatError, Conversation>> {
     return this._leftOrRight(() => this._chatAPI.getOrCreateOTOConversation(userID));
+  }
+
+  getMoreMessages(conversationID: number, messageID: number): Promise<Either<ChatError, Message[]>> {
+    return this._leftOrRight(() => this._chatAPI.getMoreMessages(conversationID, messageID));
   }
 
   sendMessage(input: SendMessageInput): Promise<Either<ChatError, Message>> {
