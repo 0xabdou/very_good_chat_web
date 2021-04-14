@@ -297,7 +297,7 @@ const getConvs = (): [GQLConversation, Conversation] => {
       [`${user1.id}`]: message1.sentAt,
       [`${user2.id}`]: message2.sentAt,
     },
-    hasMore: true,
+    hasMore: false,
   };
   return [GQLConv, conv];
 };
