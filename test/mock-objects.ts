@@ -51,6 +51,8 @@ import {
 import Conversation from "../src/features/chat/types/conversation";
 import ChatAPI, {SendMessageInput} from "../src/features/chat/data/sources/chat-api";
 import {GetFriends_getFriends_user as GQLUser} from "../src/_generated/GetFriends";
+import {SubscribeToTypings_typings} from "../src/_generated/SubscribeToTypings";
+import Typing from "../src/features/chat/types/typing";
 
 export const MockFile = mock<File>();
 
@@ -308,6 +310,17 @@ export const mockSendMessageInput: SendMessageInput = {
   conversationID: 911,
   text: 'Hello world',
   medias: [new File(['1', '2', '3'], "viva l'Algerie")]
+};
+
+export const mockGQLTyping: SubscribeToTypings_typings = {
+  __typename: 'Typing',
+  conversationID: 123,
+  userID: "123"
+};
+
+export const mockTyping: Typing = {
+  conversationID: mockGQLTyping.conversationID,
+  userID: mockGQLTyping.userID
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);

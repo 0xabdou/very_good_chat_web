@@ -6,14 +6,17 @@ import {isRight} from "fp-ts/Either";
 import {MESSAGES_PER_FETCH, SendMessageInput} from "./data/sources/chat-api";
 import Message from "./types/message";
 import {Media} from "./types/media";
+import Typing from "./types/typing";
 
 export type ChatState = {
   conversations: Conversation[] | null,
+  typings: { [conversationID: number]: string[] }
   error: ChatError | null,
 }
 
 export const initialChatState: ChatState = {
   conversations: null,
+  typings: {},
   error: null,
 };
 
@@ -50,6 +53,13 @@ const getMoreMessages = createAsyncThunk<Message[], number, ThunkAPI<ChatError>>
     const result = await thunkAPI.extra.chatRepo.getMoreMessages(conversationID, firstMsgID);
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
+  }
+);
+
+const typing = createAsyncThunk<void, number, ThunkAPI<ChatError>>(
+  'chat/typing',
+  (conversationID, thunkAPI) => {
+    void thunkAPI.extra.chatRepo.typing(conversationID);
   }
 );
 
@@ -111,6 +121,24 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   }
 );
 
+const timeouts: { [conversationID: number]: { [userID: string]: NodeJS.Timeout } } = {};
+const subscribeToTypings = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
+  'chat/subscribeToTypings',
+  async (_, thunkAPI) => {
+    thunkAPI.extra.chatRepo.subscribeToTypings().subscribe((typing) => {
+      thunkAPI.dispatch(chatActions.addTyping(typing));
+      const {conversationID, userID} = typing;
+      if (timeouts[conversationID] && timeouts[conversationID][userID]) {
+        clearTimeout(timeouts[conversationID][userID]);
+      }
+      if (!timeouts[conversationID]) timeouts[conversationID] = {};
+      timeouts[conversationID][userID] = setTimeout(() => {
+        thunkAPI.dispatch(chatActions.removeTyping(typing));
+      }, 5000);
+    });
+  }
+);
+
 export const _handleRejected = (
   state: ChatState,
   action: PayloadAction<ChatError | undefined>
@@ -142,6 +170,22 @@ const chatSlice = createSlice({
         if (conv.seenDates[sb.userID] < sb.date) conv.seenDates[sb.userID] = sb.date;
       }
     },
+    addTyping(state: ChatState, action: PayloadAction<Typing>) {
+      const {conversationID, userID} = action.payload;
+      const typings = state.typings[conversationID];
+      if (typings) {
+        if (typings.indexOf(userID) == -1) typings.push(userID);
+      } else {
+        state.typings[conversationID] = [userID];
+      }
+    },
+    removeTyping(state: ChatState, action: PayloadAction<Typing>) {
+      const {conversationID, userID} = action.payload;
+      const typings = state.typings[conversationID];
+      if (typings) {
+        state.typings[conversationID] = typings.filter(id => id != userID);
+      }
+    }
   },
   extraReducers: builder => {
     // getConversations
@@ -214,8 +258,10 @@ export const chatActions = {
   getConversations,
   getOrCreateOTOConversation,
   getMoreMessages,
+  typing,
   sendMessage,
   messagesSeen,
   subscribeToMessages,
+  subscribeToTypings,
   ...chatSlice.actions
 };

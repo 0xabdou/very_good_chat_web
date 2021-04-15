@@ -139,6 +139,23 @@ export const SUBSCRIBE_TO_MESSAGES = gql`
     }
 `;
 
+export const SUBSCRIBE_TO_TYPINGS = gql`
+    subscription SubscribeToTypings {
+        typings {
+            conversationID
+            userID
+        }
+    }
+`;
+
+export const TYPING = gql`
+    mutation ImTyping($conversationID: Int!) {
+        typing(conversationID: $conversationID) {
+            conversationID,
+        }
+    }
+`;
+
 export const GET_MORE_MESSAGES = gql`
     query GetMoreMessages($conversationID: Int!, $messageID: Int!) {
         getMoreMessages(conversationID: $conversationID, messageID: $messageID){

@@ -12,7 +12,9 @@ import {
   MESSAGES_DELIVERED,
   MESSAGES_SEEN,
   SEND_MESSAGE,
-  SUBSCRIBE_TO_MESSAGES
+  SUBSCRIBE_TO_MESSAGES,
+  SUBSCRIBE_TO_TYPINGS,
+  TYPING
 } from "../graphql";
 import {UserAPI} from "../../../user/data/sources/user-api";
 import {ConversationType} from "../../../../_generated/globalTypes";
@@ -42,6 +44,9 @@ import {
   GetMoreMessages,
   GetMoreMessagesVariables
 } from "../../../../_generated/GetMoreMessages";
+import Typing from "../../types/typing";
+import {SubscribeToTypings} from "../../../../_generated/SubscribeToTypings";
+import {ImTyping, ImTypingVariables} from "../../../../_generated/ImTyping";
 
 export interface IChatAPI {
   getConversations(): Promise<Conversation[]>;
@@ -50,6 +55,8 @@ export interface IChatAPI {
 
   getMoreMessages(conversationID: number, messageID: number): Promise<Message[]>;
 
+  typing(conversationID: number): Promise<null>;
+
   sendMessage(input: SendMessageInput): Promise<Message>;
 
   messagesDelivered(conversationIDs: number[]): Promise<number>;
@@ -57,6 +64,8 @@ export interface IChatAPI {
   messagesSeen(conversationID: number): Promise<number>;
 
   subscribeToMessages(): Observable<MessageSub>;
+
+  subscribeToTypings(): Observable<Typing>;
 }
 
 export const MESSAGES_PER_FETCH = 30;
@@ -83,7 +92,13 @@ export default class ChatAPI implements IChatAPI {
     return ChatAPI.parseConversation(data?.getOrCreateOneToOneConversation!);
   }
 
-
+  async typing(conversationID: number): Promise<null> {
+    await this._client.mutate<ImTyping, ImTypingVariables>({
+      mutation: TYPING,
+      variables: {conversationID}
+    });
+    return null;
+  }
 
   async sendMessage(input: SendMessageInput): Promise<Message> {
     const {data} = await this._client.mutate<SendMessage, SendMessageVariables>({
@@ -112,6 +127,21 @@ export default class ChatAPI implements IChatAPI {
         return {
           message: ChatAPI.parseMessage(data!.messages.message),
           update: data!.messages.update ?? undefined
+        };
+      });
+  }
+
+  subscribeToTypings(): Observable<Typing> {
+    const sub = this._client.subscribe<SubscribeToTypings>({
+      query: SUBSCRIBE_TO_TYPINGS,
+      fetchPolicy: 'no-cache'
+    });
+    return sub
+      .filter(({data}) => Boolean(data?.typings))
+      .map(({data}) => {
+        return {
+          conversationID: data!.typings.conversationID,
+          userID: data!.typings.userID
         };
       });
   }

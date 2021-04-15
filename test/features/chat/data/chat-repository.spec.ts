@@ -8,10 +8,12 @@ import ChatError from "../../../../src/features/chat/types/chat-error";
 import {
   mockConversation,
   mockMessage,
-  mockSendMessageInput
+  mockSendMessageInput,
+  mockTyping
 } from "../../../mock-objects";
 import Observable from "zen-observable";
 import {MessageSub} from "../../../../src/features/chat/types/message";
+import Typing from "../../../../src/features/chat/types/typing";
 
 const MockChatAPI = mock<IChatAPI>();
 
@@ -85,6 +87,19 @@ describe('getMoreMessages', () => {
   });
 });
 
+describe('typing', () => {
+  it("should do what it is fated to do", async () => {
+    // arrange
+    const conversationID = 1242;
+    when(MockChatAPI.typing(anything())).thenResolve(null);
+    // act
+    const result = await chatRepo.typing(conversationID);
+    // assert
+    expect(result).toStrictEqual(right(null));
+    verify(MockChatAPI.typing(conversationID)).once();
+  });
+});
+
 describe('sendMessage', () => {
   it('should return a message', async () => {
     // arrange
@@ -119,5 +134,16 @@ describe('subscribeToMessages', () => {
   const result = chatRepo.subscribeToMessages();
   // assert
   verify(MockChatAPI.subscribeToMessages()).once();
+  expect(result).toBe(observable);
+});
+
+describe('subscribeToTypings', () => {
+  // arrange
+  const observable = Observable.of<Typing>(mockTyping);
+  when(MockChatAPI.subscribeToTypings()).thenReturn(observable);
+  // act
+  const result = chatRepo.subscribeToTypings();
+  // assert
+  verify(MockChatAPI.subscribeToTypings()).once();
   expect(result).toBe(observable);
 });

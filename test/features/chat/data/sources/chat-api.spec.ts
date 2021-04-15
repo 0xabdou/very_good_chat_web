@@ -12,9 +12,11 @@ import {
   mockGQLConversation,
   mockGQLMedia,
   mockGQLMessage,
+  mockGQLTyping,
   mockMedia,
   mockMessage,
-  mockSendMessageInput
+  mockSendMessageInput,
+  mockTyping
 } from "../../../../mock-objects";
 import {
   GET_CONVERSATIONS,
@@ -22,7 +24,9 @@ import {
   GET_OR_CREATE_OTO_CONVERSATION,
   MESSAGES_DELIVERED,
   SEND_MESSAGE,
-  SUBSCRIBE_TO_MESSAGES
+  SUBSCRIBE_TO_MESSAGES,
+  SUBSCRIBE_TO_TYPINGS,
+  TYPING
 } from "../../../../../src/features/chat/data/graphql";
 import {GetOrCreateOTOConversation} from "../../../../../src/_generated/GetOrCreateOTOConversation";
 import {SendMessage} from "../../../../../src/_generated/SendMessage";
@@ -37,6 +41,8 @@ import {
   GetMoreMessagesVariables
 } from "../../../../../src/_generated/GetMoreMessages";
 import Conversation, {UsersLastSeen} from "../../../../../src/features/chat/types/conversation";
+import {SubscribeToTypings} from "../../../../../src/_generated/SubscribeToTypings";
+import {ImTyping} from "../../../../../src/_generated/ImTyping";
 
 const MockApolloClient = mock<ApolloClient<any>>();
 
@@ -145,6 +151,24 @@ describe("getMoreMessages", () => {
   });
 });
 
+describe('typing', () => {
+  it('should send a typing', async () => {
+    /// arrange
+    const conversationID = 123123;
+    when(MockApolloClient.mutate(anything())).thenResolve({
+      data: {typing: {__typename: "Typing", conversationID}}
+    } as ApolloQueryResult<ImTyping>);
+    // act
+    const result = await chatAPI.typing(conversationID);
+    // assert
+    expect(result).toBeNull();
+    verify(MockApolloClient.mutate(deepEqual({
+      mutation: TYPING,
+      variables: {conversationID}
+    }))).once();
+  });
+});
+
 describe('sendMessage', () => {
   it('should send a message', async () => {
     /// arrange
@@ -215,6 +239,29 @@ describe('subscribeToMessages', () => {
     });
     verify(MockApolloClient.subscribe(deepEqual({
       query: SUBSCRIBE_TO_MESSAGES,
+      fetchPolicy: 'no-cache'
+    }))).once();
+  });
+});
+
+describe('subscribeToTypings', () => {
+  type STMFR = FetchResult<SubscribeToTypings>;
+
+  it('should subscribe to typings', () => {
+    // arrange
+    const typing = {
+      data: {typings: mockGQLTyping}
+    } as STMFR;
+    const observable = Observable.of<STMFR>(typing, {});
+    when(MockApolloClient.subscribe(anything())).thenReturn(observable);
+    // act
+    const result = chatAPI.subscribeToTypings();
+    // assert
+    result.forEach(m => {
+      expect(m).toStrictEqual(mockTyping);
+    });
+    verify(MockApolloClient.subscribe(deepEqual({
+      query: SUBSCRIBE_TO_TYPINGS,
       fetchPolicy: 'no-cache'
     }))).once();
   });

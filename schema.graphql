@@ -104,6 +104,7 @@ type Mutation {
     register(input: UserCreation!): Me!
     sendFriendRequest(userID: String!): Friendship!
     sendMessage(message: SendMessageInput!): Message!
+    typing(conversationID: Int!): Typing!
     unblock(blocked_id: String!): String!
     unfriend(userID: String!): Friendship!
     updateActiveStatus(activeStatus: Boolean!): Boolean!
@@ -136,6 +137,13 @@ type Query {
 
 type Subscription {
     messages: MessageSub!
+    typings: Typing!
+}
+
+type Typing {
+    conversationID: Float!
+    date: Timestamp!
+    userID: String!
 }
 
 type User {

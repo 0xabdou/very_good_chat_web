@@ -17,7 +17,8 @@ import {
   mockMe,
   mockMedia,
   mockMessage,
-  mockTheDate
+  mockTheDate,
+  mockTyping
 } from "../../mock-objects";
 import {AppState, AppStore} from "../../../src/core/redux/store";
 import reducer, {
@@ -37,6 +38,7 @@ import {
 import Message, {MessageSub} from "../../../src/features/chat/types/message";
 import Observable from "zen-observable";
 import {waitFor} from "@testing-library/react";
+import Typing from "../../../src/features/chat/types/typing";
 
 const MockChatRepo = mock<IChatRepository>();
 const MockFileUtils = mock<IFileUtils>();
@@ -413,6 +415,21 @@ describe('getMoteMessages', () => {
         }
       );
     });
+  });
+});
+
+describe("sendMessage", () => {
+  it("should do what it's fated to do", async () => {
+    // arrange
+    const conversationID = 1231;
+    // act
+    await chatActions.typing(conversationID)(
+      mockStore.dispatch,
+      mockStore.getState,
+      extra
+    );
+    // assert
+    verify(MockChatRepo.typing(conversationID)).once();
   });
 });
 
@@ -796,5 +813,115 @@ describe('reducers', () => {
       expect(result).toStrictEqual(outputState);
     });
   });
+});
 
+describe("subscribeToTypings", () => {
+  it('should subscribe to typings', async () => {
+    // arrange
+    const observable = Observable.of<Typing>(mockTyping);
+    when(MockChatRepo.subscribeToTypings()).thenReturn(observable);
+    // act
+    await chatActions.subscribeToTypings()(
+      mockStore.dispatch,
+      mockStore.getState,
+      extra
+    );
+    // assert
+    let action: PayloadAction<Typing> | undefined;
+    await waitFor(() => {
+      action = mockStore.getActions().find(a => a.type == chatActions.addTyping.type);
+      expect(action).not.toBeUndefined();
+    });
+    expect(action?.payload).toStrictEqual(mockTyping);
+    verify(MockChatRepo.subscribeToTypings()).once();
+  });
+
+  describe('reducers', () => {
+    describe("addTyping", () => {
+      test("existing typing with userID", () => {
+        // arrange
+        const inputState: ChatState = {
+          ...initialChatState,
+          typings: {
+            [mockTyping.conversationID]: [mockTyping.userID]
+          }
+        };
+        const outputState = inputState;
+        const action = chatActions.addTyping(mockTyping);
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+      test("existing typing without userID", () => {
+        // arrange
+        const inputState: ChatState = {
+          ...initialChatState,
+          typings: {
+            [mockTyping.conversationID]: ["zblbola"]
+          }
+        };
+        const outputState: ChatState = {
+          ...initialChatState,
+          typings: {
+            [mockTyping.conversationID]: ["zblbola", mockTyping.userID]
+          }
+        };
+        const action = chatActions.addTyping(mockTyping);
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+      test("non-existing typing", () => {
+        // arrange
+        const inputState: ChatState = {...initialChatState};
+        const outputState: ChatState = {
+          ...inputState,
+          typings: {
+            ...inputState.typings,
+            [mockTyping.conversationID]: [mockTyping.userID]
+          }
+        };
+        const action = chatActions.addTyping(mockTyping);
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+    });
+
+    describe("removeTyping", () => {
+      test("existing typing", () => {
+        // arrange
+        const inputState: ChatState = {
+          ...initialChatState,
+          typings: {
+            [mockTyping.conversationID]: ["zblbola", mockTyping.userID]
+          }
+        };
+        const outputState: ChatState = {
+          ...initialChatState,
+          typings: {
+            [mockTyping.conversationID]: ["zblbola"]
+          }
+        };
+        const action = chatActions.removeTyping(mockTyping);
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+      test("non-existing typing", () => {
+        // arrange
+        const inputState: ChatState = {...initialChatState};
+        const outputState: ChatState = {...inputState};
+        const action = chatActions.removeTyping(mockTyping);
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
+    });
+  });
 });
