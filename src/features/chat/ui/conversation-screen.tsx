@@ -10,7 +10,6 @@ import MessagesList from "./components/messages-list";
 import {useDropzone} from "react-dropzone";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
-import {formatDate} from "../../../shared/utils/date-utils";
 import FriendAvatar from "../../friend/ui/components/friend-avatar";
 
 const ConversationScreen = () => {
@@ -27,14 +26,20 @@ const ConversationScreen = () => {
   const [fileError, setFileError] = useState<CustomError | null>(null);
   // The current conversation
   // we get the id from the url params and get the actual conversation from the state
-  const conversationID = useParams<{ id: string }>().id;
+  const conversationID = Number(useParams<{ id: string }>().id);
   const conversation = useAppSelector(
-    state => state.chat.conversations?.find(c => `${c.id}` == conversationID)
+    state => state.chat.conversations?.find(c => c.id == conversationID)
   );
   const friend = useAppSelector(
     state => state.friends.friends?.find(f => f.user.id == conversation?.participants[0].id)
   );
-  console.log(friend);
+  const typing: boolean = useAppSelector(state => {
+    const userID = conversation?.participants[0]?.id;
+    if (!userID) return false;
+    const typings = state.chat.typings[conversationID];
+    if (!typings) return false;
+    return typings.indexOf(userID) != -1;
+  });
 
   // Update [isActive] when needed
   useEffect(() => {
@@ -128,16 +133,16 @@ const ConversationScreen = () => {
             {otherUser?.name ?? otherUser?.username}
           </Typography>
           {
-            // TODO: IMPLEMENT TYPING...
-            friend && friend.lastSeen &&
+            typing &&
             <span className={classes.lastSeen}>
-              seen {formatDate(friend.lastSeen)}
+              Typing...
             </span>
           }
         </div>
       </TopBar>
       <MessagesList conversation={conversation} currentUserID={me?.id ?? ''}/>
       <ChatTextField
+        conversationID={conversationID}
         files={files}
         fileRemoved={fileRemoved}
         submit={submit}

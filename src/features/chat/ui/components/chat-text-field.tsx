@@ -4,6 +4,7 @@ import React, {
   ChangeEvent,
   KeyboardEventHandler,
   useCallback,
+  useRef,
   useState
 } from "react";
 import {
@@ -16,8 +17,11 @@ import {
 import {BaseEmoji, Picker} from "emoji-mart";
 import MediaPreview from "./media-preview";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import {useAppDispatch} from "../../../../core/redux/hooks";
+import useChatActions from "../../chat-actions-provider";
 
 export type ChatTextFieldProps = {
+  conversationID: number,
   files: File[],
   fileRemoved: (index: number) => void,
   submit: (text: string) => void,
@@ -25,8 +29,11 @@ export type ChatTextFieldProps = {
 }
 
 const ChatTextField = (props: ChatTextFieldProps) => {
+  const dispatch = useAppDispatch();
+  const {typing} = useChatActions();
   const [text, setText] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const timer = useRef<NodeJS.Timeout | null>(null);
   const classes = useStyles({typing: text.length > 0 || props.files.length > 0});
 
   const submit = useCallback(() => {
@@ -37,6 +44,12 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   // text input stuff
   const onChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
+    if (!timer.current) {
+      dispatch(typing(props.conversationID));
+      timer.current = setTimeout(() => {
+        timer.current = null;
+      }, 3000);
+    }
   }, []);
   const onKeyPress: KeyboardEventHandler = useCallback((e) => {
     if (e.code == 'Enter' && !e.shiftKey) {

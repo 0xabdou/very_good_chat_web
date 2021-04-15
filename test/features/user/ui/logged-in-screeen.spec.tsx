@@ -46,6 +46,7 @@ const getNotificationsAction = {type: 'notification'} as any;
 const getBadgesAction = {type: 'badges'} as any;
 const updateLSAction = {type: 'last seen'} as any;
 const subToMsgAction = {type: 'sub to msg'} as any;
+const subToTypingsAction = {type: 'sub to typings'} as any;
 
 const initialMeState: MeState = {
   initialized: false,
@@ -92,6 +93,7 @@ beforeAll(() => {
   when(MockMeActions.updateLastSeen()).thenReturn(updateLSAction);
   when(MockChatActions.getConversations()).thenReturn(getConversationsAction);
   when(MockChatActions.subscribeToMessages()).thenReturn(subToMsgAction);
+  when(MockChatActions.subscribeToTypings()).thenReturn(subToTypingsAction);
 });
 
 beforeEach(() => {
@@ -111,16 +113,17 @@ test('Should dispatch all required actions on render', async () => {
   expect(actions[0]).toBe(meAction);
   expect(actions[1]).toBe(getConversationsAction);
   expect(actions[2]).toBe(subToMsgAction);
-  expect(actions[3]).toBe(getBadgesAction);
+  expect(actions[3]).toBe(subToTypingsAction);
+  expect(actions[4]).toBe(getBadgesAction);
   // polling
   await waitFor(() => verify(MockFriendActions.getFriendRequests()).once());
   verify(MockFriendActions.getFriends()).once();
   verify(MockNotificationActions.getNotifications()).once();
-  expect(actions[4]).toBe(getFriendsReqsAction);
-  expect(actions[5]).toBe(getFriendsAction);
-  expect(actions[6]).toBe(getNotificationsAction);
-  expect(actions[7]).toBe(updateLSAction);
-  expect(actions).toHaveLength(8);
+  expect(actions[5]).toBe(getFriendsReqsAction);
+  expect(actions[6]).toBe(getFriendsAction);
+  expect(actions[7]).toBe(getNotificationsAction);
+  expect(actions[8]).toBe(updateLSAction);
+  expect(actions).toHaveLength(9);
 });
 
 test('Should display a loader if the state is being initialized', () => {

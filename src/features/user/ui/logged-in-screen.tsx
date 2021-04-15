@@ -30,12 +30,17 @@ const LoggedInScreen = () => {
   const {getFriends, getFriendRequests} = useFriendsActions();
   const {getBadges} = useBadgeActions();
   const {getNotifications} = useNotificationActions();
-  const {getConversations, subscribeToMessages} = useChatActions();
+  const {
+    getConversations,
+    subscribeToMessages,
+    subscribeToTypings
+  } = useChatActions();
 
   useEffect(() => {
     dispatch(getMe());
     dispatch(getConversations());
     dispatch(subscribeToMessages());
+    dispatch(subscribeToTypings());
     dispatch(getBadges());
     startPolling(() => {
       dispatch(getFriendRequests());
