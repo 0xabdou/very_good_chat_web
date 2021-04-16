@@ -144,13 +144,14 @@ export const SUBSCRIBE_TO_TYPINGS = gql`
         typings {
             conversationID
             userID
+            started
         }
     }
 `;
 
 export const TYPING = gql`
-    mutation ImTyping($conversationID: Int!) {
-        typing(conversationID: $conversationID) {
+    mutation ImTyping($conversationID: Int!, $started: Boolean!) {
+        typing(typing: {conversationID: $conversationID, started: $started}) {
             conversationID,
         }
     }

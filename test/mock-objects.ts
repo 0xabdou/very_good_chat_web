@@ -52,7 +52,7 @@ import Conversation from "../src/features/chat/types/conversation";
 import ChatAPI, {SendMessageInput} from "../src/features/chat/data/sources/chat-api";
 import {GetFriends_getFriends_user as GQLUser} from "../src/_generated/GetFriends";
 import {SubscribeToTypings_typings} from "../src/_generated/SubscribeToTypings";
-import Typing from "../src/features/chat/types/typing";
+import Typing, {TypingInput} from "../src/features/chat/types/typing";
 
 export const MockFile = mock<File>();
 
@@ -315,12 +315,19 @@ export const mockSendMessageInput: SendMessageInput = {
 export const mockGQLTyping: SubscribeToTypings_typings = {
   __typename: 'Typing',
   conversationID: 123,
-  userID: "123"
+  userID: "123",
+  started: true,
 };
 
 export const mockTyping: Typing = {
   conversationID: mockGQLTyping.conversationID,
-  userID: mockGQLTyping.userID
+  userID: mockGQLTyping.userID,
+  started: mockGQLTyping.started,
+};
+
+export const mockTypingInput: TypingInput = {
+  conversationID: 412124,
+  started: true,
 };
 
 export const getMockStore = () => createMockStore<AppState, AppDispatch>([thunk]);

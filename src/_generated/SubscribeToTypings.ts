@@ -11,6 +11,7 @@ export interface SubscribeToTypings_typings {
   __typename: "Typing";
   conversationID: number;
   userID: string;
+  started: boolean;
 }
 
 export interface SubscribeToTypings {

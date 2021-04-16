@@ -9,7 +9,8 @@ import {
   mockConversation,
   mockMessage,
   mockSendMessageInput,
-  mockTyping
+  mockTyping,
+  mockTypingInput
 } from "../../../mock-objects";
 import Observable from "zen-observable";
 import {MessageSub} from "../../../../src/features/chat/types/message";
@@ -90,13 +91,12 @@ describe('getMoreMessages', () => {
 describe('typing', () => {
   it("should do what it is fated to do", async () => {
     // arrange
-    const conversationID = 1242;
     when(MockChatAPI.typing(anything())).thenResolve(null);
     // act
-    const result = await chatRepo.typing(conversationID);
+    const result = await chatRepo.typing(mockTypingInput);
     // assert
     expect(result).toStrictEqual(right(null));
-    verify(MockChatAPI.typing(conversationID)).once();
+    verify(MockChatAPI.typing(mockTypingInput)).once();
   });
 });
 

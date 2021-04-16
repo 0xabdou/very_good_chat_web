@@ -6,7 +6,7 @@ import {isRight} from "fp-ts/Either";
 import {MESSAGES_PER_FETCH, SendMessageInput} from "./data/sources/chat-api";
 import Message from "./types/message";
 import {Media} from "./types/media";
-import Typing from "./types/typing";
+import Typing, {TypingInput} from "./types/typing";
 
 export type ChatState = {
   conversations: Conversation[] | null,
@@ -56,10 +56,10 @@ const getMoreMessages = createAsyncThunk<Message[], number, ThunkAPI<ChatError>>
   }
 );
 
-const typing = createAsyncThunk<void, number, ThunkAPI<ChatError>>(
+const typing = createAsyncThunk<void, TypingInput, ThunkAPI<ChatError>>(
   'chat/typing',
-  (conversationID, thunkAPI) => {
-    void thunkAPI.extra.chatRepo.typing(conversationID);
+  (input, thunkAPI) => {
+    void thunkAPI.extra.chatRepo.typing(input);
   }
 );
 
@@ -121,20 +121,14 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   }
 );
 
-const timeouts: { [conversationID: number]: { [userID: string]: NodeJS.Timeout } } = {};
 const subscribeToTypings = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToTypings',
   async (_, thunkAPI) => {
     thunkAPI.extra.chatRepo.subscribeToTypings().subscribe((typing) => {
-      thunkAPI.dispatch(chatActions.addTyping(typing));
-      const {conversationID, userID} = typing;
-      if (timeouts[conversationID] && timeouts[conversationID][userID]) {
-        clearTimeout(timeouts[conversationID][userID]);
-      }
-      if (!timeouts[conversationID]) timeouts[conversationID] = {};
-      timeouts[conversationID][userID] = setTimeout(() => {
+      if (typing.started)
+        thunkAPI.dispatch(chatActions.addTyping(typing));
+      else
         thunkAPI.dispatch(chatActions.removeTyping(typing));
-      }, 5000);
     });
   }
 );

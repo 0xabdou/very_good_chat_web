@@ -45,16 +45,26 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   const onChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
     setText(e.target.value);
     if (!timer.current) {
-      dispatch(typing(props.conversationID));
-      timer.current = setTimeout(() => {
-        timer.current = null;
-      }, 3000);
+      dispatch(typing({conversationID: props.conversationID, started: true}));
+    } else {
+      clearTimeout(timer.current);
     }
+    timer.current = setTimeout(() => {
+      dispatch(typing({
+        conversationID: props.conversationID,
+        started: false
+      }));
+      timer.current = null;
+    }, 3000);
+
   }, []);
   const onKeyPress: KeyboardEventHandler = useCallback((e) => {
     if (e.code == 'Enter' && !e.shiftKey) {
       e.preventDefault();
       submit();
+      dispatch(typing({conversationID: props.conversationID, started: false}));
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = null;
     }
   }, [text, props.submit]);
 

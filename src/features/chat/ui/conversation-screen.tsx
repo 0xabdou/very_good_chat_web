@@ -132,15 +132,13 @@ const ConversationScreen = () => {
           <Typography variant='h6' className={topBarClasses.title}>
             {otherUser?.name ?? otherUser?.username}
           </Typography>
-          {
-            typing &&
-            <span className={classes.lastSeen}>
-              Typing...
-            </span>
-          }
         </div>
       </TopBar>
-      <MessagesList conversation={conversation} currentUserID={me?.id ?? ''}/>
+      <MessagesList
+        conversation={conversation}
+        currentUserID={me?.id ?? ''}
+        typing={typing}
+      />
       <ChatTextField
         conversationID={conversationID}
         files={files}

@@ -44,7 +44,7 @@ import {
   GetMoreMessages,
   GetMoreMessagesVariables
 } from "../../../../_generated/GetMoreMessages";
-import Typing from "../../types/typing";
+import Typing, {TypingInput} from "../../types/typing";
 import {SubscribeToTypings} from "../../../../_generated/SubscribeToTypings";
 import {ImTyping, ImTypingVariables} from "../../../../_generated/ImTyping";
 
@@ -55,7 +55,7 @@ export interface IChatAPI {
 
   getMoreMessages(conversationID: number, messageID: number): Promise<Message[]>;
 
-  typing(conversationID: number): Promise<null>;
+  typing(input: TypingInput): Promise<null>;
 
   sendMessage(input: SendMessageInput): Promise<Message>;
 
@@ -92,10 +92,10 @@ export default class ChatAPI implements IChatAPI {
     return ChatAPI.parseConversation(data?.getOrCreateOneToOneConversation!);
   }
 
-  async typing(conversationID: number): Promise<null> {
+  async typing(input: TypingInput): Promise<null> {
     await this._client.mutate<ImTyping, ImTypingVariables>({
       mutation: TYPING,
-      variables: {conversationID}
+      variables: input
     });
     return null;
   }
@@ -141,7 +141,8 @@ export default class ChatAPI implements IChatAPI {
       .map(({data}) => {
         return {
           conversationID: data!.typings.conversationID,
-          userID: data!.typings.userID
+          userID: data!.typings.userID,
+          started: data!.typings.started
         };
       });
   }

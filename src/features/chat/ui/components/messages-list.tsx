@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import {Icon, IconButton, makeStyles} from "@material-ui/core";
+import {Avatar, Icon, IconButton, makeStyles} from "@material-ui/core";
 import Message from "../../types/message";
 import MessageListItem from "./message-list-item/message-list-item";
 import {ItemContent, ListItem, Virtuoso, VirtuosoHandle} from "react-virtuoso";
@@ -13,6 +13,7 @@ import {Theme} from "@material-ui/core/styles/createMuiTheme";
 export type MessagesListProps = {
   conversation: Conversation,
   currentUserID: string,
+  typing?: boolean
 }
 
 const MessagesList = (props: MessagesListProps) => {
@@ -25,12 +26,17 @@ const MessagesList = (props: MessagesListProps) => {
   const isAtBottom = useRef<boolean | null>(null);
   const lastMsgID = useRef<number | null>(null);
   const [showArrow, setShowArrow] = useState(false);
-  const classes = useStyles({showArrow});
+  const classes = useStyles({showArrow, typing: props.typing});
 
   useEffect(() => {
     lastMsgID.current =
       props.conversation.messages[props.conversation.messages.length - 1].id;
   }, [props.conversation.messages]);
+
+  useEffect(() => {
+    if (props.typing && isAtBottom.current)
+      scrollToBottom();
+  }, [props.typing, isAtBottom.current]);
 
   const itemContent: ItemContent<Message> = useCallback((index) => {
     return (
@@ -103,8 +109,20 @@ const MessagesList = (props: MessagesListProps) => {
               followOutput={followOutput}
               overscan={600}
               components={{
-                Header: () => <ListLoader
-                  loading={props.conversation.fetchingMore}/>
+                Header: () => (
+                  <div className={classes.loader}>
+                    <PulseLoader/>
+                  </div>
+                ),
+                Footer: () => (
+                  <div className={classes.typing}>
+                    <Avatar
+                      className={classes.typingAvatar}
+                      src={props.conversation.participants[0].photo?.small}
+                    />
+                    <span className={classes.typingText}>Typing...</span>
+                  </div>
+                )
               }}
               ref={ref}
               itemsRendered={itemsRendered}
@@ -118,17 +136,13 @@ const MessagesList = (props: MessagesListProps) => {
     </div>
   );
 };
-const ListLoader = ({loading}: { loading?: boolean }) => {
-  const classes = useStyles({});
-  if (!loading) return <div/>;
-  return (
-    <div className={classes.loader}>
-      <PulseLoader/>
-    </div>
-  );
-};
 
-const useStyles = makeStyles<Theme, { showArrow?: boolean }>({
+type MessagesListStyle = {
+  showArrow?: boolean,
+  typing?: boolean,
+}
+
+const useStyles = makeStyles<Theme, MessagesListStyle>({
   outer: {
     position: "relative",
     width: '100%',
@@ -140,6 +154,24 @@ const useStyles = makeStyles<Theme, { showArrow?: boolean }>({
     justifyContent: "center",
     alignItems: "center",
     padding: '16px',
+  },
+  typing: props => ({
+    display: "flex",
+    alignItems: "center",
+    transform: props.typing ? "scale(1)" : "scale(0)",
+    width: props.typing ? undefined : 0,
+    height: props.typing ? undefined : 0,
+    paddingTop: "24px",
+    paddingLeft: "12px",
+  }),
+  typingAvatar: {
+    width: "20px",
+    height: "20px",
+    marginRight: "16px",
+  },
+  typingText: {
+    fontSize: "0.9rem",
+    color: "grey",
   },
   arrow: props => ({
     position: "absolute",

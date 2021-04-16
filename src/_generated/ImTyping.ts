@@ -18,4 +18,5 @@ export interface ImTyping {
 
 export interface ImTypingVariables {
   conversationID: number;
+  started: boolean;
 }

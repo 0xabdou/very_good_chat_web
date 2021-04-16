@@ -16,7 +16,8 @@ import {
   mockMedia,
   mockMessage,
   mockSendMessageInput,
-  mockTyping
+  mockTyping,
+  mockTypingInput
 } from "../../../../mock-objects";
 import {
   GET_CONVERSATIONS,
@@ -154,17 +155,16 @@ describe("getMoreMessages", () => {
 describe('typing', () => {
   it('should send a typing', async () => {
     /// arrange
-    const conversationID = 123123;
     when(MockApolloClient.mutate(anything())).thenResolve({
-      data: {typing: {__typename: "Typing", conversationID}}
+      data: {typing: {__typename: "Typing", conversationID: 12332}}
     } as ApolloQueryResult<ImTyping>);
     // act
-    const result = await chatAPI.typing(conversationID);
+    const result = await chatAPI.typing(mockTypingInput);
     // assert
     expect(result).toBeNull();
     verify(MockApolloClient.mutate(deepEqual({
       mutation: TYPING,
-      variables: {conversationID}
+      variables: mockTypingInput
     }))).once();
   });
 });

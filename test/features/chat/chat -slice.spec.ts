@@ -18,7 +18,8 @@ import {
   mockMedia,
   mockMessage,
   mockTheDate,
-  mockTyping
+  mockTyping,
+  mockTypingInput
 } from "../../mock-objects";
 import {AppState, AppStore} from "../../../src/core/redux/store";
 import reducer, {
@@ -364,12 +365,12 @@ describe('getMoteMessages', () => {
             ...inputState,
             conversations: [
               {
-              ...conv,
-              messages: [...messages, ...conv.messages],
-              hasMore: true,
-              fetchingMore: false,
-            }
-          ],
+                ...conv,
+                messages: [...messages, ...conv.messages],
+                hasMore: true,
+                fetchingMore: false,
+              }
+            ],
           };
           const action: PayloadAction<Message[], string, { arg: number }> = {
             type: chatActions.getMoreMessages.fulfilled.type,
@@ -396,12 +397,12 @@ describe('getMoteMessages', () => {
             ...inputState,
             conversations: [
               {
-              ...conv,
-              messages: [...messages, ...conv.messages],
-              hasMore: false,
-              fetchingMore: false,
-            }
-          ],
+                ...conv,
+                messages: [...messages, ...conv.messages],
+                hasMore: false,
+                fetchingMore: false,
+              }
+            ],
           };
           const action: PayloadAction<Message[], string, { arg: number }> = {
             type: chatActions.getMoreMessages.fulfilled.type,
@@ -418,18 +419,16 @@ describe('getMoteMessages', () => {
   });
 });
 
-describe("sendMessage", () => {
+describe("typing", () => {
   it("should do what it's fated to do", async () => {
-    // arrange
-    const conversationID = 1231;
     // act
-    await chatActions.typing(conversationID)(
+    await chatActions.typing(mockTypingInput)(
       mockStore.dispatch,
       mockStore.getState,
       extra
     );
     // assert
-    verify(MockChatRepo.typing(conversationID)).once();
+    verify(MockChatRepo.typing(mockTypingInput)).once();
   });
 });
 
@@ -818,7 +817,10 @@ describe('reducers', () => {
 describe("subscribeToTypings", () => {
   it('should subscribe to typings', async () => {
     // arrange
-    const observable = Observable.of<Typing>(mockTyping);
+    const observable = Observable.of<Typing>(mockTyping, {
+      ...mockTyping,
+      started: false
+    });
     when(MockChatRepo.subscribeToTypings()).thenReturn(observable);
     // act
     await chatActions.subscribeToTypings()(
@@ -827,12 +829,14 @@ describe("subscribeToTypings", () => {
       extra
     );
     // assert
-    let action: PayloadAction<Typing> | undefined;
     await waitFor(() => {
-      action = mockStore.getActions().find(a => a.type == chatActions.addTyping.type);
+      const action = mockStore.getActions().find(a => a.type == chatActions.removeTyping.type);
       expect(action).not.toBeUndefined();
+      expect(action!.payload).toStrictEqual({...mockTyping, started: false});
     });
-    expect(action?.payload).toStrictEqual(mockTyping);
+    const action = mockStore.getActions().find(a => a.type == chatActions.addTyping.type);
+    expect(action).not.toBeUndefined();
+    expect(action!.payload).toStrictEqual(mockTyping);
     verify(MockChatRepo.subscribeToTypings()).once();
   });
 
