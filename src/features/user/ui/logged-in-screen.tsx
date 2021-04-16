@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect} from "react";
 import MainScreen from "./main-screen";
 import ProfileUpdatingScreen from "./profile-updating-screen";
-import {makeStyles} from "@material-ui/core";
+import {makeStyles, useMediaQuery} from "@material-ui/core";
 import UserError from "../types/user-error";
 import {useMeActions} from "../me-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
@@ -35,6 +35,7 @@ const LoggedInScreen = () => {
     subscribeToMessages,
     subscribeToTypings
   } = useChatActions();
+  const isMobile = useMediaQuery("(max-width: 650px)");
 
   useEffect(() => {
     dispatch(getMe());
@@ -104,9 +105,12 @@ const LoggedInScreen = () => {
           <Route path='/u/:username'>
             <FriendProfileScreen/>
           </Route>
-          <Route path='/c/:id'>
-            <ConversationScreen/>
-          </Route>
+          {
+            isMobile &&
+            <Route path='/c/:id'>
+              <ConversationScreen/>
+            </Route>
+          }
           <Route path='/'>
             <MainScreen/>
           </Route>

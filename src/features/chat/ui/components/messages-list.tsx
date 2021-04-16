@@ -1,14 +1,11 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {Avatar, Icon, IconButton, makeStyles} from "@material-ui/core";
-import Message from "../../types/message";
 import MessageListItem from "./message-list-item/message-list-item";
-import {ItemContent, ListItem, Virtuoso, VirtuosoHandle} from "react-virtuoso";
-import AutoSizer from "react-virtualized-auto-sizer";
 import Conversation from "../../types/conversation";
 import {useAppDispatch} from "../../../../core/redux/hooks";
 import useChatActions from "../../chat-actions-provider";
-import {PulseLoader} from "react-spinners";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import {PulseLoader} from "react-spinners";
 
 export type MessagesListProps = {
   conversation: Conversation,
@@ -17,120 +14,75 @@ export type MessagesListProps = {
 }
 
 const MessagesList = (props: MessagesListProps) => {
-  const START_INDEX = 1000000000;
-  const [firstItemIndex, setFirstItemIndex] = useState(START_INDEX);
-  const [initialTopMostItemIndex] = useState(props.conversation.messages.length - 1);
   const dispatch = useAppDispatch();
   const {getMoreMessages} = useChatActions();
-  const ref = useRef<VirtuosoHandle>(null);
-  const isAtBottom = useRef<boolean | null>(null);
-  const lastMsgID = useRef<number | null>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const isFetching = useRef<boolean | null>(false);
   const [showArrow, setShowArrow] = useState(false);
-  const classes = useStyles({showArrow, typing: props.typing});
+  const classes = useStyles({
+    showArrow,
+    typing: props.typing,
+    fetchingMore: props.conversation.hasMore,
+  });
 
   useEffect(() => {
-    lastMsgID.current =
-      props.conversation.messages[props.conversation.messages.length - 1].id;
-  }, [props.conversation.messages]);
+    if (ref.current) ref.current.onscroll = onScroll;
+    return () => {
+      if (ref.current) ref.current.onscroll = null;
+    };
+  }, [ref.current]);
 
-  useEffect(() => {
-    if (props.typing && isAtBottom.current)
-      scrollToBottom();
-  }, [props.typing, isAtBottom.current]);
+  const onScroll = async () => {
+    const d = ref.current;
+    if (!d) return console.log("REF CUR NULL");
+    const sh = d.scrollHeight;
+    const st = d.scrollTop;
+    const ch = d.clientHeight;
+    const diff = sh + st - ch;
+    setShowArrow(st <= -120);
+    if (diff <= 50 && !isFetching.current && props.conversation.hasMore) {
+      isFetching.current = true;
+      console.log("HALAW BOOM BOOM");
+      await dispatch(getMoreMessages(props.conversation.id));
+      isFetching.current = false;
+    }
+  };
 
-  const itemContent: ItemContent<Message> = useCallback((index) => {
+  const scrollToBottom = useCallback(() => {
+    if (ref.current) ref.current.scrollTo({top: 0, behavior: "smooth"});
+  }, [ref.current]);
+
+  const messages = props.conversation.messages.map((m, i) => {
     return (
       <MessageListItem
         conversation={props.conversation}
-        index={index - firstItemIndex}
+        index={i}
         currentUserID={props.currentUserID}
+        key={`${m.id}`}
       />
     );
-  }, [props.conversation, props.currentUserID, firstItemIndex]);
-
-  const getMore = useCallback(async () => {
-    if (props.conversation.fetchingMore) return;
-    if (props.conversation.hasMore) {
-      const result = await dispatch(getMoreMessages(props.conversation.id));
-      if (result.meta.requestStatus == "fulfilled") {
-        const fetched = result.payload as Message[];
-        setFirstItemIndex(idx => idx - fetched.length);
-      }
-    }
-  }, [props.conversation, setFirstItemIndex, dispatch]);
-
-  const scrollToBottom = useCallback(() => {
-    ref.current?.scrollToIndex({
-      index: START_INDEX + 1000,
-      behavior: "smooth"
-    });
-  }, [ref.current]);
-
-  const bottomStateChanged = useCallback((state: boolean) => {
-    isAtBottom.current = state;
-  }, [isAtBottom]);
-
-  const followOutput = useCallback(
-    () => {
-      const lastMsg = props.conversation.messages[props.conversation.messages.length - 1];
-      if (lastMsg.id != lastMsgID.current) {
-        if (isAtBottom.current || lastMsg.senderID == props.currentUserID) {
-          setTimeout(scrollToBottom, 100);
-        }
-      }
-      return false;
-    },
-    [props.conversation.messages,
-      props.currentUserID,
-      isAtBottom.current,
-      lastMsgID.current,
-      ref.current]
-  );
-
-  const itemsRendered = useCallback((items: ListItem<Message>[]) => {
-    const last = items[items.length - 1]?.data?.id;
-    if (last != lastMsgID.current) setShowArrow(true);
-    else setShowArrow(false);
-  }, [lastMsgID.current, setShowArrow]);
-
+  });
   return (
     <div className={classes.outer}>
-      <AutoSizer>
-        {({width, height}) => {
-          return (
-            <Virtuoso
-              firstItemIndex={firstItemIndex}
-              initialTopMostItemIndex={initialTopMostItemIndex}
-              data={props.conversation.messages}
-              startReached={getMore}
-              itemContent={itemContent}
-              style={{height, width, overflowX: 'hidden'}}
-              atBottomStateChange={bottomStateChanged}
-              followOutput={followOutput}
-              overscan={600}
-              components={{
-                Header: () => (
-                  <div className={classes.loader}>
-                    <PulseLoader/>
-                  </div>
-                ),
-                Footer: () => (
-                  <div className={classes.typing}>
-                    <Avatar
-                      className={classes.typingAvatar}
-                      src={props.conversation.participants[0].photo?.small}
-                    />
-                    <span className={classes.typingText}>Typing...</span>
-                  </div>
-                )
-              }}
-              ref={ref}
-              itemsRendered={itemsRendered}
+      <div className={classes.messages} ref={ref}>
+        <div>
+          <div className={classes.loader} key={new Date().getTime() + 1124}>
+            <PulseLoader/>
+          </div>
+          {messages}
+          <div className={classes.typing} key="zblbola">
+            <Avatar
+              className={classes.typingAvatar}
+              src={props.conversation.participants[0].photo?.small}
             />
-          );
-        }}
-      </AutoSizer>
-      <IconButton className={classes.arrow} onClick={scrollToBottom}>
+            <span className={classes.typingText}>Typing...</span>
+          </div>
+        </div>
+      </div>
+      <IconButton
+        className={classes.arrow}
+        onClick={scrollToBottom}
+      >
         <Icon className={classes.arrowIcon}>arrow_downward</Icon>
       </IconButton>
     </div>
@@ -140,6 +92,7 @@ const MessagesList = (props: MessagesListProps) => {
 type MessagesListStyle = {
   showArrow?: boolean,
   typing?: boolean,
+  fetchingMore?: boolean,
 }
 
 const useStyles = makeStyles<Theme, MessagesListStyle>({
@@ -149,11 +102,18 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
     flexGrow: 1,
     overflow: "hidden",
   },
-  loader: {
-    display: 'flex',
+  loader: props => ({
+    display: props.fetchingMore ? 'flex' : "none",
     justifyContent: "center",
     alignItems: "center",
     padding: '16px',
+  }),
+  messages: {
+    display: "flex",
+    flexDirection: "column-reverse",
+    width: "100%",
+    height: "100%",
+    overflowY: "auto",
   },
   typing: props => ({
     display: "flex",
@@ -163,6 +123,7 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
     height: props.typing ? undefined : 0,
     paddingTop: "24px",
     paddingLeft: "12px",
+    transition: "200ms",
   }),
   typingAvatar: {
     width: "20px",
@@ -192,3 +153,39 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
 
 
 export default MessagesList;
+
+//<AutoSizer>
+//  {({width, height}) => {
+//    return (
+//      <Virtuoso
+//        firstItemIndex={firstItemIndex}
+//        initialTopMostItemIndex={initialTopMostItemIndex}
+//        data={props.conversation.messages}
+//        startReached={getMore}
+//        itemContent={itemContent}
+//        style={{height, width, overflowX: 'hidden'}}
+//        atBottomStateChange={bottomStateChanged}
+//        followOutput={followOutput}
+//        overscan={600}
+//        components={{
+//          Header: () => (
+//            <div className={classes.loader}>
+//              <PulseLoader/>
+//            </div>
+//          ),
+//          Footer: () => (
+//            <div className={classes.typing}>
+//              <Avatar
+//                className={classes.typingAvatar}
+//                src={props.conversation.participants[0].photo?.small}
+//              />
+//              <span className={classes.typingText}>Typing...</span>
+//            </div>
+//          )
+//        }}
+//        ref={ref}
+//        itemsRendered={itemsRendered}
+//      />
+//    );
+//  }}
+//</AutoSizer>

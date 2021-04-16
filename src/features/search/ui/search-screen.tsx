@@ -119,7 +119,7 @@ const useStyles = makeStyles({
   full: {
     display: 'flex',
     marginTop: '1rem',
-    flexGrow: 1,
+    height: "100%",
   },
   centered: {
     margin: 'auto',
