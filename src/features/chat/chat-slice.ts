@@ -83,7 +83,7 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
       seenBy: [],
       sent: false
     };
-    thunkAPI.dispatch(chatActions.appendMessage(pendingMessage));
+    thunkAPI.dispatch(chatActions.appendMessage({message: pendingMessage}));
     const result = await thunkAPI.extra.chatRepo.sendMessage({
       conversationID: input.conversationID,
       text: input.text,
@@ -110,12 +110,13 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToMessages',
   async (_, thunkAPI) => {
     thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((sub) => {
+      const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
+      const message = sub.message;
       if (sub.update) {
-        const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
-        thunkAPI.dispatch(chatActions.updateMessage({...sub.message, mine}));
+        thunkAPI.dispatch(chatActions.updateMessage({message, mine}));
       } else {
-        thunkAPI.dispatch(chatActions.appendMessage(sub.message));
-        thunkAPI.extra.chatRepo.messagesDelivered([sub.message.conversationID]);
+        thunkAPI.dispatch(chatActions.appendMessage({message, mine}));
+        thunkAPI.extra.chatRepo.messagesDelivered([message.conversationID]);
       }
     });
   }
@@ -146,22 +147,27 @@ const chatSlice = createSlice({
   name: 'chat',
   initialState: initialChatState,
   reducers: {
-    appendMessage(state: ChatState, action: PayloadAction<Message>) {
-      const message = action.payload;
+    appendMessage(state: ChatState, action: PayloadAction<{ message: Message, mine?: boolean }>) {
+      const {message, mine} = action.payload;
       const index = state.conversations!.findIndex(c => c.id == message.conversationID);
       const conv = state.conversations!.splice(index, 1)[0];
+      if (!mine) {
+        if ((conv.seenDates[message.senderID] ?? 0) < message.sentAt)
+          conv.seenDates[message.senderID] = message.sentAt;
+      }
       conv.messages.push(message);
       state.conversations?.unshift(conv);
     },
-    updateMessage(state: ChatState, action: PayloadAction<Message & { mine?: boolean }>) {
-      const message = action.payload;
+    updateMessage(state: ChatState, action: PayloadAction<{ message: Message, mine?: boolean }>) {
+      const {message, mine} = action.payload;
       const conv = state.conversations!.find(c => c.id == message.conversationID);
       if (!conv) return;
       const mIndex = conv.messages.findIndex(m => m.id == message.id);
       conv.messages.splice(mIndex, 1, message);
-      if (message.mine && message.seenBy[0]) {
+      if (mine && message.seenBy[0]) {
         const sb = message.seenBy[0];
-        if (conv.seenDates[sb.userID] < sb.date) conv.seenDates[sb.userID] = sb.date;
+        if (conv.seenDates[sb.userID] < sb.date)
+          conv.seenDates[sb.userID] = sb.date;
       }
     },
     addTyping(state: ChatState, action: PayloadAction<Typing>) {

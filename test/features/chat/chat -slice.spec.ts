@@ -473,7 +473,7 @@ describe('sendMessage', () => {
     expect(mockStore.getActions()).toHaveLength(3);
     const action = mockStore.getActions()[1] as PayloadAction<Message>;
     expect(action.type).toBe(appendMessage.type);
-    expect(action.payload).toStrictEqual(pendingMessage);
+    expect(action.payload).toStrictEqual({message: pendingMessage});
   });
 
   it('should return the right action if fulfilled', async () => {
@@ -528,7 +528,7 @@ describe('sendMessage', () => {
     };
     const inputState: ChatState = {...initialChatState, conversations: convs};
 
-    test('appendMessage', () => {
+    test('appendMessage (not mine)', () => {
       // arrange
       const pendingMessage = inputState.conversations![1].messages[1];
       const inputState1: ChatState = {
@@ -554,13 +554,56 @@ describe('sendMessage', () => {
               convs[1].messages[0],
               convs[1].messages[2],
               pendingMessage,
-            ]
+            ],
+            seenDates: {
+              ...convs[1].seenDates,
+              [pendingMessage.senderID]: pendingMessage.sentAt
+            }
           },
           convs[0],
           convs[2]
         ]
       };
-      const action: PayloadAction<Message> = appendMessage(pendingMessage);
+      const action = appendMessage({message: pendingMessage});
+      // act
+      const result = reducer(inputState1, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+
+    test('appendMessage (mine)', () => {
+      // arrange
+      const pendingMessage = inputState.conversations![1].messages[1];
+      const inputState1: ChatState = {
+        ...inputState,
+        conversations: [
+          convs[0],
+          {
+            ...convs[1],
+            messages: [
+              convs[1].messages[0],
+              convs[1].messages[2],
+            ]
+          },
+          convs[2]
+        ]
+      };
+      const outputState: ChatState = {
+        ...inputState1,
+        conversations: [
+          {
+            ...convs[1],
+            messages: [
+              convs[1].messages[0],
+              convs[1].messages[2],
+              pendingMessage,
+            ],
+          },
+          convs[0],
+          convs[2]
+        ]
+      };
+      const action = appendMessage({message: pendingMessage, mine: true});
       // act
       const result = reducer(inputState1, action);
       // assert
@@ -693,11 +736,17 @@ describe('subscribeToMessages', () => {
     const acts = store.getActions();
     const idx = acts.findIndex(action => action.type == chatActions.updateMessage.type);
     expect(acts[idx].type).toBe(chatActions.updateMessage.type);
-    expect(acts[idx].payload).toStrictEqual({...m1.message, mine: false});
+    expect(acts[idx].payload).toStrictEqual({message: m1.message, mine: false});
     expect(acts[idx + 1].type).toBe(chatActions.updateMessage.type);
-    expect(acts[idx + 1].payload).toStrictEqual({...m2.message, mine: true});
+    expect(acts[idx + 1].payload).toStrictEqual({
+      message: m2.message,
+      mine: true
+    });
     expect(acts[idx + 2].type).toBe(chatActions.appendMessage.type);
-    expect(acts[idx + 2].payload).toStrictEqual(m3.message);
+    expect(acts[idx + 2].payload).toStrictEqual({
+      message: m3.message,
+      mine: false
+    });
     verify(MockChatRepo.subscribeToMessages()).once();
   });
 });
@@ -733,33 +782,11 @@ describe('reducers', () => {
     conversations: [conv1, conv2]
   };
 
-  test('appendMessage', () => {
-    // arrange
-    const msg: Message = {
-      ...mockMessage,
-      conversationID: id2,
-      senderID: msg1.senderID,
-      id: 22,
-    };
-    const action: PayloadAction<Message> = chatActions.appendMessage(msg);
-    const outputState: ChatState = {
-      ...state,
-      conversations: [
-        {...conv2, messages: [...conv2.messages, msg]},
-        conv1
-      ]
-    };
-    // act
-    const result = reducer(state, action);
-    // assert
-    expect(result).toStrictEqual(outputState);
-  });
-
   describe('updateMessage', () => {
     test('mine', () => {
       // arrange
       const date = new Date().getTime() + 10000;
-      const msg: Message & { mine?: boolean } = {
+      const msg: Message = {
         ...mockMessage,
         conversationID: id2,
         text: "WAAAAAAAAAAA MIIIIIIII",
@@ -767,9 +794,8 @@ describe('reducers', () => {
           {userID: msg1.senderID, date}
         ],
         id: 21,
-        mine: true,
       };
-      const action: PayloadAction<Message> = chatActions.updateMessage(msg);
+      const action = chatActions.updateMessage({message: msg, mine: true});
       const outputState: ChatState = {
         ...state,
         conversations: [
@@ -798,7 +824,7 @@ describe('reducers', () => {
         text: "WAAAAAAAAAAA MIIIIIIII",
         id: 21,
       };
-      const action: PayloadAction<Message> = chatActions.updateMessage(msg);
+      const action = chatActions.updateMessage({message: msg});
       const outputState: ChatState = {
         ...state,
         conversations: [

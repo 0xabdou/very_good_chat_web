@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {makeStyles, Typography} from "@material-ui/core";
+import {ButtonBase, makeStyles, Typography} from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
-import {useParams} from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import FullscreenLoader from "../../../shared/components/fullscreen-loader";
 import useChatActions from "../chat-actions-provider";
@@ -30,9 +30,11 @@ const ConversationScreen = () => {
   const conversation = useAppSelector(
     state => state.chat.conversations?.find(c => c.id == conversationID)
   );
+  // The friend object of the other side of the conversation
   const friend = useAppSelector(
     state => state.friends.friends?.find(f => f.user.id == conversation?.participants[0].id)
   );
+  // Is the other side currently typing?
   const typing: boolean = useAppSelector(state => {
     const userID = conversation?.participants[0]?.id;
     if (!userID) return false;
@@ -40,6 +42,8 @@ const ConversationScreen = () => {
     if (!typings) return false;
     return typings.indexOf(userID) != -1;
   });
+  // Navigation stuff
+  const history = useHistory();
 
   // Update [isActive] when needed
   useEffect(() => {
@@ -104,6 +108,12 @@ const ConversationScreen = () => {
   const stringifyCustomError = useCallback(
     (error: CustomError | null) => error?.message ?? '', []
   );
+
+  // Callback for when the avatar/name on the top bar is clicked
+  const goToProfile = useCallback(() => {
+    history.push(`/u/${otherUser.username}`);
+  }, [history]);
+
   // React dropzone stuff
   const {getRootProps, getInputProps, isDragActive, open} = useDropzone({
     onDrop,
@@ -118,7 +128,8 @@ const ConversationScreen = () => {
 
   if (!conversation) return <FullscreenLoader/>;
 
-  const otherUser = conversation.participants[0];
+  // The other side of the conversation
+  const otherUser = conversation?.participants[0];
   const rootProps = getRootProps({
     className: classes.outer,
     'data-testid': 'conversation-screen'
@@ -127,12 +138,15 @@ const ConversationScreen = () => {
   return (
     <div {...rootProps} >
       <TopBar>
-        <FriendAvatar src={otherUser.photo?.small} lastSeen={friend?.lastSeen}/>
-        <div className={classes.title}>
-          <Typography variant='h6' className={topBarClasses.title}>
-            {otherUser?.name ?? otherUser?.username}
-          </Typography>
-        </div>
+        <ButtonBase onClick={goToProfile}>
+          <FriendAvatar src={otherUser.photo?.small}
+                        lastSeen={friend?.lastSeen}/>
+          <div className={classes.title}>
+            <Typography variant='h6' className={topBarClasses.title}>
+              {otherUser?.name ?? otherUser?.username}
+            </Typography>
+          </div>
+        </ButtonBase>
       </TopBar>
       <MessagesList
         conversation={conversation}

@@ -46,7 +46,15 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
   let date: number;
   if (incoming) {
     if (!after) deliveryStatusType = DeliveryStatusType.SEEN;
-    else deliveryStatusType = DeliveryStatusType.NONE;
+    else if (_sameSender(message, after)) {
+      deliveryStatusType = DeliveryStatusType.NONE;
+    } else {
+      const lastSeen = props.conversation.seenDates[message.senderID] ?? 0;
+      if (message.sentAt >= lastSeen)
+        deliveryStatusType = DeliveryStatusType.SEEN;
+      else
+        deliveryStatusType = DeliveryStatusType.NONE;
+    }
     date = message.sentAt;
   } else if (!message.sent) {
     deliveryStatusType = DeliveryStatusType.SENDING;
@@ -55,8 +63,11 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     const sb = message.seenBy[0];
     const lastSeen = props.conversation.seenDates[sb.userID] ?? 0;
     if (sb.date == lastSeen) {
-      if (after && _sameSender(message, after) && after.seenBy[0]) {
-        deliveryStatusType = DeliveryStatusType.NONE;
+      if (after && _sameSender(message, after)) {
+        if (after.seenBy[0])
+          deliveryStatusType = DeliveryStatusType.NONE;
+        else
+          deliveryStatusType = DeliveryStatusType.SEEN;
       } else {
         deliveryStatusType = DeliveryStatusType.SEEN;
       }
@@ -71,7 +82,6 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
   }
   const showIncomingAvatar = incoming
     && (!after || (after && !_sameSender(message, after)));
-  const showDeliveryStatus = !incoming || (incoming && !after);
   const hasMedia = Boolean(message.medias && message.medias.length);
 
   const classes = useStyles({
@@ -100,12 +110,11 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
           <div className={classes.bubbleText}>{message.text}</div>}
         </span>
         <div className={classes.status}>
-          {showDeliveryStatus &&
           <DeliveryStatus
             type={deliveryStatusType}
             date={date}
             photoURL={otherUser.photo?.small}
-          />}
+          />
         </div>
       </div>
     </div>
