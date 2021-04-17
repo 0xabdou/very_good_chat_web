@@ -265,6 +265,7 @@ const getConvs = (): [GQLConversation, Conversation] => {
   const message1: GQLMessage = {
     ...mockGQLMessage,
     id: 0,
+    senderID: user1.id,
     sentAt: new Date().getTime(),
     seenBy: [{
       __typename: 'Delivery',
@@ -276,6 +277,7 @@ const getConvs = (): [GQLConversation, Conversation] => {
   const message2: GQLMessage = {
     ...mockGQLMessage,
     id: 2,
+    senderID: user2.id,
     sentAt: new Date().getTime() + 10000,
     seenBy: [{
       __typename: 'Delivery',

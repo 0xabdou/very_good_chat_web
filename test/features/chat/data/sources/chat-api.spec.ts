@@ -51,14 +51,14 @@ const chatAPI = new ChatAPI(instance(MockApolloClient));
 
 describe('parsing', () => {
   describe('parseConversation', () => {
-    test(`with less that ${MESSAGES_PER_FETCH} messages`, () => {
+    test(`with less than ${MESSAGES_PER_FETCH} messages`, () => {
       // act
       const result = ChatAPI.parseConversation(mockGQLConversation);
       // assert
       expect(result).toStrictEqual(mockConversation);
     });
 
-    test(`with more that ${MESSAGES_PER_FETCH} messages`, () => {
+    test(`with more than ${MESSAGES_PER_FETCH} messages`, () => {
       // act
       const input: GetConversations_getConversations = {
         ...mockGQLConversation,
@@ -66,14 +66,15 @@ describe('parsing', () => {
           {length: MESSAGES_PER_FETCH},
           (_, idx): GetConversations_getConversations_messages => ({
             ...mockGQLMessage,
+            senderID: mockGQLConversation.participants[idx % 2].id,
             id: idx
           })
         )
       };
-      const seenDates: UsersLastSeen = {};
-      mockGQLConversation.participants.forEach(p => {
-        seenDates[p.id] = 0;
-      });
+      const seenDates: UsersLastSeen = {
+        [mockGQLConversation.participants[0].id]: 0,
+        [mockGQLConversation.participants[1].id]: mockGQLMessage.sentAt,
+      };
       const output: Conversation = {
         ...mockConversation,
         messages: input.messages.map(ChatAPI.parseMessage),

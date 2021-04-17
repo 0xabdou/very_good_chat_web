@@ -26,7 +26,7 @@ it('should display user info (sent)', () => {
   renderIt(props);
   // assert
   expect(screen.getByText(user.username)).toBeInTheDocument();
-  expect(screen.getByText('sent ' + formatDate(props.req.date))).toBeInTheDocument();
+  expect(screen.getByText(formatDate(props.req.date))).toBeInTheDocument();
   const avatar = screen.getByAltText('request-avatar') as HTMLImageElement;
   expect(avatar.src).toMatch(user.photo!.small);
 });
@@ -51,7 +51,7 @@ it('should display user info (received)', () => {
   renderIt(props);
   // assert
   expect(screen.getByText(user.username)).toBeInTheDocument();
-  expect(screen.getByText('received ' + formatDate(props.req.date))).toBeInTheDocument();
+  expect(screen.getByText(formatDate(props.req.date))).toBeInTheDocument();
   const avatar = screen.getByAltText('request-avatar') as HTMLImageElement;
   expect(avatar.src).toMatch(user.photo!.small);
 });

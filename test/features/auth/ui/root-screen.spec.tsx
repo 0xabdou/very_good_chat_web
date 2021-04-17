@@ -11,6 +11,7 @@ import {Provider} from "react-redux";
 import {AuthActionsContext} from "../../../../src/features/auth/auth-actions-context";
 import {instance, mock, resetCalls, verify, when} from "ts-mockito";
 import {authActions} from "../../../../src/features/auth/auth-slice";
+import {MemoryRouter} from "react-router-dom";
 
 const MockStore = getMockStore();
 const MockAuthActions = mock<typeof authActions>();
@@ -33,9 +34,11 @@ beforeEach(() => {
 const Wrapped = ({mockStore}: { mockStore: AppStore }) => {
   return (
     <Provider store={mockStore}>
-      <AuthActionsContext.Provider value={instance(MockAuthActions)}>
-        <RootScreen/>
-      </AuthActionsContext.Provider>
+      <MemoryRouter initialEntries={["/"]} initialIndex={0}>
+        <AuthActionsContext.Provider value={instance(MockAuthActions)}>
+          <RootScreen/>
+        </AuthActionsContext.Provider>
+      </MemoryRouter>
     </Provider>
   );
 };
