@@ -15,9 +15,9 @@ import {ErrorSnackbar} from "../../../shared/components/snackbars";
 import {FriendRequest} from "../types/friend-request";
 import {BadgeName} from "../../badge/types/badge";
 import {useBadgeActions} from "../../badge/badge-actions-context";
-import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
 import FriendProfileScreen from "./friend-profile-screen";
+import ResponsiveTwoSides from "../../user/ui/responsive-two-sides";
 
 type FriendRequestsScreenProps = {
   received?: boolean
@@ -135,49 +135,42 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
       </div>
     );
   }
+  const leftTopBar = (
+    <Typography variant='h6' className={topBarClasses.title}>
+      {props.received ? 'Friend requests' : 'Sent requests'}
+    </Typography>
+  );
+  const leftChildren = (
+    <>
+      {props.received &&
+      <div className={classes.sent} data-testid='view-sent-requests'>
+        <Button onClick={viewSentReqs}>View sent requests</Button>
+      </div>}
+      {child}
+      <ErrorSnackbar
+        currentError={state.requestsError}
+        stringify={stringifyFriendError}
+        exclude={[]}
+      />
+    </>
+  );
+  const rightChildren = (
+    <Route path="/u/:username">
+      <FriendProfileScreen/>
+    </Route>
+  );
+  const rightFiller = "Click on a request to see the user";
   return (
-    <div className={classes.outer}>
-      <div className={classes.leftSection}>
-        <div className={classes.leftSectionTopBar}>
-          <Typography variant='h6' className={topBarClasses.title}>
-            {props.received ? 'Friend requests' : 'Sent requests'}
-          </Typography>
-        </div>
-        {props.received &&
-        <div className={classes.sent} data-testid='view-sent-requests'>
-          <Button onClick={viewSentReqs}>View sent requests</Button>
-        </div>}
-        {child}
-        <ErrorSnackbar
-          currentError={state.requestsError}
-          stringify={stringifyFriendError}
-          exclude={[]}
-        />
-      </div>
-      <div className={classes.rightSection}>
-        <Route path="/u/:username">
-          <FriendProfileScreen/>
-        </Route>
-        <span className={classes.filler}>
-          Click on a request to see the user
-        </span>
-      </div>
-    </div>
+    <ResponsiveTwoSides
+      leftTopBar={leftTopBar}
+      leftChildren={leftChildren}
+      rightChildren={rightChildren}
+      rightFiller={rightFiller}
+    />
   );
 };
 
-type MainScreenStyle = {
-  isMobile: boolean,
-  isLarge: boolean,
-}
-
-const useStyles = makeStyles<Theme, MainScreenStyle>({
-  outer: {
-    position: "relative",
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-  },
+const useStyles = makeStyles({
   centered: {
     margin: 'auto',
   },
@@ -187,40 +180,6 @@ const useStyles = makeStyles<Theme, MainScreenStyle>({
     alignItems: 'center',
     height: "50px",
   },
-  leftSection: props => ({
-    position: "relative",
-    display: "flex",
-    flexDirection: "column",
-    width: props.isMobile
-      ? "100%"
-      : props.isLarge ? "35%" : "40%",
-    minWidth: "300px",
-    borderRight: "0.1px solid rgba(0,0,0,0.1)",
-    paddingTop: "56px",
-    height: "100%",
-  }),
-  leftSectionTopBar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    display: "flex",
-    padding: "8px 16px",
-    alignItems: "center",
-    width: "100%",
-  },
-  rightSection: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flex: 1,
-    height: "100%",
-  },
-  filler: {
-    position: "absolute",
-    color: "black",
-    zIndex: -1,
-  }
 });
 
 export default FriendRequestsScreen;
