@@ -117,7 +117,11 @@ const removeRequest = (state: FriendsState, userID: string) => {
 const friendsSlice = createSlice({
   name: 'friends',
   initialState: initialFriendsState,
-  reducers: {},
+  reducers: {
+    requestRemoved(state: FriendsState, action: PayloadAction<string>) {
+      removeRequest(state, action.payload);
+    }
+  },
   extraReducers: builder => {
     // getFriends
     builder

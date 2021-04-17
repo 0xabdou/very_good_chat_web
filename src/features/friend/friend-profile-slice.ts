@@ -1,10 +1,11 @@
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import User from "../user/types/user";
 import {Friendship, FriendshipInfo, FriendshipStatus} from "./types/friendship";
-import {ThunkAPI} from "../../core/redux/store";
+import {AppDispatch, ThunkAPI} from "../../core/redux/store";
 import FriendError from "./types/friend-error";
 import {isRight} from "fp-ts/Either";
 import {blockToFriendError} from "../block/types/block-error";
+import {friendsActions} from "./friends-slice";
 
 export type FriendProfileState = {
   user: User | null,
@@ -34,7 +35,10 @@ const sendFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendErro
     }
     const result = await thunkAPI.extra.friendRepo
       .sendFriendRequest(userID);
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      notifyFriendsSlice(thunkAPI.dispatch);
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -49,7 +53,13 @@ const cancelFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendEr
     }
     const result = await thunkAPI.extra.friendRepo
       .cancelFriendRequest(userID);
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      notifyFriendsSlice(
+        thunkAPI.dispatch,
+        thunkAPI.getState().friendProfile.user!.id
+      );
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -64,7 +74,13 @@ const acceptFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendEr
     }
     const result = await thunkAPI.extra.friendRepo
       .acceptFriendRequest(userID);
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      notifyFriendsSlice(
+        thunkAPI.dispatch,
+        thunkAPI.getState().friendProfile.user!.id
+      );
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -79,7 +95,13 @@ const declineFriendRequest = createAsyncThunk<Friendship, void, ThunkAPI<FriendE
     }
     const result = await thunkAPI.extra.friendRepo
       .declineFriendRequest(userID);
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      notifyFriendsSlice(
+        thunkAPI.dispatch,
+        thunkAPI.getState().friendProfile.user!.id
+      );
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -93,7 +115,10 @@ const unfriend = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
       return thunkAPI.rejectWithValue(FriendError.general);
     }
     const result = await thunkAPI.extra.friendRepo.unfriend(userID);
-    if (isRight(result)) return result.right;
+    if (isRight(result)) {
+      notifyFriendsSlice(thunkAPI.dispatch);
+      return result.right;
+    }
     return thunkAPI.rejectWithValue(result.left);
   }
 );
@@ -107,7 +132,10 @@ const block = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
       return thunkAPI.rejectWithValue(FriendError.general);
     }
     const result = await thunkAPI.extra.blockRepo.block(userID);
-    if (isRight(result)) return {status: FriendshipStatus.BLOCKING};
+    if (isRight(result)) {
+      notifyFriendsSlice(thunkAPI.dispatch);
+      return {status: FriendshipStatus.BLOCKING};
+    }
     return thunkAPI.rejectWithValue(blockToFriendError(result.left));
   }
 );
@@ -125,6 +153,12 @@ const unblock = createAsyncThunk<Friendship, void, ThunkAPI<FriendError>>(
     return thunkAPI.rejectWithValue(blockToFriendError(result.left));
   }
 );
+
+const notifyFriendsSlice = (dispatch: AppDispatch, userID?: string) => {
+  if (userID) dispatch(friendsActions.requestRemoved(userID));
+  dispatch(friendsActions.getFriendRequests());
+  dispatch(friendsActions.getFriends());
+};
 
 export const initialFriendProfileState: FriendProfileState = {
   user: null,
