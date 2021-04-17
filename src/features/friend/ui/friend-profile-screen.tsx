@@ -24,6 +24,7 @@ const FriendProfileScreen = () => {
   const routeParams = useParams<{ username: string }>();
 
   useEffect(() => {
+    console.log("GETTING: ", routeParams);
     dispatch(actions.getFriendshipInfo(routeParams.username));
     const searchedUser = searchResults?.find(u => u.username == routeParams.username);
     setCachedUser(searchedUser);
@@ -49,7 +50,6 @@ const FriendProfileScreen = () => {
       <ErrorSnackbar<FriendError>
         currentError={state.error}
         stringify={stringifyFriendError}
-        exclude={[]}
       />
     </div>
   );
@@ -60,6 +60,7 @@ const useStyles = makeStyles({
     display: 'flex',
     height: '100%',
     width: '100%',
+    background: "white",
   },
   wrapper: {
     display: 'flex',

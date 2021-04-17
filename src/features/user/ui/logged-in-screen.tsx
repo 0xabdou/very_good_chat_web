@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect} from "react";
 import MainScreen from "./main-screen";
 import ProfileUpdatingScreen from "./profile-updating-screen";
-import {makeStyles, useMediaQuery} from "@material-ui/core";
+import {makeStyles} from "@material-ui/core";
 import UserError from "../types/user-error";
 import {useMeActions} from "../me-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import RetryPage from "../../../shared/components/retry-page";
 import FullscreenLoader from "../../../shared/components/fullscreen-loader";
-import {Redirect, Route, Switch} from "react-router-dom";
+import {Redirect, Route, Switch, useLocation} from "react-router-dom";
 import ProfileScreen from "./profile-screen";
 import FriendProfileScreen from "../../friend/ui/friend-profile-screen";
 import FriendRequestsScreen from "../../friend/ui/friend-requests-screen";
@@ -21,6 +21,7 @@ import SettingsScreen from "../../settings/ui/settings-screen";
 import {startPolling} from "../../../shared/utils/polling";
 import useChatActions from "../../chat/chat-actions-provider";
 import ConversationScreen from "../../chat/ui/conversation-screen";
+import {useMobileMQ} from "../../../shared/styles/media-query";
 
 const LoggedInScreen = () => {
   const state = useAppSelector(state => state.me);
@@ -35,7 +36,8 @@ const LoggedInScreen = () => {
     subscribeToMessages,
     subscribeToTypings
   } = useChatActions();
-  const isMobile = useMediaQuery("(max-width: 650px)");
+  const isMobile = useMobileMQ();
+  const location = useLocation<any>();
 
   useEffect(() => {
     dispatch(getMe());
@@ -66,6 +68,11 @@ const LoggedInScreen = () => {
   const onRetry = useCallback(() => {
     dispatch((getMe()));
   }, []);
+
+  const viewingUserFromReceivedRequests =
+    location.state && location.state.viewingUserFromReceivedRequests;
+  const viewingUserFromSentRequests =
+    location.state && location.state.viewingUserFromSentRequests;
   let child: React.ReactNode;
   if (!state.initialized) {
     if (state.error != null)
@@ -102,9 +109,24 @@ const LoggedInScreen = () => {
           <Route path='/notifications'><NotificationsScreen/></Route>
           <Route path='/settings'><SettingsScreen/></Route>
           <Redirect exact from={`/u/${me.username}`} to='/profile'/>
-          <Route path='/u/:username'>
-            <FriendProfileScreen/>
-          </Route>
+          {
+            (isMobile || !(viewingUserFromReceivedRequests || viewingUserFromSentRequests)) &&
+            <Route path='/u/:username'>
+              <FriendProfileScreen/>
+            </Route>
+          }
+          {
+            (!isMobile && viewingUserFromReceivedRequests) &&
+            <Route path='/u/:username'>
+              <FriendRequestsScreen received/>
+            </Route>
+          }
+          {
+            (!isMobile && viewingUserFromSentRequests) &&
+            <Route path='/u/:username'>
+              <FriendRequestsScreen/>
+            </Route>
+          }
           {
             isMobile &&
             <Route path='/c/:id'>

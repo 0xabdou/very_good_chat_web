@@ -4,17 +4,20 @@ import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {PulseLoader} from "react-spinners";
 import RetryButton from "../../../shared/components/retry-button";
 import {useFriendsActions} from "../friends-actions-context";
-import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
+import {useTopBarStyles} from "../../user/ui/components/top-bar";
 import AutoSizer from "react-virtualized-auto-sizer";
 import {FixedSizeList} from "react-window";
 import RequestListItem from "./components/request-list-item";
 import User from "../../user/types/user";
-import {useHistory} from "react-router-dom";
+import {Route, useHistory} from "react-router-dom";
 import {stringifyFriendError} from "../types/friend-error";
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
 import {FriendRequest} from "../types/friend-request";
 import {BadgeName} from "../../badge/types/badge";
 import {useBadgeActions} from "../../badge/badge-actions-context";
+import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
+import FriendProfileScreen from "./friend-profile-screen";
 
 type FriendRequestsScreenProps = {
   received?: boolean
@@ -26,18 +29,29 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
   const actions = useFriendsActions();
   const {updateBadge} = useBadgeActions();
   const history = useHistory();
-  const classes = useStyles();
+  const isMobile = useMobileMQ();
+  const isLarge = useLargeMQ();
+  const classes = useStyles({isMobile, isLarge});
   const topBarClasses = useTopBarStyles();
 
   useEffect(() => {
     if (props.received) {
       dispatch(updateBadge(BadgeName.FRIEND_REQUESTS));
     }
-  }, []);
+  }, [props.received]);
 
   const goToUserProfile = useCallback((user: User) => {
-    history.push(`/u/${user.username}`);
-  }, [history]);
+    const pathname = `/u/${user.username}`;
+    if (history.location.pathname != pathname) {
+      history.push({
+        pathname,
+        state: {
+          viewingUserFromReceivedRequests: props.received,
+          viewingUserFromSentRequests: !props.received,
+        }
+      });
+    }
+  }, [history, props.received]);
 
   const cancelRequest = useCallback((user: User) => {
     dispatch(actions.cancelFriendRequest(user.id));
@@ -75,7 +89,7 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
             itemCount={reqs.length}
             itemData={reqs}
             itemKey={itemKey}
-            height={height}
+            height={height - 50}
             width={width}
             itemSize={72}
           >
@@ -123,32 +137,46 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
   }
   return (
     <div className={classes.outer}>
-      <TopBar>
-        <Typography variant='h6' className={topBarClasses.title}>
-          {props.received ? 'Friend requests' : 'Sent requests'}
-        </Typography>
-      </TopBar>
-      {props.received &&
-      <div className={classes.sent} data-testid='view-sent-requests'>
-        <Button onClick={viewSentReqs}>View sent requests</Button>
-      </div>}
-      {child}
-      <ErrorSnackbar
-        currentError={state.requestsError}
-        stringify={stringifyFriendError}
-        exclude={[]}
-      />
+      <div className={classes.leftSection}>
+        <div className={classes.leftSectionTopBar}>
+          <Typography variant='h6' className={topBarClasses.title}>
+            {props.received ? 'Friend requests' : 'Sent requests'}
+          </Typography>
+        </div>
+        {props.received &&
+        <div className={classes.sent} data-testid='view-sent-requests'>
+          <Button onClick={viewSentReqs}>View sent requests</Button>
+        </div>}
+        {child}
+        <ErrorSnackbar
+          currentError={state.requestsError}
+          stringify={stringifyFriendError}
+          exclude={[]}
+        />
+      </div>
+      <div className={classes.rightSection}>
+        <Route path="/u/:username">
+          <FriendProfileScreen/>
+        </Route>
+        <span className={classes.filler}>
+          Click on a request to see the user
+        </span>
+      </div>
     </div>
   );
 };
 
-const useStyles = makeStyles({
+type MainScreenStyle = {
+  isMobile: boolean,
+  isLarge: boolean,
+}
+
+const useStyles = makeStyles<Theme, MainScreenStyle>({
   outer: {
+    position: "relative",
     width: '100%',
     height: '100%',
     display: 'flex',
-    flexDirection: 'column',
-    paddingTop: '56px',
   },
   centered: {
     margin: 'auto',
@@ -156,6 +184,42 @@ const useStyles = makeStyles({
   sent: {
     display: 'flex',
     justifyContent: 'center',
+    alignItems: 'center',
+    height: "50px",
+  },
+  leftSection: props => ({
+    position: "relative",
+    display: "flex",
+    flexDirection: "column",
+    width: props.isMobile
+      ? "100%"
+      : props.isLarge ? "35%" : "40%",
+    minWidth: "300px",
+    borderRight: "0.1px solid rgba(0,0,0,0.1)",
+    paddingTop: "56px",
+    height: "100%",
+  }),
+  leftSectionTopBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    display: "flex",
+    padding: "8px 16px",
+    alignItems: "center",
+    width: "100%",
+  },
+  rightSection: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    height: "100%",
+  },
+  filler: {
+    position: "absolute",
+    color: "black",
+    zIndex: -1,
   }
 });
 

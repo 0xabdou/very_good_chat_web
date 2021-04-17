@@ -49,6 +49,10 @@ const ConversationScreen = () => {
   useEffect(() => {
     window.onblur = () => setIsActive(false);
     window.onfocus = () => setIsActive(true);
+    return () => {
+      window.onblur = null;
+      window.onfocus = null;
+    };
   }, []);
 
   // Mark messages as seen whenever [isActive] changes to true
@@ -182,6 +186,7 @@ const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
     width: '100%',
     height: '100%',
     paddingTop: '56px',
+    background: "white",
   },
   title: {
     display: 'flex',

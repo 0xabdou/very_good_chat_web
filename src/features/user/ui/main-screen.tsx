@@ -1,6 +1,6 @@
 import React, {useCallback, useState} from "react";
 import {useTopBarStyles} from "./components/top-bar";
-import {Avatar, makeStyles, Typography, useMediaQuery} from "@material-ui/core";
+import {Avatar, makeStyles, Typography} from "@material-ui/core";
 import {Route, useHistory} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {AppState} from "../../../core/redux/store";
@@ -11,13 +11,14 @@ import Badges from "../../badge/ui/components/badges";
 import ChatScreen from "../../chat/ui/chat-screen";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import ConversationScreen from "../../chat/ui/conversation-screen";
+import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
 
 const MainScreen = () => {
   const [searching, setSearching] = useState(false);
   const history = useHistory();
   const state = useSelector((state: AppState) => state.me);
-  const isMobile = useMediaQuery("(max-width: 650px)");
-  const isLarge = useMediaQuery("(min-width: 1000px)");
+  const isMobile = useMobileMQ();
+  const isLarge = useLargeMQ();
 
   if (!state.me)
     return <div/>;
@@ -33,6 +34,7 @@ const MainScreen = () => {
   const endSearch = useCallback(() => {
     setSearching(false);
   }, []);
+
 
   const topBarClasses = useTopBarStyles();
   const classes = useStyles({isMobile, isLarge});
@@ -51,6 +53,7 @@ const MainScreen = () => {
             <Typography variant="h6" className={topBarClasses.title}>
               Chats
             </Typography>
+            <div className={classes.spacer}/>
             <Badges/>
           </div>
           <SearchTextField
@@ -60,14 +63,14 @@ const MainScreen = () => {
           {searching && <SearchScreen/>}
           {!searching && <ChatScreen/>}
         </div>
-        {
-          !isMobile &&
+        <div className={classes.rightSection}>
           <Route path="/c/:id">
-            <div className={classes.rightSection}>
-              <ConversationScreen/>
-            </div>
+            <ConversationScreen/>
           </Route>
-        }
+          <span className={classes.filler}>
+            Click on a conversation to start chatting
+          </span>
+        </div>
       </div>
     </div>
   );
@@ -79,16 +82,12 @@ type MainScreenStyle = {
 }
 
 const useStyles = makeStyles<Theme, MainScreenStyle>({
-  wrapper: props => ({
+  wrapper: {
     ...wrapper,
     flexDirection: 'column',
-    paddingTop: props.isMobile ? "70px" : 0,
     height: "100%",
     overflowY: "hidden",
     overflowX: "hidden",
-  }),
-  spacer: {
-    height: '12%',
   },
   full: {
     marginTop: '1rem',
@@ -109,19 +108,40 @@ const useStyles = makeStyles<Theme, MainScreenStyle>({
     height: "100%",
   },
   leftSection: props => ({
-    width: props.isLarge ? "35%" : "40%",
+    position: "relative",
+    width: props.isMobile
+      ? "100%"
+      : props.isLarge ? "35%" : "40%",
     minWidth: "300px",
-    borderRight: "0.1px solid rgba(0,0,0,0.1)"
+    borderRight: "0.1px solid rgba(0,0,0,0.1)",
+    paddingTop: "70px",
   }),
   leftSectionTopBar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
     display: "flex",
     padding: "8px 16px",
     alignItems: "center",
+    width: "100%",
   },
   rightSection: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     flex: 1,
     height: "100%",
-  }
+  },
+  spacer: {
+    flex: 1,
+  },
+  filler: props => ({
+    display: props.isMobile ? "none" : undefined,
+    position: "absolute",
+    color: "black",
+    zIndex: -1,
+  })
 });
 
 export default MainScreen;

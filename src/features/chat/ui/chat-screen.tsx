@@ -23,7 +23,9 @@ const ChatScreen = () => {
   }, []);
 
   const onItemClick = useCallback((conversation: Conversation) => {
-    history.push(`/c/${conversation.id}`);
+    const pathname = `/c/${conversation.id}`;
+    if (history.location.pathname != pathname)
+      history.push(pathname);
   }, [history]);
 
   const itemKey = useCallback((index: number, data: Conversation[]) => {
