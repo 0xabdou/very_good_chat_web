@@ -99,6 +99,7 @@ const useStyles = makeStyles<Theme, StyleProps>(() => {
       minHeight: '2.5rem',
       boxSizing: 'border-box',
       alignItems: 'center',
+      marginBottom: "1rem",
     },
     textField: props => {
       return {

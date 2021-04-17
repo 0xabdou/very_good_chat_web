@@ -13,6 +13,18 @@ import {useHistory} from "react-router-dom";
 
 const ChatScreen = () => {
   const chatState = useAppSelector(state => state.chat);
+  const me = useAppSelector(state => state.me.me);
+  const typings = useAppSelector(state => {
+    let newTypings: { [convID: string]: boolean } = {};
+    state.chat.conversations?.forEach(conv => {
+      const userID = conv.participants[0]?.id;
+      if (!userID) return newTypings[conv.id] = false;
+      const convTypings = state.chat.typings[conv.id];
+      if (!convTypings) return newTypings[conv.id] = false;
+      newTypings[conv.id] = convTypings.indexOf(userID) != -1;
+    });
+    return newTypings;
+  });
   const dispatch = useAppDispatch();
   const actions = useChatActions();
   const history = useHistory();
@@ -52,6 +64,8 @@ const ChatScreen = () => {
                     <ConversationListItem
                       style={style}
                       conversation={data[index]}
+                      currentUserID={me?.id ?? ""}
+                      typing={typings[data[index].id]}
                       onClick={onItemClick}
                     />
                   );

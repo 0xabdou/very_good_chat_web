@@ -101,8 +101,10 @@ const sendMessage = createAsyncThunk<Message, SendMessageInput & { tempID: numbe
 
 const messagesSeen = createAsyncThunk<void, number, ThunkAPI<ChatError>>(
   'chat/messagesSeen',
-  (conversationID, thunkAPI) => {
-    void thunkAPI.extra.chatRepo.messagesSeen(conversationID);
+  (convID, thunkAPI) => {
+    const userID = thunkAPI.getState().me.me!.id;
+    thunkAPI.dispatch(chatActions.recentMessagesSeen({convID, userID}));
+    void thunkAPI.extra.chatRepo.messagesSeen(convID);
   }
 );
 
@@ -184,6 +186,19 @@ const chatSlice = createSlice({
       const typings = state.typings[conversationID];
       if (typings) {
         state.typings[conversationID] = typings.filter(id => id != userID);
+      }
+    },
+    recentMessagesSeen(
+      state: ChatState,
+      action: PayloadAction<{ convID: number, userID: string }>
+    ) {
+      const {convID, userID} = action.payload;
+      const conv = state.conversations!.find(c => c.id == convID);
+      const messages = conv!.messages;
+      let idx = messages.length - 1;
+      while (!messages[idx].seenBy[0] && idx >= 0) {
+        messages[idx].seenBy[0] = {userID, date: new Date().getTime(),};
+        idx--;
       }
     }
   },
