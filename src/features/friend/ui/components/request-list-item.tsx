@@ -7,23 +7,23 @@ import {
   IconButton,
   ListItem,
   ListItemAvatar,
-  ListItemText,
   makeStyles
 } from "@material-ui/core";
 import {PulseLoader} from "react-spinners";
 import {formatDate} from "../../../../shared/utils/date-utils";
+import {Theme} from "@material-ui/core/styles/createMuiTheme";
 
 export type RequestListItemProps = {
   req: FriendRequest,
   style?: React.CSSProperties
-  received?: Boolean,
-  loading?: Boolean
+  received?: boolean,
+  loading?: boolean
   onClick?: (user: User) => void,
   onAccept?: (user: User) => void,
   onCancel?: (user: User) => void,
 }
 const RequestListItem = (props: RequestListItemProps) => {
-  const classes = useStyles();
+  const classes = useStyles({received: props.received});
   const user = props.req.user;
 
   const onClick = useCallback(() => {
@@ -38,7 +38,6 @@ const RequestListItem = (props: RequestListItemProps) => {
     if (props.onCancel) props.onCancel(user);
   }, [props.onClick]);
 
-  const secondary = `${props.received ? 'received' : 'sent'} ${formatDate(props.req.date)}`;
   return (
     <div style={props.style} data-testid='request-list-item'>
       <ListItem
@@ -48,10 +47,12 @@ const RequestListItem = (props: RequestListItemProps) => {
         <ListItemAvatar>
           <Avatar src={user.photo?.small} alt='request-avatar'/>
         </ListItemAvatar>
-        <ListItemText
-          primary={user.username}
-          secondary={secondary}
-        />
+        <div className={classes.listItemText}>
+          <div className={classes.primaryText}>{user.username}</div>
+          <div className={classes.secondaryText}>
+            {formatDate(props.req.date)}
+          </div>
+        </div>
       </ListItem>
       <div className={classes.actions} data-testid='request-actions'>
         {props.loading &&
@@ -59,13 +60,21 @@ const RequestListItem = (props: RequestListItemProps) => {
             <PulseLoader size={10} color='grey'/>
           </span>}
         {!props.loading &&
-        <IconButton aria-label="cancel" onClick={onCancel}
-                    data-testid='cancel-request'>
+        <IconButton
+          className={classes.button}
+          onClick={onCancel}
+          aria-label="cancel"
+          data-testid='cancel-request'
+        >
           <Icon className={classes.clear}>clear</Icon>
         </IconButton>}
         {!props.loading && props.received &&
-        <IconButton aria-label="accept" onClick={onAccept}
-                    data-testid='accept-request'>
+        <IconButton
+          className={classes.button}
+          onClick={onAccept}
+          aria-label="accept"
+          data-testid='accept-request'
+        >
           <Icon className={classes.check}>check</Icon>
         </IconButton>}
       </div>
@@ -73,7 +82,7 @@ const RequestListItem = (props: RequestListItemProps) => {
   );
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles<Theme, { received?: boolean }>({
   item: {
     position: 'relative',
     minHeight: '72px'
@@ -83,6 +92,11 @@ const useStyles = makeStyles({
     right: 16,
     top: '50%',
     transform: 'translateY(-50%)',
+    marginRight: "8px",
+  },
+  button: {
+    padding: "5px",
+    margin: "2px",
   },
   clear: {
     color: 'red'
@@ -111,7 +125,24 @@ const useStyles = makeStyles({
       border: '1px solid white',
       margin: '2px',
     }
-  }
+  },
+  listItemText: props => ({
+    display: "flex",
+    flexDirection: "column",
+    maxWidth: props.received ? "50%" : "60%",
+  }),
+  primaryText: {
+    color: "black",
+    fontSize: "1rem",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
+  secondaryText: {
+    color: "#808080",
+    fontSize: "0.875rem",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
 });
 
 export default RequestListItem;
