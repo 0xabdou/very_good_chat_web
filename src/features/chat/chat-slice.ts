@@ -112,8 +112,15 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToMessages',
   async (_, thunkAPI) => {
     thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((sub) => {
-      const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
       const message = sub.message;
+      const conv = thunkAPI.getState().chat.conversations?.find(conv => {
+        return conv.id == message.conversationID;
+      });
+      if (!conv) {
+        thunkAPI.dispatch(chatActions.getOrCreateOTOConversation(message.senderID));
+        return;
+      }
+      const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
       if (sub.update) {
         thunkAPI.dispatch(chatActions.updateMessage({message, mine}));
       } else {
@@ -196,7 +203,8 @@ const chatSlice = createSlice({
       const conv = state.conversations!.find(c => c.id == convID);
       const messages = conv!.messages;
       let idx = messages.length - 1;
-      while (!messages[idx].seenBy[0] && idx >= 0) {
+      while (idx >= 0 && !messages[idx].seenBy[0]) {
+        console.log("ZBLBOLA: ", idx);
         messages[idx].seenBy[0] = {userID, date: new Date().getTime(),};
         idx--;
       }
@@ -226,7 +234,7 @@ const chatSlice = createSlice({
               break;
             }
           }
-          if (!pushed) state.conversations.push(action.payload);
+          if (!pushed) state.conversations.unshift(action.payload);
         }
       })
       .addCase(getOrCreateOTOConversation.rejected, _handleRejected);

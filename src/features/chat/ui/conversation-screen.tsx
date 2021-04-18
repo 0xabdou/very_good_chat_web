@@ -59,6 +59,7 @@ const ConversationScreen = () => {
 
   // Mark messages as seen whenever [isActive] changes to true
   useEffect(() => {
+    console.log("BRUH: ", isActive);
     if (isActive) {
       dispatch(chatActions.messagesSeen(Number(conversationID)));
     }

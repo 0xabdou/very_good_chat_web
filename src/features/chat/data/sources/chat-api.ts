@@ -172,9 +172,11 @@ export default class ChatAPI implements IChatAPI {
       pIDs.push(p.id);
     });
     let mIdx = conv.messages.length - 1;
-    const lastMsg = conv.messages[mIdx];
-    seenDates[lastMsg.senderID] = lastMsg.sentAt;
-    pIDs = pIDs.filter(id => id != lastMsg.senderID);
+    if (mIdx >= 0) {
+      const lastMsg = conv.messages[mIdx];
+      seenDates[lastMsg.senderID] = lastMsg.sentAt;
+      pIDs = pIDs.filter(id => id != lastMsg.senderID);
+    }
     while (mIdx >= 0 && pIDs.length) {
       const message = conv.messages[mIdx];
       for (let seenBy of message.seenBy) {
