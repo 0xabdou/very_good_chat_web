@@ -263,6 +263,8 @@ const chatSlice = createSlice({
         const conv = state.conversations!.find(c => c.id == conversationID)!;
         const messageIndex = conv.messages.findIndex(m => m.id == tempID);
         conv.messages[messageIndex].error = true;
+        if (action.payload == ChatError.blocked || action.payload == ChatError.blocking)
+          conv.canChat = false;
       });
   }
 });

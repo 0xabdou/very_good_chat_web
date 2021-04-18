@@ -56,6 +56,7 @@ export interface GetConversations_getConversations {
   participants: GetConversations_getConversations_participants[];
   messages: GetConversations_getConversations_messages[];
   type: ConversationType;
+  canChat: boolean;
 }
 
 export interface GetConversations {

@@ -44,6 +44,8 @@ const ConversationScreen = () => {
   });
   // Navigation stuff
   const history = useHistory();
+  // The other side of the conversation
+  const otherUser = conversation?.participants[0];
 
   // Update [isActive] when needed
   useEffect(() => {
@@ -115,7 +117,7 @@ const ConversationScreen = () => {
 
   // Callback for when the avatar/name on the top bar is clicked
   const goToProfile = useCallback(() => {
-    history.push(`/u/${otherUser.username}`);
+    if (otherUser) history.push(`/u/${otherUser.username}`);
   }, [history]);
 
   // React dropzone stuff
@@ -132,8 +134,6 @@ const ConversationScreen = () => {
 
   if (!conversation) return <FullscreenLoader/>;
 
-  // The other side of the conversation
-  const otherUser = conversation?.participants[0];
   const rootProps = getRootProps({
     className: classes.outer,
     'data-testid': 'conversation-screen'
@@ -143,7 +143,7 @@ const ConversationScreen = () => {
     <div {...rootProps} >
       <TopBar>
         <ButtonBase onClick={goToProfile}>
-          <FriendAvatar src={otherUser.photo?.small}
+          <FriendAvatar src={otherUser?.photo?.small}
                         lastSeen={friend?.lastSeen}/>
           <div className={classes.title}>
             <Typography variant='h6' className={topBarClasses.title}>
@@ -157,13 +157,22 @@ const ConversationScreen = () => {
         currentUserID={me?.id ?? ''}
         typing={typing}
       />
-      <ChatTextField
-        conversationID={conversationID}
-        files={files}
-        fileRemoved={fileRemoved}
-        submit={submit}
-        addFileClicked={open}
-      />
+      {
+        conversation.canChat &&
+        <ChatTextField
+          conversationID={conversationID}
+          files={files}
+          fileRemoved={fileRemoved}
+          submit={submit}
+          addFileClicked={open}
+        />
+      }
+      {
+        !conversation.canChat &&
+        <div className={classes.cannotChat}>
+          You can't reply to this conversation
+        </div>
+      }
       <div className={classes.dragIndicator}>
         Drop files here
       </div>
@@ -219,6 +228,12 @@ const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
       color: 'black',
       background: 'white',
     };
+  },
+  cannotChat: {
+    display: "flex",
+    justifyContent: "center",
+    fontSize: "0.8rem",
+    padding: "16px",
   }
 });
 

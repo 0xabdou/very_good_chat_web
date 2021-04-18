@@ -26,7 +26,6 @@ const ConversationListItem = (props: ConversationListItemProps) => {
   const message = props.conversation.messages.length > 0
     ? props.conversation.messages[props.conversation.messages.length - 1]
     : undefined;
-  console.log("MESSAGE: ", message);
   const mine = message?.senderID == props.currentUserID;
   const seen = Boolean(mine || message?.seenBy[0]);
   const classes = useStyles({seen});
@@ -56,12 +55,12 @@ const ConversationListItem = (props: ConversationListItemProps) => {
     secondary = <span className={classes.secondary}>Typing...</span>;
   } else if (message.text) {
     secondary = (
-      <div className={classes.secondary}>
+      <>
         <span className={classes.secondaryText}>
           {mine && "You: "}{message.text}
         </span>
         <span>- {formatDate(message.sentAt, "mini-minute-now")}</span>
-      </div>
+      </>
     );
   } else if (message.medias?.length) {
     let icon, text: string;

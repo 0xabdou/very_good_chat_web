@@ -33,6 +33,7 @@ export const GET_CONVERSATIONS = gql`
                 }
             }
             type
+            canChat
         }
     }
 `;
@@ -70,6 +71,7 @@ export const GET_OR_CREATE_OTO_CONVERSATION = gql`
                 }
             }
             type
+            canChat
         }
     }
 `;

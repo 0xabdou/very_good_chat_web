@@ -667,6 +667,36 @@ describe('sendMessage', () => {
       // assert
       expect(result).toStrictEqual(outputState);
     });
+
+    it('should return the right state if rejected with a block', () => {
+      // arrange
+      const outputState: ChatState = {
+        ...inputState,
+        conversations: [
+          convs[0],
+          {
+            ...convs[1],
+            id: sentMessage.conversationID,
+            messages: [
+              convs[1].messages[0],
+              {...convs[1].messages[1], error: true},
+              convs[1].messages[2],
+            ],
+            canChat: false,
+          },
+          convs[2],
+        ]
+      };
+      const action: PayloadAction<ChatError, string, { arg: SendMessageInput & { tempID: number } }> = {
+        type: sendMessage.rejected.type,
+        payload: ChatError.blocked,
+        meta: {arg: sentInput}
+      };
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
   });
 });
 

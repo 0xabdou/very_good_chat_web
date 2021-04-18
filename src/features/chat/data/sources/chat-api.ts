@@ -191,6 +191,7 @@ export default class ChatAPI implements IChatAPI {
       messages: conv.messages.map(ChatAPI.parseMessage),
       type: ConversationType[conv.type],
       seenDates,
+      canChat: conv.canChat,
       hasMore: conv.messages.length >= MESSAGES_PER_FETCH,
     };
   }

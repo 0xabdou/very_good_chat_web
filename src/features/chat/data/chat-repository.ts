@@ -82,6 +82,8 @@ export default class ChatRepository implements IChatRepository {
           // Probably an internet error, not sure
           return left(ChatError.network);
         }
+        if (code == "BLOCKED") return left(ChatError.blocked);
+        if (code == "BLOCKING") return left(ChatError.blocking);
       }
       return left(ChatError.general);
     }

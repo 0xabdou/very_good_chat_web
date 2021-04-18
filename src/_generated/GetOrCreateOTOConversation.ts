@@ -56,6 +56,7 @@ export interface GetOrCreateOTOConversation_getOrCreateOneToOneConversation {
   participants: GetOrCreateOTOConversation_getOrCreateOneToOneConversation_participants[];
   messages: GetOrCreateOTOConversation_getOrCreateOneToOneConversation_messages[];
   type: ConversationType;
+  canChat: boolean;
 }
 
 export interface GetOrCreateOTOConversation {

@@ -290,7 +290,8 @@ const getConvs = (): [GQLConversation, Conversation] => {
     id: 546576879,
     type: GQLConversationType.ONE_TO_ONE,
     participants: [user1, user2],
-    messages: [message1, message2]
+    messages: [message1, message2],
+    canChat: true,
   };
   const conv: Conversation = {
     id: GQLConv.id,
@@ -301,6 +302,7 @@ const getConvs = (): [GQLConversation, Conversation] => {
       [`${user1.id}`]: message1.sentAt,
       [`${user2.id}`]: message2.sentAt,
     },
+    canChat: GQLConv.canChat,
     hasMore: false,
   };
   return [GQLConv, conv];

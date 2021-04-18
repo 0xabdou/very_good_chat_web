@@ -8,6 +8,7 @@ type Conversation = {
   type: ConversationType
   seenDates: UsersLastSeen,
   hasMore: boolean,
+  canChat: boolean,
   fetchingMore?: boolean,
 };
 
