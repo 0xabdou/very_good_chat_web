@@ -10,13 +10,21 @@ import Typing, {TypingInput} from "./types/typing";
 
 export type ChatState = {
   conversations: Conversation[] | null,
-  typings: { [conversationID: number]: string[] }
+  typing: { [conversationID: number]: string[] }
+  hasMore: { [conversationID: number]: boolean }
+  fetchingMore: { [conversationID: number]: boolean }
+  // conversationID -> userID -> last seen messageID
+  lastSeen: { [conversationID: number]: { [userID: string]: number } }
   error: ChatError | null,
 }
 
+
 export const initialChatState: ChatState = {
   conversations: null,
-  typings: {},
+  typing: {},
+  hasMore: {},
+  fetchingMore: {},
+  lastSeen: {},
   error: null,
 };
 
@@ -47,10 +55,11 @@ const getOrCreateOTOConversation = createAsyncThunk<Conversation, string, ThunkA
 const getMoreMessages = createAsyncThunk<Message[], number, ThunkAPI<ChatError>>(
   'chat/getMoreMessages',
   async (conversationID, thunkAPI) => {
-    const conv = thunkAPI.getState().chat.conversations?.find(c => c.id == conversationID);
-    if (!conv) return [];
-    const firstMsgID = conv.messages[0].id;
-    const result = await thunkAPI.extra.chatRepo.getMoreMessages(conversationID, firstMsgID);
+    const firstMsgID = thunkAPI.getState().chat.conversations!
+      .find(c => c.id == conversationID)!
+      .messages[0].id;
+    const result = await thunkAPI.extra.chatRepo
+      .getMoreMessages(conversationID, firstMsgID);
     if (isRight(result)) return result.right;
     return thunkAPI.rejectWithValue(result.left);
   }
@@ -121,12 +130,14 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
         return;
       }
       const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
-      if (sub.update) {
-        thunkAPI.dispatch(chatActions.updateMessage({message, mine}));
-      } else {
-        thunkAPI.dispatch(chatActions.appendMessage({message, mine}));
+      setTimeout(() => {
+        thunkAPI.dispatch(chatActions.appendMessage({
+          message,
+          update: sub.update || mine
+        }));
+      }, mine ? 500 : 0);
+      if (!mine)
         thunkAPI.extra.chatRepo.messagesDelivered([message.conversationID]);
-      }
     });
   }
 );
@@ -152,47 +163,72 @@ export const _handleRejected = (
     : action.payload;
 };
 
+const setLastSeenAndHasMore = (state: ChatState, conv: Conversation) => {
+  const messages = conv.messages;
+  let userIDs: string[] = [];
+  const lastSeen: { [userID: string]: number } = {};
+  conv.participants.forEach(p => {
+    userIDs.push(p.id);
+    lastSeen[p.id] = -1;
+  });
+  let idx = messages.length - 1;
+  while (idx >= 0 && userIDs.length) {
+    const message = messages[idx];
+    if (userIDs.indexOf(message.senderID) != -1) {
+      userIDs = userIDs.filter(id => id != message.senderID);
+      lastSeen[message.senderID] = message.id;
+    }
+    const sb = message.seenBy[0];
+    if (sb && userIDs.indexOf(sb.userID) != -1) {
+      userIDs = userIDs.filter(id => id != sb.userID);
+      lastSeen[sb.userID] = message.id;
+    }
+    idx--;
+  }
+  state.lastSeen[conv.id] = lastSeen;
+  state.hasMore[conv.id] = conv.messages.length >= MESSAGES_PER_FETCH;
+};
+
 const chatSlice = createSlice({
   name: 'chat',
   initialState: initialChatState,
   reducers: {
-    appendMessage(state: ChatState, action: PayloadAction<{ message: Message, mine?: boolean }>) {
-      const {message, mine} = action.payload;
+    appendMessage(state: ChatState, action: PayloadAction<{ message: Message, update?: boolean }>) {
+      const {message, update} = action.payload;
+      console.log("APPENDING: ", message);
       const index = state.conversations!.findIndex(c => c.id == message.conversationID);
-      const conv = state.conversations!.splice(index, 1)[0];
-      if (!mine) {
-        if ((conv.seenDates[message.senderID] ?? 0) < message.sentAt)
-          conv.seenDates[message.senderID] = message.sentAt;
+      console.log(action.payload);
+      if (update) {
+        const conv = state.conversations![index];
+        const mIndex = conv.messages.findIndex(m => m.id == message.id);
+        const sb = message.seenBy[0];
+        if (sb && state.lastSeen[conv.id][sb.userID] < message.id) {
+          state.lastSeen[conv.id][sb.userID] = message.id;
+        }
+        if (mIndex != -1) {
+          conv.messages[mIndex] = message;
+          return;
+        }
       }
+      const conv = state.conversations!.splice(index, 1)[0];
       conv.messages.push(message);
       state.conversations?.unshift(conv);
-    },
-    updateMessage(state: ChatState, action: PayloadAction<{ message: Message, mine?: boolean }>) {
-      const {message, mine} = action.payload;
-      const conv = state.conversations!.find(c => c.id == message.conversationID);
-      if (!conv) return;
-      const mIndex = conv.messages.findIndex(m => m.id == message.id);
-      conv.messages.splice(mIndex, 1, message);
-      if (mine && message.seenBy[0]) {
-        const sb = message.seenBy[0];
-        if (conv.seenDates[sb.userID] < sb.date)
-          conv.seenDates[sb.userID] = sb.date;
-      }
+      state.lastSeen[conv.id][message.senderID] = message.id;
     },
     addTyping(state: ChatState, action: PayloadAction<Typing>) {
       const {conversationID, userID} = action.payload;
-      const typings = state.typings[conversationID];
+      const typings = state.typing[conversationID];
       if (typings) {
         if (typings.indexOf(userID) == -1) typings.push(userID);
       } else {
-        state.typings[conversationID] = [userID];
+        state.typing[conversationID] = [userID];
       }
     },
     removeTyping(state: ChatState, action: PayloadAction<Typing>) {
       const {conversationID, userID} = action.payload;
-      const typings = state.typings[conversationID];
+      const typings = state.typing[conversationID];
       if (typings) {
-        state.typings[conversationID] = typings.filter(id => id != userID);
+        state.typing[conversationID] = typings.filter(id => id != userID);
       }
     },
     recentMessagesSeen(
@@ -203,8 +239,9 @@ const chatSlice = createSlice({
       const conv = state.conversations!.find(c => c.id == convID);
       const messages = conv!.messages;
       let idx = messages.length - 1;
-      while (idx >= 0 && !messages[idx].seenBy[0]) {
-        console.log("ZBLBOLA: ", idx);
+      if (idx < 0) return;
+      state.lastSeen[convID][userID] = messages[idx].id;
+      while (idx >= 0 && messages[idx].senderID != userID && !messages[idx].seenBy[0]) {
         messages[idx].seenBy[0] = {userID, date: new Date().getTime(),};
         idx--;
       }
@@ -218,53 +255,73 @@ const chatSlice = createSlice({
       })
       .addCase(getConversations.fulfilled, (state, action) => {
         state.conversations = action.payload;
+        action.payload.forEach(conv => {
+          setLastSeenAndHasMore(state, conv);
+        });
       })
       .addCase(getConversations.rejected, _handleRejected);
     // getOrCreateOTOConversation
     builder
       .addCase(getOrCreateOTOConversation.fulfilled, (state, action) => {
+        const conv = action.payload;
         if (!state.conversations) {
-          state.conversations = [action.payload];
+          state.conversations = [conv];
+          setLastSeenAndHasMore(state, conv);
         } else {
-          let pushed = false;
-          for (let i in state.conversations) {
-            if (state.conversations[i].id == action.payload.id) {
-              state.conversations[i] = action.payload;
-              pushed = true;
-              break;
-            }
+          const existing = state.conversations.find(c => c.id == conv.id);
+          if (!existing) {
+            state.conversations.unshift(conv);
+            setLastSeenAndHasMore(state, conv);
           }
-          if (!pushed) state.conversations.unshift(action.payload);
         }
       })
       .addCase(getOrCreateOTOConversation.rejected, _handleRejected);
     // getMoreMessages
     builder
       .addCase(getMoreMessages.pending, (state, action) => {
-        const convID = action.meta.arg;
-        const conv = state.conversations!.find(c => c.id == convID)!;
-        conv.fetchingMore = true;
+        state.fetchingMore[action.meta.arg] = true;
       })
       .addCase(getMoreMessages.fulfilled, (state, action) => {
         const convID = action.meta.arg;
         const conv = state.conversations!.find(c => c.id == convID)!;
         const newMessages = action.payload;
-        conv.hasMore = newMessages.length >= MESSAGES_PER_FETCH;
+        let userIDs: string[] = [];
+        conv.participants.forEach(p => {
+          if (state.lastSeen[convID][p.id] == -1)
+            userIDs.push(p.id);
+        });
+        if (userIDs.length) {
+          let idx = newMessages.length - 1;
+          while (idx >= 0 && userIDs.length) {
+            const msg = newMessages[idx];
+            if (userIDs.indexOf(msg.senderID) != -1) {
+              userIDs = userIDs.filter(id => id != msg.senderID);
+              state.lastSeen[convID][msg.senderID] = msg.id;
+            }
+            const sb = msg.seenBy[0];
+            if (sb && userIDs.indexOf(sb.userID) != -1) {
+              userIDs = userIDs.filter(id => id != sb.userID);
+              state.lastSeen[convID][sb.userID] = msg.id;
+            }
+            idx--;
+          }
+        }
         conv.messages = [...newMessages, ...conv.messages];
-        conv.fetchingMore = false;
+        state.hasMore[convID] = newMessages.length >= MESSAGES_PER_FETCH;
+        state.fetchingMore[action.meta.arg] = false;
       })
       .addCase(getMoreMessages.rejected, (state, action) => {
-        const convID = action.meta.arg;
-        const conv = state.conversations!.find(c => c.id == convID)!;
-        conv.fetchingMore = false;
+        state.fetchingMore[action.meta.arg] = false;
       });
     // sendMessage
     builder
       .addCase(sendMessage.fulfilled, (state, action) => {
         const {conversationID, tempID} = action.meta.arg;
+        const message = action.payload;
         const conv = state.conversations!.find(c => c.id == conversationID)!;
         const messageIndex = conv.messages.findIndex(m => m.id == tempID);
-        conv.messages[messageIndex] = action.payload;
+        conv.messages[messageIndex] = message;
+        state.lastSeen[conv.id][message.senderID] = message.id;
       })
       .addCase(sendMessage.rejected, (state, action) => {
         const {conversationID, tempID} = action.meta.arg;

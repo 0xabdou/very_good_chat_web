@@ -8,6 +8,7 @@ import MessageMediaGrid from "./message-media-grid";
 
 export type MessageListItemProps = {
   conversation: Conversation,
+  lastSeen: { [userID: string]: number },
   index: number,
   currentUserID: string,
 };
@@ -42,36 +43,23 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     if (_sameSender(message, before)) bubbleType = BubbleType.LAST;
     else bubbleType = BubbleType.ISOLATED;
   }
+  const lastSeenMessageID = props.lastSeen[message.senderID];
   let deliveryStatusType: DeliveryStatusType;
   let date: number;
   if (incoming) {
-    if (!after) deliveryStatusType = DeliveryStatusType.SEEN;
-    else if (_sameSender(message, after)) {
+    if (message.id == lastSeenMessageID)
+      deliveryStatusType = DeliveryStatusType.SEEN;
+    else
       deliveryStatusType = DeliveryStatusType.NONE;
-    } else {
-      const lastSeen = props.conversation.seenDates[message.senderID] ?? 0;
-      if (message.sentAt >= lastSeen)
-        deliveryStatusType = DeliveryStatusType.SEEN;
-      else
-        deliveryStatusType = DeliveryStatusType.NONE;
-    }
     date = message.sentAt;
   } else if (!message.sent) {
     deliveryStatusType = DeliveryStatusType.SENDING;
     date = message.sentAt;
   } else if (message.seenBy[0]) {
-    const sb = message.seenBy[0];
-    const lastSeen = props.conversation.seenDates[sb.userID] ?? 0;
-    if (sb.date == lastSeen) {
-      if (after && _sameSender(message, after)) {
-        if (after.seenBy[0])
-          deliveryStatusType = DeliveryStatusType.NONE;
-        else
-          deliveryStatusType = DeliveryStatusType.SEEN;
-      } else {
-        deliveryStatusType = DeliveryStatusType.SEEN;
-      }
-    } else deliveryStatusType = DeliveryStatusType.NONE;
+    if (message.id == lastSeenMessageID)
+      deliveryStatusType = DeliveryStatusType.SEEN;
+    else
+      deliveryStatusType = DeliveryStatusType.NONE;
     date = message.seenBy[0].date;
   } else if (message.deliveredTo[0]) {
     deliveryStatusType = DeliveryStatusType.DELIVERED;

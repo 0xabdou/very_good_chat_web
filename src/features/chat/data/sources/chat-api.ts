@@ -1,4 +1,4 @@
-import Conversation, {UsersLastSeen} from "../../types/conversation";
+import Conversation from "../../types/conversation";
 import Message, {Delivery, MessageSub} from "../../types/message";
 import {ApolloClient} from "@apollo/client";
 import {
@@ -165,36 +165,12 @@ export default class ChatAPI implements IChatAPI {
   }
 
   static parseConversation(conv: GetConversations_getConversations): Conversation {
-    const seenDates: UsersLastSeen = {};
-    let pIDs: string[] = [];
-    conv.participants.forEach(p => {
-      seenDates[p.id] = 0;
-      pIDs.push(p.id);
-    });
-    let mIdx = conv.messages.length - 1;
-    if (mIdx >= 0) {
-      const lastMsg = conv.messages[mIdx];
-      seenDates[lastMsg.senderID] = lastMsg.sentAt;
-      pIDs = pIDs.filter(id => id != lastMsg.senderID);
-    }
-    while (mIdx >= 0 && pIDs.length) {
-      const message = conv.messages[mIdx];
-      for (let seenBy of message.seenBy) {
-        if (pIDs.indexOf(seenBy.userID) != -1) {
-          seenDates[seenBy.userID] = seenBy.date;
-          pIDs = pIDs.filter(id => id != seenBy.userID);
-        }
-      }
-      mIdx--;
-    }
     return {
       id: conv.id,
+      type: ConversationType[conv.type],
       participants: conv.participants.map(UserAPI.parseUser),
       messages: conv.messages.map(ChatAPI.parseMessage),
-      type: ConversationType[conv.type],
-      seenDates,
       canChat: conv.canChat,
-      hasMore: conv.messages.length >= MESSAGES_PER_FETCH,
     };
   }
 

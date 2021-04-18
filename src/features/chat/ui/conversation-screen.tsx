@@ -38,9 +38,21 @@ const ConversationScreen = () => {
   const typing: boolean = useAppSelector(state => {
     const userID = conversation?.participants[0]?.id;
     if (!userID) return false;
-    const typings = state.chat.typings[conversationID];
+    const typings = state.chat.typing[conversationID];
     if (!typings) return false;
     return typings.indexOf(userID) != -1;
+  });
+  // does the conversation have more messages to fetch
+  const hasMore: boolean = useAppSelector(state => {
+    return state.chat.hasMore[conversationID];
+  });
+  // Are messages in this conversation currently being fetched
+  const fetchingMore: boolean = useAppSelector(state => {
+    return state.chat.fetchingMore[conversationID];
+  });
+  // Last seen messages
+  const lastSeen = useAppSelector(state => {
+    return state.chat.lastSeen[conversationID];
   });
   // Navigation stuff
   const history = useHistory();
@@ -157,6 +169,9 @@ const ConversationScreen = () => {
         conversation={conversation}
         currentUserID={me?.id ?? ''}
         typing={typing}
+        hasMore={hasMore}
+        fetchingMore={fetchingMore}
+        lastSeen={lastSeen}
       />
       {
         conversation.canChat &&

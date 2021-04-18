@@ -41,7 +41,7 @@ import {
   GetMoreMessages,
   GetMoreMessagesVariables
 } from "../../../../../src/_generated/GetMoreMessages";
-import Conversation, {UsersLastSeen} from "../../../../../src/features/chat/types/conversation";
+import Conversation from "../../../../../src/features/chat/types/conversation";
 import {SubscribeToTypings} from "../../../../../src/_generated/SubscribeToTypings";
 import {ImTyping} from "../../../../../src/_generated/ImTyping";
 
@@ -71,15 +71,9 @@ describe('parsing', () => {
           })
         )
       };
-      const seenDates: UsersLastSeen = {
-        [mockGQLConversation.participants[0].id]: 0,
-        [mockGQLConversation.participants[1].id]: mockGQLMessage.sentAt,
-      };
       const output: Conversation = {
         ...mockConversation,
         messages: input.messages.map(ChatAPI.parseMessage),
-        hasMore: true,
-        seenDates,
       };
       const result = ChatAPI.parseConversation(input);
       // assert

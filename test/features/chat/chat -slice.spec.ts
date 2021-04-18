@@ -39,7 +39,8 @@ import {
 import Message, {MessageSub} from "../../../src/features/chat/types/message";
 import Observable from "zen-observable";
 import {waitFor} from "@testing-library/react";
-import Typing from "../../../src/features/chat/types/typing";
+import Typing, {TypingInput} from "../../../src/features/chat/types/typing";
+import {MockStore} from "redux-mock-store";
 
 const MockChatRepo = mock<IChatRepository>();
 const MockFileUtils = mock<IFileUtils>();
@@ -100,8 +101,7 @@ describe('general purpose reducers', () => {
 });
 
 describe('getConversations', () => {
-  const {getConversations} = chatActions;
-  const act = (store: AppStore = mockStore) => getConversations()(
+  const act = (store: AppStore = mockStore) => chatActions.getConversations()(
     store.dispatch,
     store.getState,
     extra
@@ -113,7 +113,7 @@ describe('getConversations', () => {
     // act
     const result = await act();
     // assert
-    expect(result.type).toBe(getConversations.fulfilled.type);
+    expect(result.type).toBe(chatActions.getConversations.fulfilled.type);
     expect(result.payload).toStrictEqual([mockConversation]);
     verify(MockChatRepo.getConversations()).once();
     verify(MockChatRepo.messagesDelivered(deepEqual([mockConversation.id]))).once();
@@ -125,7 +125,7 @@ describe('getConversations', () => {
     // act
     const result = await act();
     // assert
-    expect(result.type).toBe(getConversations.rejected.type);
+    expect(result.type).toBe(chatActions.getConversations.rejected.type);
     expect(result.payload).toBe(chatError);
     verify(MockChatRepo.getConversations()).once();
   });
@@ -136,7 +136,7 @@ describe('getConversations', () => {
       const inputState: ChatState = {...initialChatState, error: chatError};
       const outputState: ChatState = {...inputState, error: null};
       const action: PayloadAction<undefined> = {
-        type: getConversations.pending.type, payload: undefined
+        type: chatActions.getConversations.pending.type, payload: undefined
       };
       // act
       const result = reducer(inputState, action);
@@ -149,10 +149,19 @@ describe('getConversations', () => {
       const inputState: ChatState = {...initialChatState};
       const outputState: ChatState = {
         ...inputState,
-        conversations: [mockConversation]
+        conversations: [mockConversation],
+        hasMore: {
+          [mockConversation.id]: false
+        },
+        lastSeen: {
+          [mockConversation.id]: {
+            [mockConversation.messages[0].senderID]: mockConversation.messages[1].id,
+            [mockConversation.messages[1].senderID]: mockConversation.messages[1].id,
+          }
+        }
       };
       const action: PayloadAction<Conversation[]> = {
-        type: getConversations.fulfilled.type,
+        type: chatActions.getConversations.fulfilled.type,
         payload: [mockConversation]
       };
       // act
@@ -199,12 +208,22 @@ describe('getOrCreateOTOConversation', () => {
 
   describe('reducers', () => {
     describe('should return the right state if fulfilled', () => {
+      const hasMore = {[mockConversation.id]: false};
+      const lastSeen = {
+        [mockConversation.id]: {
+          [mockConversation.messages[0].senderID]: mockConversation.messages[1].id,
+          [mockConversation.messages[1].senderID]: mockConversation.messages[1].id,
+        }
+      };
+
       it('when conversations is null', () => {
         // arrange
         const inputState: ChatState = {...initialChatState};
         const outputState: ChatState = {
           ...inputState,
-          conversations: [mockConversation]
+          conversations: [mockConversation],
+          hasMore,
+          lastSeen,
         };
         const action: PayloadAction<Conversation> = {
           type: getOrCreateOTOConversation.fulfilled.type,
@@ -223,7 +242,9 @@ describe('getOrCreateOTOConversation', () => {
         };
         const outputState: ChatState = {
           ...inputState,
-          conversations: [...inputState.conversations!, mockConversation]
+          conversations: [mockConversation, ...inputState.conversations!],
+          hasMore,
+          lastSeen,
         };
         const action: PayloadAction<Conversation> = {
           type: getOrCreateOTOConversation.fulfilled.type,
@@ -244,14 +265,7 @@ describe('getOrCreateOTOConversation', () => {
             {...mockConversation, id: 123456789011}
           ]
         };
-        const outputState: ChatState = {
-          ...inputState,
-          conversations: [
-            {...mockConversation, id: 1234567890},
-            mockConversation,
-            {...mockConversation, id: 123456789011}
-          ]
-        };
+        const outputState: ChatState = {...inputState};
         const action: PayloadAction<Conversation> = {
           type: getOrCreateOTOConversation.fulfilled.type,
           payload: mockConversation
@@ -265,21 +279,27 @@ describe('getOrCreateOTOConversation', () => {
   });
 });
 
-describe('getMoteMessages', () => {
+describe('getMoreMessages', () => {
   const convID = 1223;
   const msgID = 77777;
   const conv: Conversation = {
     ...mockConversation,
     id: convID,
     messages: [
-      {...mockMessage, id: msgID},
-      {...mockMessage, id: 88888},
+      {...mockConversation.messages[0], id: msgID},
+      {...mockConversation.messages[1], id: 88888},
     ]
   };
 
   const testInputState: ChatState = {
     ...initialChatState,
-    conversations: [conv]
+    conversations: [conv],
+    lastSeen: {
+      [conv.id]: {
+        [conv.messages[1].senderID]: conv.messages[1].id,
+        [conv.messages[1].seenBy[0].userID]: conv.messages[1].id,
+      }
+    }
   };
 
   const act = (store: AppStore = mockStore) => chatActions.getMoreMessages(convID)(
@@ -315,7 +335,10 @@ describe('getMoteMessages', () => {
   describe('reducers', () => {
     const loadingState: ChatState = {
       ...testInputState,
-      conversations: [{...conv, fetchingMore: true}]
+      fetchingMore: {
+        ...testInputState.fetchingMore,
+        [convID]: true
+      }
     };
 
     it('should return the right state when pending', () => {
@@ -338,7 +361,10 @@ describe('getMoteMessages', () => {
       const inputState: ChatState = {...loadingState};
       const outputState: ChatState = {
         ...testInputState,
-        conversations: [{...conv, fetchingMore: false}]
+        fetchingMore: {
+          ...testInputState.fetchingMore,
+          [convID]: false
+        }
       };
       const action: PayloadAction<ChatError, string, { arg: number }> = {
         type: chatActions.getMoreMessages.rejected.type,
@@ -358,7 +384,7 @@ describe('getMoteMessages', () => {
           // arrange
           const messages = Array.from(
             {length: MESSAGES_PER_FETCH},
-            (_, idx): Message => ({...mockMessage, id: idx})
+            (_, idx): Message => ({...conv.messages[0], id: idx})
           );
           const inputState: ChatState = {...loadingState};
           const outputState: ChatState = {
@@ -367,10 +393,10 @@ describe('getMoteMessages', () => {
               {
                 ...conv,
                 messages: [...messages, ...conv.messages],
-                hasMore: true,
-                fetchingMore: false,
               }
             ],
+            fetchingMore: {[conv.id]: false},
+            hasMore: {[conv.id]: true}
           };
           const action: PayloadAction<Message[], string, { arg: number }> = {
             type: chatActions.getMoreMessages.fulfilled.type,
@@ -389,8 +415,8 @@ describe('getMoteMessages', () => {
         async () => {
           // arrange
           const messages = Array.from(
-            {length: 29},
-            (_, idx): Message => ({...mockMessage, id: idx})
+            {length: MESSAGES_PER_FETCH - 1},
+            (_, idx): Message => ({...conv.messages[0], id: idx})
           );
           const inputState: ChatState = {...loadingState};
           const outputState: ChatState = {
@@ -399,10 +425,10 @@ describe('getMoteMessages', () => {
               {
                 ...conv,
                 messages: [...messages, ...conv.messages],
-                hasMore: false,
-                fetchingMore: false,
               }
             ],
+            fetchingMore: {[conv.id]: false},
+            hasMore: {[conv.id]: false},
           };
           const action: PayloadAction<Message[], string, { arg: number }> = {
             type: chatActions.getMoreMessages.fulfilled.type,
@@ -415,6 +441,49 @@ describe('getMoteMessages', () => {
           expect(result).toStrictEqual(outputState);
         }
       );
+
+      it(`should modify last seen if needed`, async () => {
+        // arrange
+        const messages = Array.from(
+          {length: MESSAGES_PER_FETCH - 1},
+          (_, idx): Message => ({...conv.messages[0], id: idx})
+        );
+        const inputState: ChatState = {
+          ...loadingState,
+          lastSeen: {
+            [conv.id]: {
+              [conv.participants[0].id]: -1,
+              [conv.participants[1].id]: conv.messages[0].id,
+            }
+          }
+        };
+        const outputState: ChatState = {
+          ...inputState,
+          conversations: [
+            {
+              ...conv,
+              messages: [...messages, ...conv.messages],
+            }
+          ],
+          lastSeen: {
+            [convID]: {
+              [conv.participants[0].id]: messages[MESSAGES_PER_FETCH - 2].id,
+              [conv.participants[1].id]: conv.messages[0].id,
+            }
+          },
+          fetchingMore: {[conv.id]: false},
+          hasMore: {[conv.id]: false},
+        };
+        const action: PayloadAction<Message[], string, { arg: number }> = {
+          type: chatActions.getMoreMessages.fulfilled.type,
+          payload: messages,
+          meta: {arg: convID}
+        };
+        // act
+        const result = reducer(inputState, action);
+        // assert
+        expect(result).toStrictEqual(outputState);
+      });
     });
   });
 });
@@ -521,94 +590,25 @@ describe('sendMessage', () => {
 
     const conversationID = convs[1].id;
     const sentMessage: Message = {
-      ...mockMessage, id: 2435678908896978, conversationID,
+      ...mockMessage,
+      id: 2435678908896978,
+      senderID: convs[0].participants[0].id,
+      conversationID,
     };
     const sentInput: SendMessageInput & { tempID: number } = {
       ...input, conversationID,
     };
-    const inputState: ChatState = {...initialChatState, conversations: convs};
+    const inputState: ChatState = {
+      ...initialChatState,
+      conversations: convs,
+      lastSeen: {
+        [conversationID]: {
+          [convs[1].participants[0].id]: -1,
+          [convs[1].participants[1].id]: -1,
+        }
+      }
+    };
 
-    test('appendMessage (not mine)', () => {
-      // arrange
-      const pendingMessage = inputState.conversations![1].messages[1];
-      const inputState1: ChatState = {
-        ...inputState,
-        conversations: [
-          convs[0],
-          {
-            ...convs[1],
-            messages: [
-              convs[1].messages[0],
-              convs[1].messages[2],
-            ]
-          },
-          convs[2]
-        ]
-      };
-      const outputState: ChatState = {
-        ...inputState1,
-        conversations: [
-          {
-            ...convs[1],
-            messages: [
-              convs[1].messages[0],
-              convs[1].messages[2],
-              pendingMessage,
-            ],
-            seenDates: {
-              ...convs[1].seenDates,
-              [pendingMessage.senderID]: pendingMessage.sentAt
-            }
-          },
-          convs[0],
-          convs[2]
-        ]
-      };
-      const action = appendMessage({message: pendingMessage});
-      // act
-      const result = reducer(inputState1, action);
-      // assert
-      expect(result).toStrictEqual(outputState);
-    });
-
-    test('appendMessage (mine)', () => {
-      // arrange
-      const pendingMessage = inputState.conversations![1].messages[1];
-      const inputState1: ChatState = {
-        ...inputState,
-        conversations: [
-          convs[0],
-          {
-            ...convs[1],
-            messages: [
-              convs[1].messages[0],
-              convs[1].messages[2],
-            ]
-          },
-          convs[2]
-        ]
-      };
-      const outputState: ChatState = {
-        ...inputState1,
-        conversations: [
-          {
-            ...convs[1],
-            messages: [
-              convs[1].messages[0],
-              convs[1].messages[2],
-              pendingMessage,
-            ],
-          },
-          convs[0],
-          convs[2]
-        ]
-      };
-      const action = appendMessage({message: pendingMessage, mine: true});
-      // act
-      const result = reducer(inputState1, action);
-      // assert
-      expect(result).toStrictEqual(outputState);
-    });
 
     it('should return the right state if fulfilled', () => {
       // arrange
@@ -626,7 +626,14 @@ describe('sendMessage', () => {
             ]
           },
           convs[2],
-        ]
+        ],
+        lastSeen: {
+          ...inputState.lastSeen,
+          [sentMessage.conversationID]: {
+            ...inputState.lastSeen[sentMessage.conversationID],
+            [sentMessage.senderID]: sentMessage.id,
+          }
+        }
       };
       const action: PayloadAction<Message, string, { arg: SendMessageInput & { tempID: number } }> = {
         type: sendMessage.fulfilled.type,
@@ -700,6 +707,38 @@ describe('sendMessage', () => {
   });
 });
 
+describe("typing", () => {
+  it("is should send a typing request", async () => {
+    // arrange
+    const input: TypingInput = {conversationID: 23, started: true};
+    // act
+    await chatActions.typing(input)(
+      mockStore.dispatch,
+      mockStore.getState,
+      extra
+    );
+    // assert
+    verify(MockChatRepo.typing(input)).once();
+  });
+});
+
+describe("messagesSeen", () => {
+  it("send the request and update the local messages", async () => {
+    // arrange
+    const conversationID = 214;
+    // act
+    await chatActions.messagesSeen(conversationID)(
+      mockStore.dispatch,
+      mockStore.getState,
+      extra
+    );
+    // assert
+    verify(MockChatRepo.messagesSeen(conversationID)).once();
+    const action = mockStore.getActions()[1];
+    expect(action.type).toBe(chatActions.recentMessagesSeen.type);
+  });
+});
+
 describe('subscribeToMessages', () => {
   const act = (store: AppStore) => chatActions.subscribeToMessages()(
     store.dispatch,
@@ -707,51 +746,37 @@ describe('subscribeToMessages', () => {
     extra
   );
 
-  it('should dispatch the right action every time there is a message', async () => {
+  const conv: Conversation = {
+    ...mockConversation,
+    id: 1234,
+    messages: [
+      {...mockMessage, id: 12345}
+    ]
+  };
+  const chatState: ChatState = {
+    ...initialChatState,
+    conversations: [conv]
+  };
+  const appState = {
+    chat: chatState,
+    me: {...initialMeState, me: mockMe}
+  } as AppState;
+  let store: MockStore = MockStore(appState);
+  beforeEach(() => {
+    store = MockStore(appState);
+  });
+
+  it('case 1', async () => {
     // arrange
-    const conv: Conversation = {
-      ...mockConversation,
-      id: 1234,
-      messages: [
-        {...mockMessage, id: 12345}
-      ]
-    };
-    const state: ChatState = {
-      ...initialChatState,
-      conversations: [conv]
-    };
-    const store = MockStore({
-      chat: state,
-      me: {...initialMeState, me: mockMe}
-    } as AppState);
-    const m1: MessageSub = {
+    const m: MessageSub = {
       message: {
         ...mockMessage,
         conversationID: conv.id,
         id: conv.messages[0].id,
         text: 'SSSSSSSSSSSSSSSSSSSSSSSSSS'
       },
-      update: true,
     };
-    const m2: MessageSub = {
-      message: {
-        ...mockMessage,
-        conversationID: conv.id,
-        senderID: mockMe.id,
-        id: conv.messages[0].id,
-        text: 'SSSSSSSSSSSSSSSSSSSSSSSSSS'
-      },
-      update: true,
-    };
-    const m3: MessageSub = {
-      message: {
-        ...mockMessage,
-        conversationID: conv.id,
-        id: 592827487,
-        text: 'ZBLBOLA'
-      },
-    };
-    const observable = Observable.of<MessageSub>(m1, m2, m3);
+    const observable = Observable.of<MessageSub>(m);
     when(MockChatRepo.subscribeToMessages()).thenReturn(observable);
     // act
     act(store);
@@ -764,111 +789,113 @@ describe('subscribeToMessages', () => {
     });
     // assert
     const acts = store.getActions();
-    const idx = acts.findIndex(action => action.type == chatActions.updateMessage.type);
-    expect(acts[idx].type).toBe(chatActions.updateMessage.type);
-    expect(acts[idx].payload).toStrictEqual({message: m1.message, mine: false});
-    expect(acts[idx + 1].type).toBe(chatActions.updateMessage.type);
-    expect(acts[idx + 1].payload).toStrictEqual({
-      message: m2.message,
-      mine: true
+    const idx = acts.findIndex(action => action.type == chatActions.appendMessage.type);
+    expect(acts[idx].type).toBe(chatActions.appendMessage.type);
+    expect(acts[idx].payload).toStrictEqual({
+      message: m.message,
+      update: false
     });
-    expect(acts[idx + 2].type).toBe(chatActions.appendMessage.type);
-    expect(acts[idx + 2].payload).toStrictEqual({
-      message: m3.message,
-      mine: false
+    verify(MockChatRepo.subscribeToMessages()).once();
+  });
+
+  it('case 2', async () => {
+    // arrange
+    const m: MessageSub = {
+      message: {
+        ...mockMessage,
+        conversationID: conv.id,
+        senderID: mockMe.id,
+        id: conv.messages[0].id,
+        text: 'SSSSSSSSSSSSSSSSSSSSSSSSSS'
+      },
+      update: true,
+    };
+    const observable = Observable.of<MessageSub>(m);
+    when(MockChatRepo.subscribeToMessages()).thenReturn(observable);
+    // act
+    act(store);
+    // wait...
+    await waitFor(() => {
+      expect(
+        store.getActions().findIndex((action: PayloadAction) => {
+          return action.type == chatActions.appendMessage.type;
+        })).not.toBe(-1);
     });
+    // assert
+    const acts = store.getActions();
+    const idx = acts.findIndex(action => action.type == chatActions.appendMessage.type);
+    expect(acts[idx].type).toBe(chatActions.appendMessage.type);
+    expect(acts[idx].payload).toStrictEqual({
+      message: m.message,
+      update: true
+    });
+    verify(MockChatRepo.subscribeToMessages()).once();
+  });
+
+  it('case 3', async () => {
+    // arrange
+    const m: MessageSub = {
+      message: {
+        ...mockMessage,
+        conversationID: conv.id,
+        id: 592827487,
+        text: 'ZBLBOLA'
+      },
+    };
+    const observable = Observable.of<MessageSub>(m);
+    when(MockChatRepo.subscribeToMessages()).thenReturn(observable);
+    // act
+    act(store);
+    // wait...
+    await waitFor(() => {
+      expect(
+        store.getActions().findIndex((action: PayloadAction) => {
+          return action.type == chatActions.appendMessage.type;
+        })).not.toBe(-1);
+    });
+    // assert
+    const acts = store.getActions();
+    const idx = acts.findIndex(action => action.type == chatActions.appendMessage.type);
+    expect(acts[idx].type).toBe(chatActions.appendMessage.type);
+    expect(acts[idx].payload).toStrictEqual({
+      message: m.message,
+      update: false
+    });
+    verify(MockChatRepo.subscribeToMessages()).once();
+  });
+
+  it('case 4', async () => {
+    // arrange
+    const m: MessageSub = {
+      message: {
+        ...mockMessage,
+        conversationID: 1234567890,
+        id: 32894,
+        text: 'A&A'
+      },
+    };
+    const observable = Observable.of<MessageSub>(m);
+    when(MockChatRepo.subscribeToMessages()).thenReturn(observable);
+    // act
+    act(store);
+    // wait...
+    await waitFor(() => {
+      expect(
+        store.getActions().findIndex((action: PayloadAction) => {
+          return action.type == chatActions.getOrCreateOTOConversation.pending.type;
+        })).not.toBe(-1);
+    });
+    // assert
+    const acts = store.getActions();
+    const idx = acts.findIndex(
+      action => action.type == chatActions.getOrCreateOTOConversation.pending.type
+    );
+    expect(acts[idx].type).toBe(chatActions.getOrCreateOTOConversation.pending.type);
+    expect(acts[idx].meta.arg).toStrictEqual(m.message.senderID);
     verify(MockChatRepo.subscribeToMessages()).once();
   });
 });
 
-describe('reducers', () => {
-  const id1 = 1;
-  const msg1: Message = {
-    ...mockMessage,
-    senderID: 'senderID1',
-    conversationID: id1,
-    id: 11,
-  };
-  const conv1: Conversation = {
-    ...mockConversation,
-    id: id1,
-    messages: [msg1]
-  };
-  const id2 = 2;
-  const msg2: Message = {
-    ...mockMessage,
-    senderID: 'senderID2',
-    conversationID: id2,
-    id: 21,
-  };
-  const conv2: Conversation = {
-    ...mockConversation,
-    id: 2,
-    messages: [msg2],
-    seenDates: {[msg1.senderID]: 0},
-  };
-  const state: ChatState = {
-    ...initialChatState,
-    conversations: [conv1, conv2]
-  };
-
-  describe('updateMessage', () => {
-    test('mine', () => {
-      // arrange
-      const date = new Date().getTime() + 10000;
-      const msg: Message = {
-        ...mockMessage,
-        conversationID: id2,
-        text: "WAAAAAAAAAAA MIIIIIIII",
-        seenBy: [
-          {userID: msg1.senderID, date}
-        ],
-        id: 21,
-      };
-      const action = chatActions.updateMessage({message: msg, mine: true});
-      const outputState: ChatState = {
-        ...state,
-        conversations: [
-          conv1,
-          {
-            ...conv2,
-            seenDates: {
-              ...conv2.seenDates,
-              [msg.seenBy[0].userID]: msg.seenBy[0].date
-            },
-            messages: [msg]
-          },
-        ]
-      };
-      // act
-      const result = reducer(state, action);
-      // assert
-      expect(result).toStrictEqual(outputState);
-    });
-
-    test('not mine', () => {
-      // arrange
-      const msg: Message = {
-        ...mockMessage,
-        conversationID: id2,
-        text: "WAAAAAAAAAAA MIIIIIIII",
-        id: 21,
-      };
-      const action = chatActions.updateMessage({message: msg});
-      const outputState: ChatState = {
-        ...state,
-        conversations: [
-          conv1,
-          {...conv2, messages: [msg]},
-        ]
-      };
-      // act
-      const result = reducer(state, action);
-      // assert
-      expect(result).toStrictEqual(outputState);
-    });
-  });
-});
 
 describe("subscribeToTypings", () => {
   it('should subscribe to typings', async () => {
@@ -895,93 +922,269 @@ describe("subscribeToTypings", () => {
     expect(action!.payload).toStrictEqual(mockTyping);
     verify(MockChatRepo.subscribeToTypings()).once();
   });
+});
 
-  describe('reducers', () => {
-    describe("addTyping", () => {
-      test("existing typing with userID", () => {
-        // arrange
-        const inputState: ChatState = {
-          ...initialChatState,
-          typings: {
-            [mockTyping.conversationID]: [mockTyping.userID]
+describe("simple reducers", () => {
+  const id1 = 1;
+  const senderID1 = "1";
+  const msg1: Message = {
+    ...mockMessage,
+    senderID: senderID1,
+    conversationID: id1,
+    id: 11,
+  };
+  const conv1: Conversation = {
+    ...mockConversation,
+    id: id1,
+    messages: [msg1],
+  };
+  const id2 = 2;
+  const senderID2 = "2";
+  const msg2: Message = {
+    ...mockMessage,
+    senderID: senderID2,
+    conversationID: id2,
+    id: 21,
+  };
+  const conv2: Conversation = {
+    ...mockConversation,
+    id: 2,
+    messages: [msg2],
+  };
+  const convs = [conv1, conv2];
+  const state: ChatState = {
+    ...initialChatState,
+    conversations: [conv1, conv2],
+    lastSeen: {
+      [id1]: {
+        [senderID1]: msg1.id,
+        [senderID2]: msg1.id
+      },
+      [id2]: {
+        [senderID1]: msg2.id,
+        [senderID2]: msg2.id
+      }
+    }
+  };
+
+  describe('appendMessage', () => {
+    test('not update', () => {
+      // arrange
+      const id = 123123;
+      const message: Message = {...msg2, id};
+      const inputState: ChatState = {...state};
+      const outputState: ChatState = {
+        ...inputState,
+        conversations: [
+          {
+            ...convs[1],
+            messages: [
+              convs[1].messages[0],
+              message,
+            ],
+          },
+          convs[0],
+        ],
+        lastSeen: {
+          ...inputState.lastSeen,
+          [conv2.id]: {
+            ...inputState.lastSeen[conv2.id],
+            [msg2.senderID]: id,
           }
-        };
-        const outputState = inputState;
-        const action = chatActions.addTyping(mockTyping);
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
-      });
-      test("existing typing without userID", () => {
-        // arrange
-        const inputState: ChatState = {
-          ...initialChatState,
-          typings: {
-            [mockTyping.conversationID]: ["zblbola"]
-          }
-        };
-        const outputState: ChatState = {
-          ...initialChatState,
-          typings: {
-            [mockTyping.conversationID]: ["zblbola", mockTyping.userID]
-          }
-        };
-        const action = chatActions.addTyping(mockTyping);
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
-      });
-      test("non-existing typing", () => {
-        // arrange
-        const inputState: ChatState = {...initialChatState};
-        const outputState: ChatState = {
-          ...inputState,
-          typings: {
-            ...inputState.typings,
-            [mockTyping.conversationID]: [mockTyping.userID]
-          }
-        };
-        const action = chatActions.addTyping(mockTyping);
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
-      });
+        }
+      };
+      const action = chatActions.appendMessage({message});
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
     });
 
-    describe("removeTyping", () => {
-      test("existing typing", () => {
-        // arrange
-        const inputState: ChatState = {
-          ...initialChatState,
-          typings: {
-            [mockTyping.conversationID]: ["zblbola", mockTyping.userID]
+    test('update', () => {
+      // arrange
+      const message: Message = {
+        ...msg2, id: 123123123
+      };
+      const updatedMsg: Message = {
+        ...message, text: "ADALKSJDLASJDLJASL",
+        seenBy: [{userID: senderID1, date: 2131232}]
+      };
+      const inputState: ChatState = {
+        ...state,
+        conversations: [
+          conv1,
+          {
+            ...conv2,
+            messages: [
+              ...conv2.messages,
+              message
+            ]
           }
-        };
-        const outputState: ChatState = {
-          ...initialChatState,
-          typings: {
-            [mockTyping.conversationID]: ["zblbola"]
+        ]
+      };
+      const outputState: ChatState = {
+        ...inputState,
+        conversations: [
+          conv1,
+          {
+            ...conv2,
+            messages: [
+              ...conv2.messages,
+              updatedMsg
+            ],
+          },
+        ],
+        lastSeen: {
+          ...inputState.lastSeen,
+          [conv2.id]: {
+            ...inputState.lastSeen[conv2.id],
+            [updatedMsg.seenBy[0].userID]: updatedMsg.id,
           }
-        };
-        const action = chatActions.removeTyping(mockTyping);
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
+        }
+      };
+      const action = chatActions.appendMessage({
+        message: updatedMsg,
+        update: true
       });
-      test("non-existing typing", () => {
-        // arrange
-        const inputState: ChatState = {...initialChatState};
-        const outputState: ChatState = {...inputState};
-        const action = chatActions.removeTyping(mockTyping);
-        // act
-        const result = reducer(inputState, action);
-        // assert
-        expect(result).toStrictEqual(outputState);
-      });
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
     });
+  });
+  describe("addTyping", () => {
+    test("existing typing with userID", () => {
+      // arrange
+      const inputState: ChatState = {
+        ...initialChatState,
+        typing: {
+          [mockTyping.conversationID]: [mockTyping.userID]
+        }
+      };
+      const outputState = inputState;
+      const action = chatActions.addTyping(mockTyping);
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+    test("existing typing without userID", () => {
+      // arrange
+      const inputState: ChatState = {
+        ...initialChatState,
+        typing: {
+          [mockTyping.conversationID]: ["zblbola"]
+        }
+      };
+      const outputState: ChatState = {
+        ...initialChatState,
+        typing: {
+          [mockTyping.conversationID]: ["zblbola", mockTyping.userID]
+        }
+      };
+      const action = chatActions.addTyping(mockTyping);
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+    test("non-existing typing", () => {
+      // arrange
+      const inputState: ChatState = {...initialChatState};
+      const outputState: ChatState = {
+        ...inputState,
+        typing: {
+          ...inputState.typing,
+          [mockTyping.conversationID]: [mockTyping.userID]
+        }
+      };
+      const action = chatActions.addTyping(mockTyping);
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+  });
+
+  describe("removeTyping", () => {
+    test("existing typing", () => {
+      // arrange
+      const inputState: ChatState = {
+        ...initialChatState,
+        typing: {
+          [mockTyping.conversationID]: ["zblbola", mockTyping.userID]
+        }
+      };
+      const outputState: ChatState = {
+        ...initialChatState,
+        typing: {
+          [mockTyping.conversationID]: ["zblbola"]
+        }
+      };
+      const action = chatActions.removeTyping(mockTyping);
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+    test("non-existing typing", () => {
+      // arrange
+      const inputState: ChatState = {...initialChatState};
+      const outputState: ChatState = {...inputState};
+      const action = chatActions.removeTyping(mockTyping);
+      // act
+      const result = reducer(inputState, action);
+      // assert
+      expect(result).toStrictEqual(outputState);
+    });
+  });
+
+  test("recentMessagesSeen", () => {
+    const lastmsgId = 2324325325532;
+    const inputState: ChatState = {
+      ...state,
+      conversations: [
+        conv1,
+        {
+          ...conv2,
+          messages: [
+            msg1,
+            {...msg2, id: lastmsgId, seenBy: []},
+          ]
+        },
+      ],
+    };
+    const outputState: ChatState = {
+      ...state,
+      conversations: [
+        conv1,
+        {
+          ...conv2,
+          messages: [
+            msg1,
+            {
+              ...msg2,
+              id: lastmsgId,
+              seenBy: [{userID: senderID1, date: mockDate.getTime()}]
+            },
+          ]
+        },
+      ],
+      lastSeen: {
+        ...state.lastSeen,
+        [conv2.id]: {
+          ...state.lastSeen[conv2.id],
+          [senderID1]: lastmsgId
+        }
+      }
+    };
+    const action = chatActions.recentMessagesSeen({
+      convID: conv2.id,
+      userID: senderID1
+    });
+    // act
+    const result = reducer(inputState, action);
+    // assert
+    expect(result).toStrictEqual(outputState);
   });
 });

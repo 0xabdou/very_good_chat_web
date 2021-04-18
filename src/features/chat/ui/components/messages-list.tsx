@@ -10,6 +10,9 @@ import {PulseLoader} from "react-spinners";
 export type MessagesListProps = {
   conversation: Conversation,
   currentUserID: string,
+  hasMore: boolean,
+  fetchingMore: boolean,
+  lastSeen: { [userID: string]: number },
   typing?: boolean
 }
 
@@ -22,7 +25,7 @@ const MessagesList = (props: MessagesListProps) => {
   const classes = useStyles({
     showArrow,
     typing: props.typing,
-    fetchingMore: props.conversation.hasMore,
+    fetchingMore: props.fetchingMore,
   });
 
   useEffect(() => {
@@ -40,7 +43,7 @@ const MessagesList = (props: MessagesListProps) => {
     const ch = d.clientHeight;
     const diff = sh + st - ch;
     setShowArrow(st <= -120);
-    if (diff <= 50 && !isFetching.current && props.conversation.hasMore) {
+    if (diff <= 50 && !isFetching.current && props.hasMore) {
       isFetching.current = true;
       console.log("HALAW BOOM BOOM");
       await dispatch(getMoreMessages(props.conversation.id));
@@ -58,6 +61,7 @@ const MessagesList = (props: MessagesListProps) => {
         conversation={props.conversation}
         index={i}
         currentUserID={props.currentUserID}
+        lastSeen={props.lastSeen}
         key={`${m.id}`}
       />
     );

@@ -262,6 +262,7 @@ export const mockMessage: Message = {
 
 const getConvs = (): [GQLConversation, Conversation] => {
   const user1: GQLUser = {...mockGQLUser, id: 'zblbola'};
+  const user2: GQLUser = {...mockGQLUser, id: 'a3sobix'};
   const message1: GQLMessage = {
     ...mockGQLMessage,
     id: 0,
@@ -269,11 +270,10 @@ const getConvs = (): [GQLConversation, Conversation] => {
     sentAt: new Date().getTime(),
     seenBy: [{
       __typename: 'Delivery',
-      userID: user1.id,
+      userID: user2.id,
       date: new Date().getTime()
     }]
   };
-  const user2: GQLUser = {...mockGQLUser, id: 'a3sobix'};
   const message2: GQLMessage = {
     ...mockGQLMessage,
     id: 2,
@@ -281,7 +281,7 @@ const getConvs = (): [GQLConversation, Conversation] => {
     sentAt: new Date().getTime() + 10000,
     seenBy: [{
       __typename: 'Delivery',
-      userID: user2.id,
+      userID: user1.id,
       date: new Date().getTime() + 10000
     }]
   };
@@ -298,12 +298,7 @@ const getConvs = (): [GQLConversation, Conversation] => {
     type: ConversationType[GQLConv.type],
     participants: GQLConv.participants.map(UserAPI.parseUser),
     messages: GQLConv.messages.map(ChatAPI.parseMessage),
-    seenDates: {
-      [`${user1.id}`]: message1.sentAt,
-      [`${user2.id}`]: message2.sentAt,
-    },
     canChat: GQLConv.canChat,
-    hasMore: false,
   };
   return [GQLConv, conv];
 };
