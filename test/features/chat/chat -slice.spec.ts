@@ -333,50 +333,6 @@ describe('getMoreMessages', () => {
   });
 
   describe('reducers', () => {
-    const loadingState: ChatState = {
-      ...testInputState,
-      fetchingMore: {
-        ...testInputState.fetchingMore,
-        [convID]: true
-      }
-    };
-
-    it('should return the right state when pending', () => {
-      // arrange
-      const inputState: ChatState = {...testInputState};
-      const outputState: ChatState = {...loadingState};
-      const action: PayloadAction<void, string, { arg: number }> = {
-        type: chatActions.getMoreMessages.pending.type,
-        payload: undefined,
-        meta: {arg: convID}
-      };
-      // act
-      const result = reducer(inputState, action);
-      // assert
-      expect(result).toStrictEqual(outputState);
-    });
-
-    it('should return the right state when rejected', () => {
-      // arrange
-      const inputState: ChatState = {...loadingState};
-      const outputState: ChatState = {
-        ...testInputState,
-        fetchingMore: {
-          ...testInputState.fetchingMore,
-          [convID]: false
-        }
-      };
-      const action: PayloadAction<ChatError, string, { arg: number }> = {
-        type: chatActions.getMoreMessages.rejected.type,
-        payload: chatError,
-        meta: {arg: convID}
-      };
-      // act
-      const result = reducer(inputState, action);
-      // assert
-      expect(result).toStrictEqual(outputState);
-    });
-
     describe('fulfilled', () => {
       it(
         `should return the right state if the number of messages >= ${MESSAGES_PER_FETCH}`,
@@ -386,7 +342,7 @@ describe('getMoreMessages', () => {
             {length: MESSAGES_PER_FETCH},
             (_, idx): Message => ({...conv.messages[0], id: idx})
           );
-          const inputState: ChatState = {...loadingState};
+          const inputState: ChatState = {...testInputState};
           const outputState: ChatState = {
             ...inputState,
             conversations: [
@@ -395,7 +351,6 @@ describe('getMoreMessages', () => {
                 messages: [...messages, ...conv.messages],
               }
             ],
-            fetchingMore: {[conv.id]: false},
             hasMore: {[conv.id]: true}
           };
           const action: PayloadAction<Message[], string, { arg: number }> = {
@@ -418,7 +373,7 @@ describe('getMoreMessages', () => {
             {length: MESSAGES_PER_FETCH - 1},
             (_, idx): Message => ({...conv.messages[0], id: idx})
           );
-          const inputState: ChatState = {...loadingState};
+          const inputState: ChatState = {...testInputState};
           const outputState: ChatState = {
             ...inputState,
             conversations: [
@@ -427,7 +382,6 @@ describe('getMoreMessages', () => {
                 messages: [...messages, ...conv.messages],
               }
             ],
-            fetchingMore: {[conv.id]: false},
             hasMore: {[conv.id]: false},
           };
           const action: PayloadAction<Message[], string, { arg: number }> = {
@@ -449,7 +403,7 @@ describe('getMoreMessages', () => {
           (_, idx): Message => ({...conv.messages[0], id: idx})
         );
         const inputState: ChatState = {
-          ...loadingState,
+          ...testInputState,
           lastSeen: {
             [conv.id]: {
               [conv.participants[0].id]: -1,
@@ -471,7 +425,6 @@ describe('getMoreMessages', () => {
               [conv.participants[1].id]: conv.messages[0].id,
             }
           },
-          fetchingMore: {[conv.id]: false},
           hasMore: {[conv.id]: false},
         };
         const action: PayloadAction<Message[], string, { arg: number }> = {

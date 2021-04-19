@@ -1,6 +1,5 @@
 import React from "react";
 import '../shared/styles/globals.scss';
-import useDimensionsFix from "../shared/utils/mobile/useDimensionsFix";
 import {Provider} from 'react-redux';
 import sl from "../dependencies/service-locator";
 import {AppStore} from "./redux/store";
@@ -14,7 +13,7 @@ import {BrowserRouter} from "react-router-dom";
 
 const App = () => {
   // Fixes some visual bugs in some mobile browsers
-  useDimensionsFix();
+  //useDimensionsFix();
   // Hook for dependency injection
   const ready = useDependencies();
 

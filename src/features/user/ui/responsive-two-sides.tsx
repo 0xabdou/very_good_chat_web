@@ -83,6 +83,7 @@ const useStyles = makeStyles<Theme, MainScreenStyle>({
     justifyContent: "center",
     flex: 1,
     height: "100%",
+    width: "1px",
   },
   filler: props => ({
     display: props.isMobile ? "none" : undefined,

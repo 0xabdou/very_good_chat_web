@@ -12,7 +12,6 @@ export type ChatState = {
   conversations: Conversation[] | null,
   typing: { [conversationID: number]: string[] }
   hasMore: { [conversationID: number]: boolean }
-  fetchingMore: { [conversationID: number]: boolean }
   // conversationID -> userID -> last seen messageID
   lastSeen: { [conversationID: number]: { [userID: string]: number } }
   error: ChatError | null,
@@ -23,7 +22,6 @@ export const initialChatState: ChatState = {
   conversations: null,
   typing: {},
   hasMore: {},
-  fetchingMore: {},
   lastSeen: {},
   error: null,
 };
@@ -278,10 +276,8 @@ const chatSlice = createSlice({
       .addCase(getOrCreateOTOConversation.rejected, _handleRejected);
     // getMoreMessages
     builder
-      .addCase(getMoreMessages.pending, (state, action) => {
-        state.fetchingMore[action.meta.arg] = true;
-      })
       .addCase(getMoreMessages.fulfilled, (state, action) => {
+        if (!action.payload) return;
         const convID = action.meta.arg;
         const conv = state.conversations!.find(c => c.id == convID)!;
         const newMessages = action.payload;
@@ -308,11 +304,7 @@ const chatSlice = createSlice({
         }
         conv.messages = [...newMessages, ...conv.messages];
         state.hasMore[convID] = newMessages.length >= MESSAGES_PER_FETCH;
-        state.fetchingMore[action.meta.arg] = false;
       })
-      .addCase(getMoreMessages.rejected, (state, action) => {
-        state.fetchingMore[action.meta.arg] = false;
-      });
     // sendMessage
     builder
       .addCase(sendMessage.fulfilled, (state, action) => {

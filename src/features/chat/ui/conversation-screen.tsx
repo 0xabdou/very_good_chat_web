@@ -46,10 +46,6 @@ const ConversationScreen = () => {
   const hasMore: boolean = useAppSelector(state => {
     return state.chat.hasMore[conversationID];
   });
-  // Are messages in this conversation currently being fetched
-  const fetchingMore: boolean = useAppSelector(state => {
-    return state.chat.fetchingMore[conversationID];
-  });
   // Last seen messages
   const lastSeen = useAppSelector(state => {
     return state.chat.lastSeen[conversationID];
@@ -71,11 +67,10 @@ const ConversationScreen = () => {
 
   // Mark messages as seen whenever [isActive] changes to true
   useEffect(() => {
-    console.log("BRUH: ", isActive);
     if (isActive) {
       dispatch(chatActions.messagesSeen(Number(conversationID)));
     }
-  }, [isActive]);
+  }, [isActive, conversationID]);
 
   // Callback for when a picked file is removed
   const fileRemoved = useCallback((index: number) => {
@@ -170,7 +165,6 @@ const ConversationScreen = () => {
         currentUserID={me?.id ?? ''}
         typing={typing}
         hasMore={hasMore}
-        fetchingMore={fetchingMore}
         lastSeen={lastSeen}
       />
       {
@@ -210,7 +204,7 @@ const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
     flexDirection: 'column',
     width: '100%',
     height: '100%',
-    paddingTop: '56px',
+    paddingTop: '64px',
     background: "white",
   },
   title: {

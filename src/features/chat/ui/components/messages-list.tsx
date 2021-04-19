@@ -11,7 +11,6 @@ export type MessagesListProps = {
   conversation: Conversation,
   currentUserID: string,
   hasMore: boolean,
-  fetchingMore: boolean,
   lastSeen: { [userID: string]: number },
   typing?: boolean
 }
@@ -25,7 +24,7 @@ const MessagesList = (props: MessagesListProps) => {
   const classes = useStyles({
     showArrow,
     typing: props.typing,
-    fetchingMore: props.fetchingMore,
+    hasMore: props.hasMore,
   });
 
   useEffect(() => {
@@ -42,10 +41,12 @@ const MessagesList = (props: MessagesListProps) => {
     const st = d.scrollTop;
     const ch = d.clientHeight;
     const diff = sh + st - ch;
-    setShowArrow(st <= -120);
+    setShowArrow(st <= -1);
+    console.log("DIFF: ", diff);
+    console.log("HAS_MORE: ", props.hasMore);
+    console.log("FETCHING_MORE: ", isFetching.current);
     if (diff <= 50 && !isFetching.current && props.hasMore) {
       isFetching.current = true;
-      console.log("HALAW BOOM BOOM");
       await dispatch(getMoreMessages(props.conversation.id));
       isFetching.current = false;
     }
@@ -96,7 +97,7 @@ const MessagesList = (props: MessagesListProps) => {
 type MessagesListStyle = {
   showArrow?: boolean,
   typing?: boolean,
-  fetchingMore?: boolean,
+  hasMore?: boolean,
 }
 
 const useStyles = makeStyles<Theme, MessagesListStyle>({
@@ -107,7 +108,7 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
     overflow: "hidden",
   },
   loader: props => ({
-    display: props.fetchingMore ? 'flex' : "none",
+    display: props.hasMore ? 'flex' : "none",
     justifyContent: "center",
     alignItems: "center",
     padding: '16px',
@@ -157,39 +158,3 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
 
 
 export default MessagesList;
-
-//<AutoSizer>
-//  {({width, height}) => {
-//    return (
-//      <Virtuoso
-//        firstItemIndex={firstItemIndex}
-//        initialTopMostItemIndex={initialTopMostItemIndex}
-//        data={props.conversation.messages}
-//        startReached={getMore}
-//        itemContent={itemContent}
-//        style={{height, width, overflowX: 'hidden'}}
-//        atBottomStateChange={bottomStateChanged}
-//        followOutput={followOutput}
-//        overscan={600}
-//        components={{
-//          Header: () => (
-//            <div className={classes.loader}>
-//              <PulseLoader/>
-//            </div>
-//          ),
-//          Footer: () => (
-//            <div className={classes.typing}>
-//              <Avatar
-//                className={classes.typingAvatar}
-//                src={props.conversation.participants[0].photo?.small}
-//              />
-//              <span className={classes.typingText}>Typing...</span>
-//            </div>
-//          )
-//        }}
-//        ref={ref}
-//        itemsRendered={itemsRendered}
-//      />
-//    );
-//  }}
-//</AutoSizer>
