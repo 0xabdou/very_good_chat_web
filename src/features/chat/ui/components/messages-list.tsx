@@ -6,15 +6,17 @@ import useChatActions from "../../chat-actions-provider";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {PulseLoader} from "react-spinners";
 import FullscreenLoader from "../../../../shared/components/fullscreen-loader";
+import {shallowEqual} from "react-redux";
 
 export type MessagesListProps = {
   conversationID: number,
 }
 
 const MessagesList = (props: MessagesListProps) => {
-  const me = useAppSelector(state => state.me.me)!;
+  const me = useAppSelector(state => state.me.me, shallowEqual)!;
   const conversation = useAppSelector(
-    state => state.chat.conversations?.find(c => c.id == props.conversationID)
+    state => state.chat.conversations?.find(c => c.id == props.conversationID),
+    shallowEqual
   );
   const typing: boolean = useAppSelector(state => {
     const userID = conversation?.participants[0]?.id;
@@ -22,11 +24,11 @@ const MessagesList = (props: MessagesListProps) => {
     const typings = state.chat.typing[props.conversationID];
     if (!typings) return false;
     return typings.indexOf(userID) != -1;
-  });
+  }, shallowEqual);
   // does the conversation have more messages to fetch
   const hasMore: boolean = useAppSelector(state => {
     return state.chat.hasMore[props.conversationID];
-  });
+  }, shallowEqual);
   const dispatch = useAppDispatch();
   const {getMoreMessages} = useChatActions();
   const ref = useRef<HTMLDivElement>(null);

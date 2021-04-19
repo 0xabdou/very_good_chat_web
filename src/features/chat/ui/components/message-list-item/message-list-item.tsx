@@ -5,6 +5,7 @@ import Message from "../../../types/message";
 import DeliveryStatus, {DeliveryStatusType} from "../delivery-status";
 import MessageMediaGrid from "./message-media-grid";
 import {useAppSelector} from "../../../../../core/redux/hooks";
+import {shallowEqual} from "react-redux";
 
 export type MessageListItemProps = {
   index: number,
@@ -19,7 +20,7 @@ const _sameSender = (message1: Message, message2: Message) => {
 const useMessageSelector = (convID: number, index: number) => {
   return useAppSelector(state => {
     return state.chat.conversations!.find(c => c.id == convID)!.messages[index];
-  });
+  }, shallowEqual);
 };
 
 const MessageListItem = React.memo((props: MessageListItemProps) => {
@@ -27,13 +28,13 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
   const otherUser = useAppSelector(state => {
     return state.chat.conversations!.find(c => c.id == props.conversationID)!
       .participants[0];
-  });
+  }, shallowEqual);
   const message = useMessageSelector(props.conversationID, props.index);
   const before = useMessageSelector(props.conversationID, props.index - 1);
   const after = useMessageSelector(props.conversationID, props.index + 1);
   const lastSeen = useAppSelector(state => {
     return state.chat.lastSeen[props.conversationID];
-  });
+  }, shallowEqual);
   const incoming = props.currentUserID != message.senderID;
   let bubbleType: BubbleType;
   if (!before && !after) bubbleType = BubbleType.ISOLATED;

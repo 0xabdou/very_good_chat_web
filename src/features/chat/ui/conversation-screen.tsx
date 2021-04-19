@@ -10,6 +10,7 @@ import {useDropzone} from "react-dropzone";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
 import FriendAvatar from "../../friend/ui/components/friend-avatar";
+import {shallowEqual} from "react-redux";
 
 const ConversationScreen = () => {
   // redux
@@ -30,7 +31,8 @@ const ConversationScreen = () => {
   );
   // The friend object of the other side of the conversation
   const friend = useAppSelector(
-    state => state.friends.friends?.find(f => f.user.id == conversation?.participants[0].id)
+    state => state.friends.friends?.find(f => f.user.id == conversation?.participants[0].id),
+    shallowEqual
   );
   // Navigation stuff
   const history = useHistory();
