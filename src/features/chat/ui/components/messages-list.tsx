@@ -1,21 +1,32 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
 import {Avatar, Icon, IconButton, makeStyles} from "@material-ui/core";
 import MessageListItem from "./message-list-item/message-list-item";
-import Conversation from "../../types/conversation";
-import {useAppDispatch} from "../../../../core/redux/hooks";
+import {useAppDispatch, useAppSelector} from "../../../../core/redux/hooks";
 import useChatActions from "../../chat-actions-provider";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {PulseLoader} from "react-spinners";
+import FullscreenLoader from "../../../../shared/components/fullscreen-loader";
 
 export type MessagesListProps = {
-  conversation: Conversation,
-  currentUserID: string,
-  hasMore: boolean,
-  lastSeen: { [userID: string]: number },
-  typing?: boolean
+  conversationID: number,
 }
 
 const MessagesList = (props: MessagesListProps) => {
+  const me = useAppSelector(state => state.me.me)!;
+  const conversation = useAppSelector(
+    state => state.chat.conversations?.find(c => c.id == props.conversationID)
+  );
+  const typing: boolean = useAppSelector(state => {
+    const userID = conversation?.participants[0]?.id;
+    if (!userID) return false;
+    const typings = state.chat.typing[props.conversationID];
+    if (!typings) return false;
+    return typings.indexOf(userID) != -1;
+  });
+  // does the conversation have more messages to fetch
+  const hasMore: boolean = useAppSelector(state => {
+    return state.chat.hasMore[props.conversationID];
+  });
   const dispatch = useAppDispatch();
   const {getMoreMessages} = useChatActions();
   const ref = useRef<HTMLDivElement>(null);
@@ -23,8 +34,8 @@ const MessagesList = (props: MessagesListProps) => {
   const [showArrow, setShowArrow] = useState(false);
   const classes = useStyles({
     showArrow,
-    typing: props.typing,
-    hasMore: props.hasMore,
+    typing,
+    hasMore,
   });
 
   useEffect(() => {
@@ -36,18 +47,15 @@ const MessagesList = (props: MessagesListProps) => {
 
   const onScroll = async () => {
     const d = ref.current;
-    if (!d) return console.log("REF CUR NULL");
+    if (!d) return;
     const sh = d.scrollHeight;
     const st = d.scrollTop;
     const ch = d.clientHeight;
     const diff = sh + st - ch;
     setShowArrow(st <= -1);
-    console.log("DIFF: ", diff);
-    console.log("HAS_MORE: ", props.hasMore);
-    console.log("FETCHING_MORE: ", isFetching.current);
-    if (diff <= 50 && !isFetching.current && props.hasMore) {
+    if (diff <= 50 && !isFetching.current && hasMore) {
       isFetching.current = true;
-      await dispatch(getMoreMessages(props.conversation.id));
+      await dispatch(getMoreMessages(props.conversationID));
       isFetching.current = false;
     }
   };
@@ -56,13 +64,14 @@ const MessagesList = (props: MessagesListProps) => {
     if (ref.current) ref.current.scrollTo({top: 0, behavior: "smooth"});
   }, [ref.current]);
 
-  const messages = props.conversation.messages.map((m, i) => {
+  if (!conversation) return <FullscreenLoader/>;
+
+  const messages = conversation.messages.map((m, i) => {
     return (
       <MessageListItem
-        conversation={props.conversation}
         index={i}
-        currentUserID={props.currentUserID}
-        lastSeen={props.lastSeen}
+        conversationID={props.conversationID}
+        currentUserID={me.id}
         key={`${m.id}`}
       />
     );
@@ -78,7 +87,7 @@ const MessagesList = (props: MessagesListProps) => {
           <div className={classes.typing} key="zblbola">
             <Avatar
               className={classes.typingAvatar}
-              src={props.conversation.participants[0].photo?.small}
+              src={conversation.participants[0].photo?.small}
             />
             <span className={classes.typingText}>Typing...</span>
           </div>

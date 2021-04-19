@@ -2,14 +2,13 @@ import React, {useRef} from "react";
 import {Avatar, makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import Message from "../../../types/message";
-import Conversation from "../../../types/conversation";
 import DeliveryStatus, {DeliveryStatusType} from "../delivery-status";
 import MessageMediaGrid from "./message-media-grid";
+import {useAppSelector} from "../../../../../core/redux/hooks";
 
 export type MessageListItemProps = {
-  conversation: Conversation,
-  lastSeen: { [userID: string]: number },
   index: number,
+  conversationID: number,
   currentUserID: string,
 };
 
@@ -17,16 +16,26 @@ const _sameSender = (message1: Message, message2: Message) => {
   return message1.senderID == message2.senderID;
 };
 
+const useMessageSelector = (convID: number, index: number) => {
+  return useAppSelector(state => {
+    return state.chat.conversations!.find(c => c.id == convID)!.messages[index];
+  });
+};
+
 const MessageListItem = React.memo((props: MessageListItemProps) => {
-  const messages = props.conversation.messages;
-  const index = props.index;
-  const message = messages[index];
-  const incoming = props.currentUserID != message.senderID;
-  const otherUser = props.conversation.participants[0];
   const ref = useRef<HTMLDivElement>(null);
+  const otherUser = useAppSelector(state => {
+    return state.chat.conversations!.find(c => c.id == props.conversationID)!
+      .participants[0];
+  });
+  const message = useMessageSelector(props.conversationID, props.index);
+  const before = useMessageSelector(props.conversationID, props.index - 1);
+  const after = useMessageSelector(props.conversationID, props.index + 1);
+  const lastSeen = useAppSelector(state => {
+    return state.chat.lastSeen[props.conversationID];
+  });
+  const incoming = props.currentUserID != message.senderID;
   let bubbleType: BubbleType;
-  const before = messages[index - 1];
-  const after = messages[index + 1];
   if (!before && !after) bubbleType = BubbleType.ISOLATED;
   else if (before && after) {
     if (_sameSender(message, before)) {
@@ -43,7 +52,7 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     if (_sameSender(message, before)) bubbleType = BubbleType.LAST;
     else bubbleType = BubbleType.ISOLATED;
   }
-  const lastSeenMessageID = props.lastSeen[message.senderID];
+  const lastSeenMessageID = lastSeen[otherUser.id];
   let deliveryStatusType: DeliveryStatusType;
   let date: number;
   if (incoming) {

@@ -3,7 +3,6 @@ import {ButtonBase, makeStyles, Typography} from "@material-ui/core";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
 import {useHistory, useParams} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
-import FullscreenLoader from "../../../shared/components/fullscreen-loader";
 import useChatActions from "../chat-actions-provider";
 import ChatTextField from "./components/chat-text-field";
 import MessagesList from "./components/messages-list";
@@ -16,7 +15,6 @@ const ConversationScreen = () => {
   // redux
   const dispatch = useAppDispatch();
   const chatActions = useChatActions();
-  const me = useAppSelector(state => state.me.me);
   // Local state
   // is the current tab active? (used to decide if messages should be marked as seen)
   const [isActive, setIsActive] = useState(document.hasFocus());
@@ -34,22 +32,6 @@ const ConversationScreen = () => {
   const friend = useAppSelector(
     state => state.friends.friends?.find(f => f.user.id == conversation?.participants[0].id)
   );
-  // Is the other side currently typing?
-  const typing: boolean = useAppSelector(state => {
-    const userID = conversation?.participants[0]?.id;
-    if (!userID) return false;
-    const typings = state.chat.typing[conversationID];
-    if (!typings) return false;
-    return typings.indexOf(userID) != -1;
-  });
-  // does the conversation have more messages to fetch
-  const hasMore: boolean = useAppSelector(state => {
-    return state.chat.hasMore[conversationID];
-  });
-  // Last seen messages
-  const lastSeen = useAppSelector(state => {
-    return state.chat.lastSeen[conversationID];
-  });
   // Navigation stuff
   const history = useHistory();
   // The other side of the conversation
@@ -140,7 +122,6 @@ const ConversationScreen = () => {
   const classes = useStyles({isDragActive});
   const topBarClasses = useTopBarStyles();
 
-  if (!conversation) return <FullscreenLoader/>;
 
   const rootProps = getRootProps({
     className: classes.outer,
@@ -160,29 +141,14 @@ const ConversationScreen = () => {
           </div>
         </ButtonBase>
       </TopBar>
-      <MessagesList
-        conversation={conversation}
-        currentUserID={me?.id ?? ''}
-        typing={typing}
-        hasMore={hasMore}
-        lastSeen={lastSeen}
+      <MessagesList conversationID={conversationID}/>
+      <ChatTextField
+        conversationID={conversationID}
+        files={files}
+        fileRemoved={fileRemoved}
+        submit={submit}
+        addFileClicked={open}
       />
-      {
-        conversation.canChat &&
-        <ChatTextField
-          conversationID={conversationID}
-          files={files}
-          fileRemoved={fileRemoved}
-          submit={submit}
-          addFileClicked={open}
-        />
-      }
-      {
-        !conversation.canChat &&
-        <div className={classes.cannotChat}>
-          You can't reply to this conversation
-        </div>
-      }
       <div className={classes.dragIndicator}>
         Drop files here
       </div>
@@ -239,12 +205,7 @@ const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
       background: 'white',
     };
   },
-  cannotChat: {
-    display: "flex",
-    justifyContent: "center",
-    fontSize: "0.8rem",
-    padding: "16px",
-  }
+
 });
 
 export default ConversationScreen;

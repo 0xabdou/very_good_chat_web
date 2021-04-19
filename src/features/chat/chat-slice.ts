@@ -115,6 +115,21 @@ const messagesSeen = createAsyncThunk<void, number, ThunkAPI<ChatError>>(
   }
 );
 
+let deliveryRequested = false;
+let delivering = false;
+const markAsDelivered = (mark: () => void) => {
+  if (delivering) {
+    deliveryRequested = true;
+    return;
+  }
+  delivering = true;
+  mark();
+  setTimeout(() => {
+    delivering = false;
+    deliveryRequested = false;
+    if (deliveryRequested) markAsDelivered(mark);
+  }, 1000);
+};
 const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToMessages',
   async (_, thunkAPI) => {
@@ -133,9 +148,11 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
           message,
           update: sub.update || mine
         }));
-      }, mine ? 500 : 0);
-      if (!mine)
-        thunkAPI.extra.chatRepo.messagesDelivered([message.conversationID]);
+      }, sub.update || mine ? 800 : 0);
+      if (!mine) {
+        markAsDelivered(() => thunkAPI.extra.chatRepo
+          .messagesDelivered([message.conversationID]));
+      }
     });
   }
 );
@@ -193,9 +210,7 @@ const chatSlice = createSlice({
   reducers: {
     appendMessage(state: ChatState, action: PayloadAction<{ message: Message, update?: boolean }>) {
       const {message, update} = action.payload;
-      console.log("APPENDING: ", message);
       const index = state.conversations!.findIndex(c => c.id == message.conversationID);
-      console.log(action.payload);
       if (update) {
         const conv = state.conversations![index];
         const mIndex = conv.messages.findIndex(m => m.id == message.id);
@@ -304,14 +319,19 @@ const chatSlice = createSlice({
         }
         conv.messages = [...newMessages, ...conv.messages];
         state.hasMore[convID] = newMessages.length >= MESSAGES_PER_FETCH;
-      })
+      });
     // sendMessage
     builder
       .addCase(sendMessage.fulfilled, (state, action) => {
-        const {conversationID, tempID} = action.meta.arg;
         const message = action.payload;
+        const {conversationID, tempID} = action.meta.arg;
         const conv = state.conversations!.find(c => c.id == conversationID)!;
+        const delivered = conv.messages.find(m => m.id == message.id);
         const messageIndex = conv.messages.findIndex(m => m.id == tempID);
+        if (delivered) {
+          conv.messages.splice(messageIndex, 1);
+          return;
+        }
         conv.messages[messageIndex] = message;
         state.lastSeen[conv.id][message.senderID] = message.id;
       })

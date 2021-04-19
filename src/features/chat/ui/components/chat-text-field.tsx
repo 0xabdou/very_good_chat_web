@@ -17,7 +17,7 @@ import {
 import {BaseEmoji, Picker} from "emoji-mart";
 import MediaPreview from "./media-preview";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import {useAppDispatch} from "../../../../core/redux/hooks";
+import {useAppDispatch, useAppSelector} from "../../../../core/redux/hooks";
 import useChatActions from "../../chat-actions-provider";
 
 export type ChatTextFieldProps = {
@@ -29,6 +29,10 @@ export type ChatTextFieldProps = {
 }
 
 const ChatTextField = (props: ChatTextFieldProps) => {
+  const canChat = useAppSelector(state => {
+    return state.chat.conversations?.find(c => c.id == props.conversationID)
+      ?.canChat;
+  });
   const dispatch = useAppDispatch();
   const {typing} = useChatActions();
   const [text, setText] = useState('');
@@ -89,6 +93,13 @@ const ChatTextField = (props: ChatTextFieldProps) => {
       />
     );
   });
+  if (!canChat) {
+    return (
+      <div className={classes.cannotChat}>
+        You can't reply to this conversation
+      </div>
+    );
+  }
   return (
     <div className={classes.wrapper} data-testid='chat-text-field'>
       {/* The add button at the right of the text field (for picking files) */}
@@ -231,6 +242,12 @@ const useStyles = makeStyles<Theme, { typing: boolean }>({
     padding: "4px 8px",
     overflowY: 'hidden',
     overflowX: 'auto'
+  },
+  cannotChat: {
+    display: "flex",
+    justifyContent: "center",
+    fontSize: "0.8rem",
+    padding: "16px",
   }
 });
 
