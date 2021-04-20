@@ -41,6 +41,18 @@ beforeEach(() => {
   resetCalls(MockAuthRepo);
 });
 
+test("setAccessToken", async () => {
+  // arrange
+  const accessToken = "%$^&^*&DASD*ASUDV";
+  const inputState: AuthState = {...initialAuthState};
+  const outputState: AuthState = {...inputState, accessToken};
+  const action = authActions.setAccessToken(accessToken);
+  // act
+  const result = authReducer(inputState, action);
+  // assert
+  expect(result).toStrictEqual(outputState);
+});
+
 describe('signInWithGoogle thunk', () => {
   const act = () => signInWithGoogle()(
     mockStore.dispatch,

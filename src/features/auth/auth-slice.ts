@@ -1,4 +1,4 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {ThunkAPI} from "../../core/redux/store";
 import AuthError from "./types/auth-error";
 import {isRight} from "fp-ts/Either";
@@ -74,7 +74,11 @@ const handleRejected = (state: AuthState, error: AuthError | undefined) => {
 const authSlice = createSlice({
   name: 'auth',
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    setAccessToken(state: AuthState, action: PayloadAction<string>) {
+      state.accessToken = action.payload;
+    }
+  },
   extraReducers: builder => {
     // getAccessToken
     builder
@@ -132,6 +136,7 @@ export const authActions = {
   getAccessToken,
   signInWithGoogle,
   signOut,
+  ...authSlice.actions
 };
 
 

@@ -18,10 +18,12 @@ export const customFetch: WindowOrWorkerGlobalScope['fetch'] = async (uri, optio
             {credentials: 'include'}
           );
           const json = await response.json();
+          const store = sl.get<AppStore>(TYPES.AppStore);
           if (response.ok) {
+            store.dispatch(authActions.setAccessToken(json.accessToken));
             resolve(json.accessToken);
           } else {
-            sl.get<AppStore>(TYPES.AppStore).dispatch(authActions.signOut());
+            store.dispatch(authActions.signOut());
             reject(new Error("Couldn't refresh the token"));
           }
         });

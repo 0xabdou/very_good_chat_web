@@ -45,6 +45,7 @@ const ConversationListItem = (props: ConversationListItemProps) => {
     else status = DeliveryStatusType.SENT;
   }
   let secondary: React.ReactNode;
+  const date = " - " + formatDate(message.sentAt, "mini-minute-now");
   if (props.typing) {
     secondary = <span className={classes.typing}>Typing...</span>;
   } else if (message.text) {
@@ -53,7 +54,7 @@ const ConversationListItem = (props: ConversationListItemProps) => {
         <span className={classes.secondaryText}>
           {mine && "You: "}{message.text}
         </span>
-        <span>- {formatDate(message.sentAt, "mini-minute-now")}</span>
+        <span>{date}</span>
       </>
     );
   } else if (message.medias?.length) {
@@ -67,7 +68,7 @@ const ConversationListItem = (props: ConversationListItemProps) => {
     }
     secondary = (
       <>
-        <Icon className={classes.secondaryIcon}>{icon}</Icon> {text}
+        <Icon className={classes.secondaryIcon}>{icon}</Icon> {text} {date}
       </>
     );
   } else {
