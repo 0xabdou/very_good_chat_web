@@ -54,7 +54,7 @@ const ConversationScreen = () => {
     if (isActive) {
       dispatch(chatActions.messagesSeen(Number(conversationID)));
     }
-  }, [isActive, conversationID]);
+  }, [isActive, conversation]);
 
   // Callback for when a picked file is removed
   const fileRemoved = useCallback((index: number) => {

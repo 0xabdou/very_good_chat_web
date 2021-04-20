@@ -10,7 +10,8 @@ import Badges from "../../badge/ui/components/badges";
 import ChatScreen from "../../chat/ui/chat-screen";
 import ConversationScreen from "../../chat/ui/conversation-screen";
 import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
-import ResponsiveTwoSides from "./responsive-two-sides";
+import ResponsiveTwoSides
+  from "../../../shared/components/responsive-two-sides";
 
 const MainScreen = () => {
   const [searching, setSearching] = useState(false);

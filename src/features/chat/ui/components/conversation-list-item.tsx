@@ -6,7 +6,6 @@ import {
   Icon,
   ListItem,
   ListItemAvatar,
-  ListItemText,
   makeStyles
 } from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
@@ -37,12 +36,6 @@ const ConversationListItem = (props: ConversationListItemProps) => {
 
   if (!message) return <div/>;
   const user = props.conversation.participants[0];
-  const primary = (
-    <span className={classes.primary}>
-      {user.username}
-    </span>
-  );
-  let secondary: React.ReactNode;
   let status: DeliveryStatusType;
   if (!message.sent) status = DeliveryStatusType.SENDING;
   else if (!mine) status = DeliveryStatusType.SEEN;
@@ -51,8 +44,9 @@ const ConversationListItem = (props: ConversationListItemProps) => {
     else if (message.deliveredTo[0]) status = DeliveryStatusType.DELIVERED;
     else status = DeliveryStatusType.SENT;
   }
+  let secondary: React.ReactNode;
   if (props.typing) {
-    secondary = <span className={classes.secondary}>Typing...</span>;
+    secondary = <span className={classes.typing}>Typing...</span>;
   } else if (message.text) {
     secondary = (
       <>
@@ -71,7 +65,11 @@ const ConversationListItem = (props: ConversationListItemProps) => {
       icon = "photo_camera";
       text = "Photo";
     }
-    secondary = <span><Icon>{icon}</Icon> {text}</span>;
+    secondary = (
+      <>
+        <Icon className={classes.secondaryIcon}>{icon}</Icon> {text}
+      </>
+    );
   } else {
     secondary = "";
   }
@@ -85,16 +83,25 @@ const ConversationListItem = (props: ConversationListItemProps) => {
             alt='conversation-avatar'
           />
         </ListItemAvatar>
-        <ListItemText primary={primary} secondary={secondary}/>
-        {!seen && <div className={classes.dot}/>}
-        {
-          seen &&
-          <DeliveryStatus
-            type={status}
-            date={message.sentAt}
-            photoURL={user.photo?.small}
-          />
-        }
+        <div className={classes.listItemText}>
+          <span className={classes.primary}>
+            {user.username}
+          </span>
+          <span className={classes.secondary}>
+            {secondary}
+          </span>
+        </div>
+        <div className={classes.deliveryStatus}>
+          {!seen && <div className={classes.dot}/>}
+          {
+            seen &&
+            <DeliveryStatus
+              type={status}
+              date={message.sentAt}
+              photoURL={user.photo?.small}
+            />
+          }
+        </div>
       </ListItem>
     </div>
   );
@@ -106,30 +113,60 @@ const useStyles = makeStyles<Theme, StyleProps>(() => {
   const blue = '#2F88FB';
   return createStyles({
     dot: {
-      maxHeight: '10px',
-      maxWidth: '10px',
-      minHeight: '10px',
-      minWidth: '10px',
+      maxHeight: '12px',
+      maxWidth: '12px',
+      minHeight: '12px',
+      minWidth: '12px',
       borderRadius: '50%',
       background: blue
+    },
+    listItemText: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      overflow: "hidden",
+      flex: 1,
+      paddingRight: "8px",
+      height: "55px",
     },
     primary: props => ({
       fontWeight: props.seen ? undefined : "bold",
       color: "black",
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      width: "100%",
+      maxWidth: "100%%",
+      paddingBottom: "8px",
     }),
-    secondary: {
+    secondary: props => ({
       display: "flex",
-    },
+      alignItems: "center",
+      width: "100%",
+      textOverflow: "ellipsis",
+      color: props.seen ? "grey" : "black",
+      fontSize: "0.875rem",
+    }),
     secondaryText: props => ({
       overflow: "hidden",
       textOverflow: "ellipsis",
       whiteSpace: "nowrap",
       maxWidth: "80%",
-      color: props.seen ? "grey" : "black",
       fontWeight: props.seen ? undefined : "bold",
       paddingRight: "5px",
       boxSizing: "border-box",
-    })
+    }),
+    deliveryStatus: {
+      margin: "8px",
+    },
+    secondaryIcon: {
+      "&&": {
+        fontSize: "1rem",
+        marginRight: "4px",
+      }
+    },
+    typing: {
+      color: "grey"
+    }
   });
 });
 

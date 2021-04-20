@@ -10,10 +10,11 @@ import {unstable_createMuiStrictModeTheme as createMuiTheme} from "@material-ui/
 import FileUtilsProvider from "../shared/utils/file-utils";
 import RootScreen from "../features/auth/ui/root-screen";
 import {BrowserRouter} from "react-router-dom";
+import useDimensionsFix from "../shared/utils/mobile/useDimensionsFix";
 
 const App = () => {
   // Fixes some visual bugs in some mobile browsers
-  //useDimensionsFix();
+  useDimensionsFix();
   // Hook for dependency injection
   const ready = useDependencies();
 

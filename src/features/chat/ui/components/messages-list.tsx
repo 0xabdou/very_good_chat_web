@@ -115,8 +115,8 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
   outer: {
     position: "relative",
     width: '100%',
-    flexGrow: 1,
     overflow: "hidden",
+    flex: 1,
   },
   loader: props => ({
     display: props.hasMore ? 'flex' : "none",

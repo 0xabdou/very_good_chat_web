@@ -1,8 +1,8 @@
 import {makeStyles} from "@material-ui/core";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
-import {wrapper} from "../../../shared/styles/shared";
+import {wrapper} from "../styles/shared";
 import React from "react";
-import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
+import {useLargeMQ, useMobileMQ} from "../styles/media-query";
 
 export type ResponsiveTwoSidesProps = {
   leftTopBar: React.ReactNode,

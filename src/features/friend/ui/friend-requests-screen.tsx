@@ -17,7 +17,8 @@ import {BadgeName} from "../../badge/types/badge";
 import {useBadgeActions} from "../../badge/badge-actions-context";
 import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
 import FriendProfileScreen from "./friend-profile-screen";
-import ResponsiveTwoSides from "../../user/ui/responsive-two-sides";
+import ResponsiveTwoSides
+  from "../../../shared/components/responsive-two-sides";
 
 type FriendRequestsScreenProps = {
   received?: boolean

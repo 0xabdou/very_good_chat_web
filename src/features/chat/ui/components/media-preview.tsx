@@ -14,7 +14,7 @@ const MediaPreview = (props: MediaPreviewProps) => {
   const classes = useMediaPreviewStyles();
 
   useEffect(() => {
-    const ext = props.file.type.split('/')[0];
+    const ext = props.file.type.split('/')[0].toLowerCase();
     if (ext == "image" || ext == "video") {
       const thumbURL = URL.createObjectURL(props.file);
       setUrl(thumbURL);
@@ -28,6 +28,7 @@ const MediaPreview = (props: MediaPreviewProps) => {
   }, [props.file, props.index]);
 
   if (!type) return <div/>;
+  console.log("TYPE: ", type);
   return (
     <div className={classes.root}>
       <IconButton className={classes.clear} onClick={remove}>
@@ -47,6 +48,9 @@ const MediaPreview = (props: MediaPreviewProps) => {
         <video
           className={classes.thumb}
           src={url}
+          muted
+          autoPlay
+          controls={false}
         />
       }
     </div>

@@ -23,7 +23,7 @@ export class FileUtils implements IFileUtils {
   }
 
   async getMedia(file: File): Promise<Media> {
-    const ext = file.name.split('.').pop();
+    const ext = file.name.split('.').pop()?.toLowerCase();
     let type: MediaType;
     const imageExt = ['png', 'jpg', 'jpeg'];
     if (imageExt.indexOf(ext!) != -1) type = MediaType.IMAGE;

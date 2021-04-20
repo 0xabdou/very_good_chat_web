@@ -93,6 +93,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
       />
     );
   });
+  if (canChat == undefined) return <div/>;
   if (!canChat) {
     return (
       <div className={classes.cannotChat}>
