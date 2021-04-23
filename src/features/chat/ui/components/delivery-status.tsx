@@ -1,4 +1,4 @@
-import {Icon, makeStyles} from "@material-ui/core";
+import {Avatar, Icon, makeStyles} from "@material-ui/core";
 import React from "react";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
 
@@ -31,10 +31,9 @@ const DeliveryStatus = (props: DeliveryStatusProps) => {
       );
     case DeliveryStatusType.SEEN:
       return (
-        <img
+        <Avatar
           className={classes.seen}
           src={props.photoURL}
-          alt='seen-photo'
         />
       );
     case DeliveryStatusType.NONE:

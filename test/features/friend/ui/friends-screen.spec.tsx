@@ -34,11 +34,6 @@ const errorState: FriendsState = {
   friendsError: FriendError.network
 };
 
-jest.mock(
-  'react-virtualized-auto-sizer',
-  () => ({children}: any) => children({height: 600, width: 600})
-);
-
 const renderIt = (store: AppStore) => {
   const path = '/friends';
   render(

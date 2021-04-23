@@ -37,11 +37,6 @@ beforeEach(() => {
   resetCalls(MockBlockActions);
 });
 
-jest.mock(
-  'react-virtualized-auto-sizer',
-  () => ({children}: any) => children({height: 600, width: 600})
-);
-
 it('should fetch blocked users on render, and have "Blocked users" as title', async () => {
   // arrange
   const state = {...initialBlockState};

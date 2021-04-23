@@ -4,6 +4,7 @@ import React, {
   ChangeEvent,
   KeyboardEventHandler,
   useCallback,
+  useEffect,
   useRef,
   useState
 } from "react";
@@ -37,6 +38,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   const {typing} = useChatActions();
   const [text, setText] = useState('');
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const sendButtonRef = useRef<HTMLButtonElement>(null);
   const timer = useRef<NodeJS.Timeout | null>(null);
   const classes = useStyles({typing: text.length > 0 || props.files.length > 0});
 
@@ -44,6 +46,22 @@ const ChatTextField = (props: ChatTextFieldProps) => {
     props.submit(text);
     setText('');
   }, [text, props.submit]);
+
+  useEffect(() => {
+    if (sendButtonRef.current) {
+      sendButtonRef.current.ontouchend = (e) => {
+        e.preventDefault();
+        console.log(e);
+        submit();
+      };
+    }
+    return () => {
+      if (sendButtonRef.current) {
+        sendButtonRef.current.ontouchend = null;
+      }
+    };
+  }, [sendButtonRef.current, submit]);
+
 
   // text input stuff
   const onChange = useCallback((e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -139,9 +157,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
       </div>
       <IconButton
         className={`${classes.button} ${classes.rightButton} ${classes.sendButton}`}
-        aria-controls="emojis"
-        aria-haspopup="true"
-        onClick={submit}
+        ref={sendButtonRef}
       >
         <Icon className={classes.buttonIcon}>send</Icon>
       </IconButton>

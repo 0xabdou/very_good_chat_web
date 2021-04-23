@@ -8,8 +8,6 @@ import {
 } from "@material-ui/core";
 import {useAppSelector} from "../../../core/redux/hooks";
 import {PulseLoader} from "react-spinners";
-import {FixedSizeList} from "react-window";
-import AutoSizer from 'react-virtualized-auto-sizer';
 import User from "../../user/types/user";
 import {SearchError} from "../types/search-error";
 import {useHistory} from "react-router-dom";
@@ -18,12 +16,6 @@ const SearchScreen = () => {
   const state = useAppSelector(state => state.search);
   const history = useHistory();
   const classes = useStyles();
-
-  const itemKey = useCallback((index: number) => {
-    if (state.results)
-      return state.results[index].username;
-    return index;
-  }, [state.results]);
 
   const onItemClicked = useCallback((user: User) => {
     history.push(`/u/${user.username}`);
@@ -44,28 +36,13 @@ const SearchScreen = () => {
       </div>;
   } else if (state.results) {
     if (state.results.length) {
-      child = (
-        <AutoSizer>
-          {({height, width}) => {
-            return <FixedSizeList
-              itemCount={state.results!.length}
-              itemKey={itemKey}
-              height={height}
-              width={width}
-              itemSize={56}
-            >
-              {({index, style}) => {
-                return (
-                  <UserListItem
-                    style={style}
-                    user={state.results![index]}
-                    onClick={onItemClicked}
-                  />
-                );
-              }}
-            </FixedSizeList>;
-          }}
-        </AutoSizer>);
+      child = state.results.map(user => {
+        return <UserListItem
+          user={user}
+          onClick={onItemClicked}
+          key={user.id}
+        />;
+      });
     } else {
       child =
         <div className={classes.centered} data-testid='search-no-results'>
@@ -118,8 +95,10 @@ const UserListItem = ({user, style, onClick}: UserListItemProps) => {
 const useStyles = makeStyles({
   full: {
     display: 'flex',
+    flexDirection: "column",
     marginTop: '1rem',
     height: "100%",
+    overflowY: "auto"
   },
   centered: {
     margin: 'auto',

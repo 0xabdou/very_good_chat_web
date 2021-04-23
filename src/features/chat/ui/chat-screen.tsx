@@ -1,8 +1,6 @@
 import React, {useCallback} from "react";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {makeStyles} from "@material-ui/core";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {FixedSizeList} from "react-window";
 import Conversation from "../types/conversation";
 import ConversationListItem from "./components/conversation-list-item";
 import RetryButton from "../../../shared/components/retry-button";
@@ -41,40 +39,24 @@ const ChatScreen = () => {
       history.push(pathname);
   }, [history]);
 
-  const itemKey = useCallback((index: number, data: Conversation[]) => {
-    return data[index].id;
-  }, []);
-
   let child: React.ReactNode;
   if (chatState.conversations) {
     const convs = chatState.conversations.filter(c => c.messages.length > 0);
     if (convs.length) {
       child = (
-        <AutoSizer>
-          {({height, width}) => {
+        <>
+          {convs.map((c, idx) => {
             return (
-              <FixedSizeList
-                itemCount={convs.length}
-                itemData={convs}
-                itemKey={itemKey}
-                height={height}
-                width={width}
-                itemSize={72}>
-                {({index, style, data}) => {
-                  return (
-                    <ConversationListItem
-                      style={style}
-                      conversation={data[index]}
-                      currentUserID={me?.id ?? ""}
-                      typing={typings[data[index].id]}
-                      onClick={onItemClick}
-                    />
-                  );
-                }}
-              </FixedSizeList>
+              <ConversationListItem
+                conversation={c}
+                currentUserID={me?.id ?? ""}
+                typing={typings[c.id]}
+                onClick={onItemClick}
+                key={idx}
+              />
             );
-          }}
-        </AutoSizer>
+          })}
+        </>
       );
     } else {
       child = (
@@ -110,10 +92,13 @@ const useStyles = makeStyles({
     flexDirection: 'column',
     width: '100%',
     height: '100%',
+    flex: 1,
+    overflowY: "auto",
+    overflowX: "hidden"
   },
   centered: {
     margin: 'auto',
-  }
+  },
 });
 
 export default ChatScreen;

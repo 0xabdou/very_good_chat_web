@@ -6,8 +6,6 @@ import FullscreenLoader from "../../../shared/components/fullscreen-loader";
 import RetryPage from "../../../shared/components/retry-page";
 import useBlockActions from "../block-actions-context";
 import {stringifyBlockError} from "../types/block-error";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {FixedSizeList} from "react-window";
 import {Block} from "../types/block";
 import BlockedListItem from "./components/blocked-list-item";
 import {useHistory} from "react-router-dom";
@@ -24,10 +22,6 @@ const BlockedUsersScreen = () => {
     dispatch(actions.getBlockedUsers());
   }, []);
 
-  const itemKey = useCallback((index: number, data: Block[]) => {
-    return data[index].user.username;
-  }, []);
-
   const retry = useCallback(() => {
     dispatch(actions.getBlockedUsers());
   }, []);
@@ -42,29 +36,17 @@ const BlockedUsersScreen = () => {
   } else if (state.blocks) {
     if (state.blocks.length) {
       child = (
-        <AutoSizer>
-          {({height, width}) => {
-            const blocks = state.blocks!;
-            return <FixedSizeList
-              itemCount={blocks.length}
-              itemData={blocks}
-              itemKey={itemKey}
-              height={height}
-              width={width}
-              itemSize={72}
-            >
-              {({index, style, data}) => {
-                return (
-                  <BlockedListItem
-                    style={style}
-                    block={data[index]}
-                    onClick={onItemClicked}
-                  />
-                );
-              }}
-            </FixedSizeList>;
-          }}
-        </AutoSizer>
+        <div className={classes.blocked}>
+          {
+            state.blocks.map(block => {
+              return <BlockedListItem
+                block={block}
+                onClick={onItemClicked}
+                key={block.user.id}
+              />;
+            })
+          }
+        </div>
       );
     } else {
       child = (
@@ -101,6 +83,11 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     paddingTop: '56px',
+  },
+  blocked: {
+    display: 'flex',
+    flexDirection: 'column',
+    overflowY: "auto",
   },
   centered: {
     margin: 'auto',

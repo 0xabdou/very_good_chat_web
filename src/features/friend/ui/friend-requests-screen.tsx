@@ -5,14 +5,11 @@ import {PulseLoader} from "react-spinners";
 import RetryButton from "../../../shared/components/retry-button";
 import {useFriendsActions} from "../friends-actions-context";
 import {useTopBarStyles} from "../../user/ui/components/top-bar";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {FixedSizeList} from "react-window";
 import RequestListItem from "./components/request-list-item";
 import User from "../../user/types/user";
 import {Route, useHistory} from "react-router-dom";
 import {stringifyFriendError} from "../types/friend-error";
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
-import {FriendRequest} from "../types/friend-request";
 import {BadgeName} from "../../badge/types/badge";
 import {useBadgeActions} from "../../badge/badge-actions-context";
 import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
@@ -74,45 +71,31 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
     history.push('/sent-requests');
   }, []);
 
-  const itemKey = useCallback((index: number, data: FriendRequest[]) => {
-    return data[index].user.username;
-  }, [state.friendRequests]);
-
   let child: React.ReactNode;
   if (state.friendRequests) {
     const reqs = props.received
       ? state.friendRequests.received
       : state.friendRequests.sent;
     if (reqs.length) {
-      child = <AutoSizer>
-        {({height, width}) => {
-          return <FixedSizeList
-            itemCount={reqs.length}
-            itemData={reqs}
-            itemKey={itemKey}
-            height={height - 50}
-            width={width}
-            itemSize={72}
-          >
-            {({index, style, data}) => {
-              const req: FriendRequest = data[index];
-              const treated = state.beingTreated.find(id => id == req.user.id);
-              const loading = treated != undefined;
-              return (
-                <RequestListItem
-                  style={style}
-                  req={req}
-                  onClick={goToUserProfile}
-                  onAccept={acceptRequest}
-                  onCancel={props.received ? declineRequest : cancelRequest}
-                  received={props.received}
-                  loading={loading}
-                />
-              );
-            }}
-          </FixedSizeList>;
-        }}
-      </AutoSizer>;
+      child = (
+        <div className={classes.reqs}>
+          {reqs.map((req, index) => {
+            const treated = state.beingTreated.find(id => id == req.user.id);
+            const loading = treated != undefined;
+            return (
+              <RequestListItem
+                req={req}
+                onClick={goToUserProfile}
+                onAccept={acceptRequest}
+                onCancel={props.received ? declineRequest : cancelRequest}
+                received={props.received}
+                loading={loading}
+                key={index}
+              />
+            );
+          })}
+        </div>
+      );
     } else {
       child = (
         <div className={classes.centered} data-testid='no-requests'>
@@ -172,6 +155,11 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
 };
 
 const useStyles = makeStyles({
+  reqs: {
+    overflowY: "auto",
+    overflowX: "hidden",
+    flex: 1,
+  },
   centered: {
     margin: 'auto',
   },

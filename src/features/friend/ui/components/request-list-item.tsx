@@ -39,7 +39,7 @@ const RequestListItem = (props: RequestListItemProps) => {
   }, [props.onClick]);
 
   return (
-    <div style={props.style} data-testid='request-list-item'>
+    <div className={classes.outer} data-testid='request-list-item'>
       <ListItem
         className={classes.item}
         onClick={onClick}
@@ -83,9 +83,13 @@ const RequestListItem = (props: RequestListItemProps) => {
 };
 
 const useStyles = makeStyles<Theme, { received?: boolean }>({
-  item: {
+  outer: {
+    display: "flex",
+    alignItems: "center",
     position: 'relative',
-    minHeight: '72px'
+  },
+  item: {
+    height: '72px',
   },
   actions: {
     position: 'absolute',
@@ -136,6 +140,7 @@ const useStyles = makeStyles<Theme, { received?: boolean }>({
     fontSize: "1rem",
     overflow: "hidden",
     textOverflow: "ellipsis",
+    paddingBottom: "8px",
   },
   secondaryText: {
     color: "#808080",

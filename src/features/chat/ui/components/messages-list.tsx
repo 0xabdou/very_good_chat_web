@@ -95,12 +95,14 @@ const MessagesList = (props: MessagesListProps) => {
           </div>
         </div>
       </div>
-      <IconButton
-        className={classes.arrow}
-        onClick={scrollToBottom}
-      >
-        <Icon className={classes.arrowIcon}>arrow_downward</Icon>
-      </IconButton>
+      <div className={classes.arrowWrapper}>
+        <IconButton
+          className={classes.arrow}
+          onClick={scrollToBottom}
+        >
+          <Icon className={classes.arrowIcon}>arrow_downward</Icon>
+        </IconButton>
+      </div>
     </div>
   );
 };
@@ -137,7 +139,7 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
     transform: props.typing ? "scale(1)" : "scale(0)",
     width: props.typing ? undefined : 0,
     height: props.typing ? undefined : 0,
-    paddingTop: "24px",
+    paddingTop: props.typing ? "12px" : 0,
     paddingLeft: "12px",
     transition: "200ms",
   }),
@@ -150,12 +152,15 @@ const useStyles = makeStyles<Theme, MessagesListStyle>({
     fontSize: "0.9rem",
     color: "grey",
   },
-  arrow: props => ({
+  arrowWrapper: {
     position: "absolute",
-    right: 0,
-    left: 0,
+    left: "50%",
+  },
+  arrow: props => ({
+    position: "relative",
     margin: "0 auto",
-    bottom: props.showArrow ? 8 : -50,
+    left: "-50%",
+    bottom: props.showArrow ? 50 : -8,
     transition: '500ms',
     background: "black",
     "&:hover": {

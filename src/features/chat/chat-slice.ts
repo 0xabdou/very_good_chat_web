@@ -134,26 +134,29 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   'chat/subscribeToMessages',
   async (_, thunkAPI) => {
     thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((sub) => {
-      const message = sub.message;
-      const conv = thunkAPI.getState().chat.conversations?.find(conv => {
-        return conv.id == message.conversationID;
-      });
-      if (!conv) {
-        thunkAPI.dispatch(chatActions.getOrCreateOTOConversation(message.senderID));
-        return;
-      }
-      const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
-      setTimeout(() => {
-        thunkAPI.dispatch(chatActions.appendMessage({
-          message,
-          update: sub.update || mine
-        }));
-      }, sub.update || mine ? 800 : 0);
-      if (!mine) {
-        markAsDelivered(() => thunkAPI.extra.chatRepo
-          .messagesDelivered([message.conversationID]));
-      }
-    });
+        const message = sub.message;
+        console.log("GOT MESSAGE: ", message);
+        const conv = thunkAPI.getState().chat.conversations?.find(conv => {
+          return conv.id == message.conversationID;
+        });
+        if (!conv) {
+          thunkAPI.dispatch(chatActions.getOrCreateOTOConversation(message.senderID));
+          return;
+        }
+        const mine = thunkAPI.getState().me.me!.id == sub.message.senderID;
+        setTimeout(() => {
+          thunkAPI.dispatch(chatActions.appendMessage({
+            message,
+            update: sub.update || mine
+          }));
+        }, sub.update || mine ? 800 : 0);
+        if (!mine) {
+          markAsDelivered(() => thunkAPI.extra.chatRepo
+            .messagesDelivered([message.conversationID]));
+        }
+      },
+      (_error) => location.reload(),
+    );
   }
 );
 
@@ -209,24 +212,22 @@ const chatSlice = createSlice({
   initialState: initialChatState,
   reducers: {
     appendMessage(state: ChatState, action: PayloadAction<{ message: Message, update?: boolean }>) {
-      const {message, update} = action.payload;
+      const {message} = action.payload;
       const index = state.conversations!.findIndex(c => c.id == message.conversationID);
-      if (update) {
-        const conv = state.conversations![index];
-        const mIndex = conv.messages.findIndex(m => m.id == message.id);
-        const sb = message.seenBy[0];
-        if (sb && state.lastSeen[conv.id][sb.userID] < message.id) {
-          state.lastSeen[conv.id][sb.userID] = message.id;
-        }
-        if (mIndex != -1) {
-          conv.messages[mIndex] = message;
-          return;
-        }
+      const conv = state.conversations![index];
+      const mIndex = conv.messages.findIndex(m => m.id == message.id);
+      const sb = message.seenBy[0];
+      if (sb && state.lastSeen[conv.id][sb.userID] < message.id) {
+        state.lastSeen[conv.id][sb.userID] = message.id;
       }
-      const conv = state.conversations!.splice(index, 1)[0];
-      conv.messages.push(message);
-      state.conversations?.unshift(conv);
-      state.lastSeen[conv.id][message.senderID] = message.id;
+      if (mIndex != -1) {
+        conv.messages[mIndex] = message;
+      } else {
+        conv.messages.push(message);
+        state.conversations!.splice(index, 1);
+        state.conversations?.unshift(conv);
+        state.lastSeen[conv.id][message.senderID] = message.id;
+      }
     },
     addTyping(state: ChatState, action: PayloadAction<Typing>) {
       const {conversationID, userID} = action.payload;

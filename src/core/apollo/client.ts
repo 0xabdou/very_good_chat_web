@@ -60,7 +60,7 @@ const apolloLink = ApolloLink.from([errorLink, operationsLink]);
 const apolloClient = new ApolloClient({
   link: apolloLink,
   cache: new InMemoryCache({}),
-  connectToDevTools: true,
+  connectToDevTools: import.meta.env.DEV,
 });
 
 export default apolloClient;

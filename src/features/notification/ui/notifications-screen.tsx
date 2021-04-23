@@ -1,8 +1,6 @@
 import React, {useCallback, useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {PulseLoader} from "react-spinners";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {FixedSizeList} from "react-window";
 import NotificationListItem from "./components/notification-list-item";
 import {Notification, NotificationType} from "../types/notification";
 import {useNotificationActions} from "../notification-actions-context";
@@ -42,26 +40,15 @@ const NotificationsScreen = () => {
     );
   } else if (state.notifications) {
     if (state.notifications.length) {
-      child = <AutoSizer>
-        {({height, width}) => {
-          return <FixedSizeList
-            itemCount={state.notifications!.length}
-            itemData={state.notifications}
-            height={height}
-            width={width}
-            itemSize={80}
-          >
-            {({index, style, data}) => {
-              return (
-                <NotificationListItem
-                  notification={data[index]}
-                  onClick={onClick}
-                  style={style}/>
-              );
-            }}
-          </FixedSizeList>;
-        }}
-      </AutoSizer>;
+      child = <>
+        {state.notifications.map(notif => {
+          return <NotificationListItem
+            notification={notif}
+            onClick={onClick}
+            key={notif.id}
+          />;
+        })}
+      </>;
     } else {
       child = (
         <span className={classes.centered} data-testid='empty-notifications'>
@@ -92,9 +79,11 @@ const NotificationsScreen = () => {
 const useStyles = makeStyles({
   outer: {
     width: '100%',
-    height: '100%',
+    height: "calc(100% - 70px)",
     display: 'flex',
-    paddingTop: '56px',
+    flexDirection: "column",
+    marginTop: '56px',
+    overflowY: "auto",
   },
   centered: {
     margin: 'auto',

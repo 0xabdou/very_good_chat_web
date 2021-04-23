@@ -64,6 +64,7 @@ const ConversationScreen = () => {
   // Callback for when a file is picked
   const onDrop = useCallback((newFiles: File[]) => {
     if (newFiles.length) {
+      console.log("GOT_FILE: ", newFiles[0].type);
       setFiles(files => {
         const allFiles = [...files, ...newFiles];
         if (allFiles.length > 10) {
@@ -110,7 +111,7 @@ const ConversationScreen = () => {
   // Callback for when the avatar/name on the top bar is clicked
   const goToProfile = useCallback(() => {
     if (otherUser) history.push(`/u/${otherUser.username}`);
-  }, [history]);
+  }, [history, otherUser]);
 
   // React dropzone stuff
   const {getRootProps, getInputProps, isDragActive, open} = useDropzone({

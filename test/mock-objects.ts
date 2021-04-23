@@ -352,9 +352,3 @@ export const mockTheDate = (): [jest.SpyInstance, Date] => {
     .mockImplementation(() => mocked as unknown as string);
   return [spy, mocked];
 };
-
-// How to mock Date
-//jest.mock(
-//  'react-virtualized-auto-sizer',
-//  () => ({children}: any) => children({height: 600, width: 600})
-//);

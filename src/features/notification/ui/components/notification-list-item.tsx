@@ -32,7 +32,7 @@ const NotificationListItem = (props: NotificationListItemProps) => {
   const vm = getViewModel(props.notification, classes);
   return (
     <ListItem
-      style={props.style}
+      className={classes.item}
       onClick={onClick}
       button
       data-testid='notification-list-item'>

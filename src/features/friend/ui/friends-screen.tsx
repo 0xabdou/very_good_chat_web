@@ -5,12 +5,9 @@ import {PulseLoader} from "react-spinners";
 import RetryButton from "../../../shared/components/retry-button";
 import {useFriendsActions} from "../friends-actions-context";
 import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
-import AutoSizer from "react-virtualized-auto-sizer";
-import {FixedSizeList} from "react-window";
 import User from "../../user/types/user";
 import {useHistory} from "react-router-dom";
 import {stringifyFriendError} from "../types/friend-error";
-import {FriendRequest} from "../types/friend-request";
 import FriendListItem from "./components/friend-list-item";
 
 const FriendsScreen = () => {
@@ -34,35 +31,20 @@ const FriendsScreen = () => {
     dispatch(actions.getFriends());
   }, []);
 
-  const itemKey = useCallback((index: number, data: FriendRequest[]) => {
-    return data[index].user.username;
-  }, []);
-
   let child: React.ReactNode;
   if (friends) {
     if (friends.length) {
-      child = <AutoSizer>
-        {({height, width}) => {
-          return <FixedSizeList
-            itemCount={friends.length}
-            itemData={friends}
-            itemKey={itemKey}
-            height={height}
-            width={width}
-            itemSize={72}
-          >
-            {({index, style, data}) => {
-              return (
-                <FriendListItem
-                  style={style}
-                  friend={data[index]}
-                  onClick={goToUserProfile}
-                />
-              );
-            }}
-          </FixedSizeList>;
-        }}
-      </AutoSizer>;
+      child = (
+        <div className={classes.friends}>
+          {friends.map(friend => {
+            return <FriendListItem
+              friend={friend}
+              onClick={goToUserProfile}
+              key={friend.user.id}
+            />;
+          })}
+        </div>
+      );
     } else {
       child = (
         <div className={classes.centered} data-testid='no-friends'>
@@ -105,6 +87,11 @@ const useStyles = makeStyles({
     display: 'flex',
     flexDirection: 'column',
     paddingTop: '56px',
+  },
+  friends: {
+    display: "flex",
+    flexDirection: "column",
+    overflowY: "auto",
   },
   centered: {
     margin: 'auto',
