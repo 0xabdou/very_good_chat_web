@@ -6,6 +6,7 @@ import DeliveryStatus, {DeliveryStatusType} from "../delivery-status";
 import MessageMediaGrid from "./message-media-grid";
 import {useAppSelector} from "../../../../../core/redux/hooks";
 import {shallowEqual} from "react-redux";
+import isUrl from "../../../../../shared/utils/is-url";
 
 export type MessageListItemProps = {
   index: number,
@@ -22,6 +23,13 @@ const useMessageSelector = (convID: number, index: number) => {
     return state.chat.conversations!.find(c => c.id == convID)!.messages[index];
   }, shallowEqual);
 };
+
+type messageListItemProps = {
+  incoming: boolean,
+  bubbleType: BubbleType,
+  deliveryStatus: DeliveryStatusType,
+  hasMedia: boolean
+}
 
 const MessageListItem = React.memo((props: MessageListItemProps) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -88,7 +96,39 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
     deliveryStatus: deliveryStatusType,
     hasMedia,
   });
-
+  let messageText: React.ReactNode | undefined;
+  if (message.text) {
+    const spaces = message.text.match(/\s+/g);
+    if (!spaces) {
+      if (isUrl(message.text)) {
+        messageText = (
+          <MessageLink href={message.text} className={classes.bubbleLink}/>
+        );
+      } else
+        messageText = message.text;
+    } else {
+      const elements: React.ReactNode[] = [];
+      const words = message.text.split(/\s+/);
+      let currentWord = "";
+      words.forEach((word, wordIdx) => {
+        if (wordIdx) currentWord = currentWord + spaces[wordIdx - 1];
+        if (isUrl(word)) {
+          elements.push(currentWord);
+          elements.push(
+            <MessageLink
+              className={classes.bubbleLink}
+              href={word}
+              key={`${message.id}_${wordIdx}_link`}
+            />
+          );
+          currentWord = "";
+        } else {
+          currentWord = currentWord + word;
+        }
+      });
+      messageText = [...elements, currentWord];
+    }
+  }
   return (
     <div data-testid='message-list-item'>
       <div className={classes.wrapper} ref={ref}>
@@ -99,14 +139,18 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
             src={otherUser.photo?.small}
           />}
         </div>
-        <span className={classes.bubble}>
+        <div className={classes.bubble}>
           {
             hasMedia &&
             <MessageMediaGrid medias={message.medias!} messageID={message.id}/>
           }
-          {message.text &&
-          <div className={classes.bubbleText}>{message.text}</div>}
-        </span>
+          {
+            messageText &&
+            <div className={classes.bubbleTextWrapper}>
+              <span className={classes.bubbleText}>{messageText}</span>
+            </div>
+          }
+        </div>
         <div className={classes.status}>
           <DeliveryStatus
             type={deliveryStatusType}
@@ -119,18 +163,24 @@ const MessageListItem = React.memo((props: MessageListItemProps) => {
   );
 });
 
+type MessageLinkProps = {
+  href: string,
+  className: string,
+};
+
+const MessageLink = ({href, className}: MessageLinkProps) => {
+  return (
+    <a className={className} href={href} target="_blank">
+      {href}
+    </a>
+  );
+};
+
 enum BubbleType {
   ISOLATED = 'ISOLATED',
   FIRST = 'FIRST',
   MIDDLE = 'MIDDLE',
   LAST = 'LAST'
-}
-
-type messageListItemProps = {
-  incoming: boolean,
-  bubbleType: BubbleType,
-  deliveryStatus: DeliveryStatusType,
-  hasMedia: boolean
 }
 
 const _getBorderRadius = (type: BubbleType): [string, string] => {
@@ -176,8 +226,14 @@ const useStyles = makeStyles<Theme, messageListItemProps>({
       color
     };
   },
-  bubbleText: {
+  bubbleTextWrapper: {
     margin: '8px 12px',
+  },
+  bubbleText: {
+    whiteSpace: 'pre-wrap',
+  },
+  bubbleLink: {
+    textDecoration: "underline"
   },
   status: {
     marginLeft: props => props.incoming ? 'auto' : '4px',

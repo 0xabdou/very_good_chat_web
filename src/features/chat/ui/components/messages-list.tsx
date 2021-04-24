@@ -31,7 +31,7 @@ const MessagesList = (props: MessagesListProps) => {
   }, shallowEqual);
   const dispatch = useAppDispatch();
   const {getMoreMessages} = useChatActions();
-  const ref = useRef<HTMLDivElement>(null);
+  const [div, setDiv] = useState<HTMLDivElement>();
   const isFetching = useRef<boolean | null>(false);
   const [showArrow, setShowArrow] = useState(false);
   const classes = useStyles({
@@ -41,21 +41,26 @@ const MessagesList = (props: MessagesListProps) => {
   });
 
   useEffect(() => {
-    if (ref.current) ref.current.onscroll = onScroll;
+    console.log("CURRENT: ", div);
+    if (div) div.onscroll = onScroll;
     return () => {
-      if (ref.current) ref.current.onscroll = null;
+      if (div) div.onscroll = null;
     };
-  }, [ref.current]);
+  }, [div]);
+
+  const onMount = useCallback((div: HTMLDivElement) => {
+    setDiv(div);
+  }, []);
 
   const onScroll = async () => {
-    const d = ref.current;
-    if (!d) return;
-    const sh = d.scrollHeight;
-    const st = d.scrollTop;
-    const ch = d.clientHeight;
+    if (!div) return;
+    const sh = div.scrollHeight;
+    const st = div.scrollTop;
+    const ch = div.clientHeight;
     const diff = sh + st - ch;
     setShowArrow(st <= -1);
     if (diff <= 50 && !isFetching.current && hasMore) {
+      console.log("ZBLBOLAAAAAAAA");
       isFetching.current = true;
       await dispatch(getMoreMessages(props.conversationID));
       isFetching.current = false;
@@ -63,8 +68,8 @@ const MessagesList = (props: MessagesListProps) => {
   };
 
   const scrollToBottom = useCallback(() => {
-    if (ref.current) ref.current.scrollTo({top: 0, behavior: "smooth"});
-  }, [ref.current]);
+    if (div) div.scrollTo({top: 0, behavior: "smooth"});
+  }, [div]);
 
   if (!conversation) return <FullscreenLoader/>;
 
@@ -80,7 +85,7 @@ const MessagesList = (props: MessagesListProps) => {
   });
   return (
     <div className={classes.outer}>
-      <div className={classes.messages} ref={ref}>
+      <div className={classes.messages} ref={onMount}>
         <div>
           <div className={classes.loader} key={new Date().getTime() + 1124}>
             <PulseLoader/>

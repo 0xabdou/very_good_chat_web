@@ -13,7 +13,7 @@ import {
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
 import {useAuthActions} from "../auth-actions-context";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
-import logoUrl from '../../../images/vgc_transparent_black.png';
+import logoUrl from '../../../assets/images/vgc_transparent_black.png';
 
 
 const LoginScreen = () => {

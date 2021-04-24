@@ -43,6 +43,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   const classes = useStyles({typing: text.length > 0 || props.files.length > 0});
 
   const submit = useCallback(() => {
+    console.log("TOHOOOOO");
     props.submit(text);
     setText('');
   }, [text, props.submit]);
@@ -54,10 +55,16 @@ const ChatTextField = (props: ChatTextFieldProps) => {
         console.log(e);
         submit();
       };
+      sendButtonRef.current.onmouseup = (e) => {
+        e.preventDefault();
+        console.log(e);
+        submit();
+      };
     }
     return () => {
       if (sendButtonRef.current) {
         sendButtonRef.current.ontouchend = null;
+        sendButtonRef.current.onmouseup = null;
       }
     };
   }, [sendButtonRef.current, submit]);
