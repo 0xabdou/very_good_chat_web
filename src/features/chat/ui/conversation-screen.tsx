@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {ButtonBase, makeStyles} from "@material-ui/core";
+import {ButtonBase, makeStyles, Typography} from "@material-ui/core";
 import TopBar from "../../user/ui/components/top-bar";
 import {useHistory, useParams} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
@@ -140,11 +140,13 @@ const ConversationScreen = () => {
       <TopBar>
         <BackButton mobileOnly/>
         <ButtonBase onClick={goToProfile} className={classes.avatarName}>
-          <FriendAvatar src={otherUser?.photo?.small}
-                        lastSeen={friend?.lastSeen}/>
-          <div className={classes.title}>
+          <FriendAvatar
+            src={otherUser?.photo?.small}
+            lastSeen={friend?.lastSeen}
+          />
+          <Typography variant="h6" className={classes.title}>
             {otherUser?.name ?? otherUser?.username}
-          </div>
+          </Typography>
         </ButtonBase>
       </TopBar>
       <MessagesList conversationID={conversationID} key={conversationID}/>
