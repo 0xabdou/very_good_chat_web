@@ -36,7 +36,7 @@ const ChatScreen = () => {
   const onItemClick = useCallback((conversation: Conversation) => {
     const pathname = `/c/${conversation.id}`;
     if (history.location.pathname != pathname)
-      history.push(pathname);
+      history.push(pathname, {canGoBack: true});
   }, [history]);
 
   let child: React.ReactNode;

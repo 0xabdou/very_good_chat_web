@@ -24,7 +24,7 @@ const MainScreen = () => {
     return <div/>;
 
   const goToProfile = useCallback(() => {
-    history.push('/profile');
+    history.push({pathname: "/profile", state: {canGoBack: true}});
   }, [history]);
 
   const beginSearch = useCallback(() => {

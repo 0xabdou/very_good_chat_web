@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {ButtonBase, makeStyles, Typography} from "@material-ui/core";
-import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
+import {ButtonBase, makeStyles} from "@material-ui/core";
+import TopBar from "../../user/ui/components/top-bar";
 import {useHistory, useParams} from "react-router-dom";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import useChatActions from "../chat-actions-provider";
@@ -11,6 +11,8 @@ import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {ErrorSnackbar} from "../../../shared/components/snackbars";
 import FriendAvatar from "../../friend/ui/components/friend-avatar";
 import {shallowEqual} from "react-redux";
+import BackButton from "../../../shared/components/back-button";
+import {useMobileMQ} from "../../../shared/styles/media-query";
 
 const ConversationScreen = () => {
   // redux
@@ -38,6 +40,8 @@ const ConversationScreen = () => {
   const history = useHistory();
   // The other side of the conversation
   const otherUser = conversation?.participants[0];
+  // isMobile
+  const isMobile = useMobileMQ();
 
   // Update [isActive] when needed
   useEffect(() => {
@@ -112,7 +116,7 @@ const ConversationScreen = () => {
 
   // Callback for when the avatar/name on the top bar is clicked
   const goToProfile = useCallback(() => {
-    if (otherUser) history.push(`/u/${otherUser.username}`);
+    if (otherUser) history.push(`/u/${otherUser.username}`, {canGoBack: true});
   }, [history, otherUser]);
 
   // React dropzone stuff
@@ -124,9 +128,7 @@ const ConversationScreen = () => {
   });
 
   // CSS
-  const classes = useStyles({isDragActive});
-  const topBarClasses = useTopBarStyles();
-
+  const classes = useStyles({isDragActive, isMobile});
 
   const rootProps = getRootProps({
     className: classes.outer,
@@ -136,17 +138,16 @@ const ConversationScreen = () => {
   return (
     <div {...rootProps} >
       <TopBar>
-        <ButtonBase onClick={goToProfile}>
+        <BackButton mobileOnly/>
+        <ButtonBase onClick={goToProfile} className={classes.avatarName}>
           <FriendAvatar src={otherUser?.photo?.small}
                         lastSeen={friend?.lastSeen}/>
           <div className={classes.title}>
-            <Typography variant='h6' className={topBarClasses.title}>
-              {otherUser?.name ?? otherUser?.username}
-            </Typography>
+            {otherUser?.name ?? otherUser?.username}
           </div>
         </ButtonBase>
       </TopBar>
-      <MessagesList conversationID={conversationID}/>
+      <MessagesList conversationID={conversationID} key={conversationID}/>
       <ChatTextField
         conversationID={conversationID}
         files={files}
@@ -168,7 +169,7 @@ const ConversationScreen = () => {
 
 type CustomError = { message: string, pleaseRerender: number }
 
-const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
+const useStyles = makeStyles<Theme, { isDragActive: boolean, isMobile: boolean }>({
   outer: {
     position: 'relative',
     display: 'flex',
@@ -178,15 +179,21 @@ const useStyles = makeStyles<Theme, { isDragActive: boolean }>({
     paddingTop: '64px',
     background: "white",
   },
-  title: {
-    display: 'flex',
-    flexDirection: 'column',
-    width: '100%',
-  },
-  lastSeen: {
+  avatarName: props => ({
+    display: "flex",
+    justifyContent: "start",
+    alignItems: "center",
     color: "black",
-    fontSize: '0.8rem',
-    textTransform: "uppercase"
+    fontSize: "1.2rem",
+    width: props.isMobile ? "80%" : "100%"
+  }),
+  title: {
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    width: "100%",
+    textAlign: "start",
+    whiteSpace: "nowrap",
+    paddingLeft: "0.5rem",
   },
   dragIndicator: props => {
     let opacity: number;

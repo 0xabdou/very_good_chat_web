@@ -65,7 +65,7 @@ const useStyles = makeStyles<Theme, MainScreenStyle>({
       : props.isLarge ? "35%" : "40%",
     minWidth: "300px",
     borderRight: "0.1px solid rgba(0,0,0,0.1)",
-    paddingTop: "70px",
+    paddingTop: "64px",
   }),
   leftSectionTopBar: {
     position: "absolute",
@@ -75,6 +75,7 @@ const useStyles = makeStyles<Theme, MainScreenStyle>({
     padding: "8px 16px",
     alignItems: "center",
     width: "100%",
+    height: "64px",
   },
   rightSection: {
     position: "relative",

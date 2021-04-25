@@ -14,6 +14,7 @@ import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {useHistory} from "react-router-dom";
 import AlertDialog from "../../../shared/components/alert-dialog";
 import {useFriendsActions} from "../../friend/friends-actions-context";
+import BackButton from "../../../shared/components/back-button";
 
 const SettingsScreen = () => {
   const meState = useAppSelector(state => state.me);
@@ -34,7 +35,7 @@ const SettingsScreen = () => {
   }, []);
 
   const goToBlockedUsersScreen = useCallback(() => {
-    history.push('/blocked-users');
+    history.push('/blocked-users', {canGoBack: true});
   }, []);
 
   const logoutClicked = useCallback(() => {
@@ -54,6 +55,7 @@ const SettingsScreen = () => {
   return (
     <div className={classes.outer} data-testid='settings-screen'>
       <TopBar>
+        <BackButton/>
         <Typography variant='h6' className={topBarClasses.title}>
           Settings
         </Typography>

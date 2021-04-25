@@ -28,6 +28,7 @@ import {useMeActions} from "../me-actions-context";
 import {useFileUtils} from "../../../shared/utils/file-utils";
 import {useAppDispatch, useAppSelector} from "../../../core/redux/hooks";
 import {UserUpdate} from "../types/user";
+import BackButton from "../../../shared/components/back-button";
 
 const validators = {
   validateUsername(username: string) {
@@ -215,6 +216,10 @@ const ProfileUpdatingScreen = (props: ProfileUpdatingScreenProps) => {
       >
         <Icon>logout</Icon>
       </IconButton>}
+      {
+        !props.registering &&
+        <BackButton className={classes.logoutButton}/>
+      }
       <div className={classes.layout}>
         <ProfilePhotoPicker
           defaultSrc={defaultSrc}

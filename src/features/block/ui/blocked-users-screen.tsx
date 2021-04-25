@@ -9,6 +9,7 @@ import {stringifyBlockError} from "../types/block-error";
 import {Block} from "../types/block";
 import BlockedListItem from "./components/blocked-list-item";
 import {useHistory} from "react-router-dom";
+import BackButton from "../../../shared/components/back-button";
 
 const BlockedUsersScreen = () => {
   const state = useAppSelector(state => state.block);
@@ -27,7 +28,7 @@ const BlockedUsersScreen = () => {
   }, []);
 
   const onItemClicked = useCallback((block: Block) => {
-    history.push(`/u/${block.user.username}`);
+    history.push(`/u/${block.user.username}`, {canGoBack: true});
   }, [history]);
 
   let child: React.ReactNode;
@@ -67,6 +68,7 @@ const BlockedUsersScreen = () => {
   return (
     <div className={classes.outer} data-testid='blocked-users-screen'>
       <TopBar>
+        <BackButton/>
         <Typography variant='h6' className={topBarClasses.title}>
           Blocked users
         </Typography>

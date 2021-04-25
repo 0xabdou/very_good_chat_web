@@ -60,7 +60,6 @@ const MessagesList = (props: MessagesListProps) => {
     const diff = sh + st - ch;
     setShowArrow(st <= -1);
     if (diff <= 50 && !isFetching.current && hasMore) {
-      console.log("ZBLBOLAAAAAAAA");
       isFetching.current = true;
       await dispatch(getMoreMessages(props.conversationID));
       isFetching.current = false;

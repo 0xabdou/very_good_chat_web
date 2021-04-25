@@ -16,6 +16,7 @@ import {useLargeMQ, useMobileMQ} from "../../../shared/styles/media-query";
 import FriendProfileScreen from "./friend-profile-screen";
 import ResponsiveTwoSides
   from "../../../shared/components/responsive-two-sides";
+import BackButton from "../../../shared/components/back-button";
 
 type FriendRequestsScreenProps = {
   received?: boolean
@@ -46,6 +47,7 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
         state: {
           viewingUserFromReceivedRequests: props.received,
           viewingUserFromSentRequests: !props.received,
+          canGoBack: true,
         }
       });
     }
@@ -68,7 +70,7 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
   }, []);
 
   const viewSentReqs = useCallback(() => {
-    history.push('/sent-requests');
+    history.push('/sent-requests', {canGoBack: true});
   }, []);
 
   let child: React.ReactNode;
@@ -120,9 +122,12 @@ const FriendRequestsScreen = (props: FriendRequestsScreenProps) => {
     );
   }
   const leftTopBar = (
-    <Typography variant='h6' className={topBarClasses.title}>
-      {props.received ? 'Friend requests' : 'Sent requests'}
-    </Typography>
+    <>
+      <BackButton to={props.received ? "/" : "/requests"}/>
+      <Typography variant='h6' className={topBarClasses.title}>
+        {props.received ? 'Friend requests' : 'Sent requests'}
+      </Typography>
+    </>
   );
   const leftChildren = (
     <>

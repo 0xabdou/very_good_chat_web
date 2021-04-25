@@ -9,6 +9,7 @@ import User from "../../user/types/user";
 import {useHistory} from "react-router-dom";
 import {stringifyFriendError} from "../types/friend-error";
 import FriendListItem from "./components/friend-list-item";
+import BackButton from "../../../shared/components/back-button";
 
 const FriendsScreen = () => {
   const friends = useAppSelector(state => state.friends.friends);
@@ -24,7 +25,7 @@ const FriendsScreen = () => {
   }, []);
 
   const goToUserProfile = useCallback((user: User) => {
-    history.push(`/u/${user.username}`);
+    history.push(`/u/${user.username}`, {canGoBack: true});
   }, [history]);
 
   const retry = useCallback(() => {
@@ -71,6 +72,7 @@ const FriendsScreen = () => {
   return (
     <div className={classes.outer}>
       <TopBar>
+        <BackButton/>
         <Typography variant='h6' className={topBarClasses.title}>
           Friends
         </Typography>

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 
-import {useParams} from "react-router-dom";
+import {useLocation, useParams} from "react-router-dom";
 import {createStyles, makeStyles} from "@material-ui/core";
 import User from "../../user/types/user";
 import CommonProfileInfo from "../../user/ui/components/common-profile-info";
@@ -14,14 +14,18 @@ import MoreButton from "./components/more-button";
 import {FriendshipStatus} from "../types/friendship";
 import ChatButton from "./components/chat-button";
 import {Theme} from "@material-ui/core/styles/createMuiTheme";
+import BackButton from "../../../shared/components/back-button";
+import {useMobileMQ} from "../../../shared/styles/media-query";
 
 const FriendProfileScreen = () => {
-  const state = useAppSelector(state => state.friendProfile, shallowEqual);
+  const profileState = useAppSelector(state => state.friendProfile, shallowEqual);
   const dispatch = useAppDispatch();
   const actions = useFriendProfileActions();
   const [cachedUser, setCachedUser] = useState<User>();
   const searchResults = useAppSelector(state => state.search.results);
   const routeParams = useParams<{ username: string }>();
+  const location = useLocation();
+  const isMobile = useMobileMQ();
 
   useEffect(() => {
     console.log("GETTING: ", routeParams);
@@ -34,21 +38,25 @@ const FriendProfileScreen = () => {
   }, []);
 
   const classes = useStyles();
-
-  const user = state.user ?? cachedUser;
+  const historyState = location.state as any;
+  const one = historyState?.viewingUserFromReceivedRequests;
+  const two = historyState?.viewingUserFromSentRequests;
+  const user = profileState.user ?? cachedUser;
   return (
     <div className={classes.outer}>
       <MoreButton/>
+      <BackButton className={classes.backButton}
+                  hide={!isMobile && (one || two)}/>
       <div className={classes.wrapper}>
         {!!user && <CommonProfileInfo user={user}/>}
         <div className={classes.buttonGroup}>
           <FriendshipButton/>
-          {state.friendship?.status == FriendshipStatus.FRIENDS && user &&
+          {profileState.friendship?.status == FriendshipStatus.FRIENDS && user &&
           <ChatButton user={user}/>}
         </div>
       </div>
       <ErrorSnackbar<FriendError>
-        currentError={state.error}
+        currentError={profileState.error}
         stringify={stringifyFriendError}
       />
     </div>
@@ -73,7 +81,10 @@ const useStyles = makeStyles({
     display: 'flex',
     width: '100%',
     justifyContent: 'center'
-
+  },
+  backButton: {
+    position: "absolute",
+    left: 0,
   }
 });
 

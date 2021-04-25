@@ -9,7 +9,7 @@ const FriendsButton = () => {
     const classes = useStyles();
 
     const goToFriends = useCallback(async () => {
-      history.push('/friends');
+      history.push('/friends', {canGoBack: true});
     }, [history]);
 
     const goToFriendsInAnotherTab = useCallback(async () => {

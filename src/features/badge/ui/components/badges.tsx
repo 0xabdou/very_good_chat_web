@@ -46,12 +46,12 @@ const Badges = () => {
   }, [badgeState, notifications]);
 
   const notifClicked = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    if (isMobile) history.push('/notifications');
+    if (isMobile) history.push('/notifications', {canGoBack: true});
     else setNotifAnchor(event.currentTarget);
   }, [history, isMobile]);
 
   const reqClicked = useCallback(() => {
-    history.push('/requests');
+    history.push('/requests', {canGoBack: true});
   }, [history]);
 
   const closeNotif = useCallback(() => {

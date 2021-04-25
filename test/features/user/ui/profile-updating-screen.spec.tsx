@@ -40,6 +40,7 @@ import {
 } from "../../../../src/features/user/types/user";
 import {meActions} from "../../../../src/features/user/me-slice";
 import {authActions} from "../../../../src/features/auth/auth-slice";
+import {MemoryRouter} from "react-router-dom";
 
 const MockAuthActions = mock<typeof authActions>();
 const MockMeActions = mock<typeof meActions>();
@@ -60,15 +61,17 @@ const renderComponent = (
   props: ProfileUpdatingScreenProps = {},
 ) => {
   render(
-    <FileUtilsContext.Provider value={instance(MockPhotoUtils)}>
-      <Provider store={mockStore}>
-        <AuthActionsContext.Provider value={instance(MockAuthActions)}>
-          <MeActionsContext.Provider value={instance(MockMeActions)}>
-            <ProfileUpdatingScreen {...props} />
-          </MeActionsContext.Provider>
-        </AuthActionsContext.Provider>
-      </Provider>
-    </FileUtilsContext.Provider>
+    <MemoryRouter initialEntries={["/"]} initialIndex={0}>
+      <FileUtilsContext.Provider value={instance(MockPhotoUtils)}>
+        <Provider store={mockStore}>
+          <AuthActionsContext.Provider value={instance(MockAuthActions)}>
+            <MeActionsContext.Provider value={instance(MockMeActions)}>
+              <ProfileUpdatingScreen {...props} />
+            </MeActionsContext.Provider>
+          </AuthActionsContext.Provider>
+        </Provider>
+      </FileUtilsContext.Provider>
+    </MemoryRouter>
   );
 };
 

@@ -14,6 +14,7 @@ import ProfileScreen from "../../../../src/features/user/ui/profile-screen";
 import {initialFriendsState} from "../../../../src/features/friend/friends-slice";
 import UserError from "../../../../src/features/user/types/user-error";
 import {meActions} from "../../../../src/features/user/me-slice";
+import {MemoryRouter} from "react-router-dom";
 
 let MockMeActions = mock<typeof meActions>();
 const MockStore = getMockStore();
@@ -26,13 +27,15 @@ const initialState = {
 
 const renderIt = (mockStore: AppStore,) => {
   render(
-    <FileUtilsContext.Provider value={instance(MockPhotoUtils)}>
-      <Provider store={mockStore}>
-        <MeActionsContext.Provider value={instance(MockMeActions)}>
-          <ProfileScreen/>
-        </MeActionsContext.Provider>
-      </Provider>
-    </FileUtilsContext.Provider>
+    <MemoryRouter initialEntries={["/"]} initialIndex={0}>
+      <FileUtilsContext.Provider value={instance(MockPhotoUtils)}>
+        <Provider store={mockStore}>
+          <MeActionsContext.Provider value={instance(MockMeActions)}>
+            <ProfileScreen/>
+          </MeActionsContext.Provider>
+        </Provider>
+      </FileUtilsContext.Provider>
+    </MemoryRouter>
   );
 };
 

@@ -7,7 +7,7 @@ export default class GoogleAuth {
         client_id: `${processEnv.VITE_GOOGLE_CLIENT}`,
         scope: 'profile',
       })
-        .then(() => console.log("GoogleAuth initialized"))
+        .then(() => null)
         .catch((e: any) => console.log("GoogleAuth couldn't initialize: ", e));
     });
   }

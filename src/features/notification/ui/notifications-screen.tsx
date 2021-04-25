@@ -27,7 +27,10 @@ const NotificationsScreen = () => {
   const onClick = useCallback((notification: Notification) => {
     dispatch(actions.markNotificationAsSeen(notification.id));
     if (notification.content.type == NotificationType.REQUEST_ACCEPTED) {
-      history.push(`/u/${notification.content.user.username}`);
+      history.push(
+        `/u/${notification.content.user.username}`,
+        {canGoBack: true}
+      );
     }
   }, []);
 

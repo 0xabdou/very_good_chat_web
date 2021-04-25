@@ -10,6 +10,7 @@ import {MeActionsContext} from "../me-actions-context";
 import FriendsButton from "./components/friends-button";
 import RetryPage from "../../../shared/components/retry-page";
 import {stringifyUserError} from "../types/user-error";
+import BackButton from "../../../shared/components/back-button";
 
 const ProfileScreen: React.FC = () => {
   const meState = useAppSelector(state => state.me);
@@ -21,11 +22,11 @@ const ProfileScreen: React.FC = () => {
   const topBarClasses = useTopBarStyles();
 
   const editProfile = useCallback(() => {
-    history.push('/edit-profile');
+    history.push('/edit-profile', {canGoBack: true});
   }, [history]);
 
   const goToSettings = useCallback(async () => {
-    history.push('/settings');
+    history.push('/settings', {canGoBack: true});
   }, [history]);
 
   const retry = useCallback(async () => {
@@ -50,6 +51,7 @@ const ProfileScreen: React.FC = () => {
   return (
     <div className={classes.outer} data-testid='profile-screen'>
       <TopBar>
+        <BackButton/>
         <Typography variant="h6" className={topBarClasses.title}>
           Profile
         </Typography>

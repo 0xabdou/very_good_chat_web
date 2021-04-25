@@ -18,7 +18,7 @@ const SearchScreen = () => {
   const classes = useStyles();
 
   const onItemClicked = useCallback((user: User) => {
-    history.push(`/u/${user.username}`);
+    history.push(`/u/${user.username}`, {canGoBack: true});
   }, []);
 
   let child: React.ReactNode;

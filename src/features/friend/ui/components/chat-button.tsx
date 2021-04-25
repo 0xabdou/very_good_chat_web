@@ -27,7 +27,7 @@ const ChatButton = (props: ChatButtonProps) => {
     const result = await dispatch(chatActions.getOrCreateOTOConversation(props.user.id));
     if (result.meta.requestStatus == 'fulfilled') {
       const conv = result.payload as Conversation;
-      history.push(`/c/${conv.id}`);
+      history.push(`/c/${conv.id}`, {canGoBack: true});
     }
     setDisabled(false);
   };
@@ -41,7 +41,7 @@ const ChatButton = (props: ChatButtonProps) => {
       }
       return false;
     });
-    if (conv) history.push(`/c/${conv.id}`);
+    if (conv) history.push(`/c/${conv.id}`, {canGoBack: true});
     else void getConvThenNavigate();
   }, [props.user]);
 
