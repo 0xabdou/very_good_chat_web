@@ -10,6 +10,7 @@ import TopBar, {useTopBarStyles} from "../../user/ui/components/top-bar";
 import {stringifyNotificationError} from "../types/notification-error";
 import {useBadgeActions} from "../../badge/badge-actions-context";
 import {BadgeName} from "../../badge/types/badge";
+import BackButton from "../../../shared/components/back-button";
 
 const NotificationsScreen = () => {
   const state = useAppSelector(state => state.notification);
@@ -70,6 +71,7 @@ const NotificationsScreen = () => {
   return (
     <div className={classes.outer}>
       <TopBar>
+        <BackButton mobileOnly/>
         <Typography variant='h6' className={topBarClasses.title}>
           Notifications
         </Typography>
