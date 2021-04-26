@@ -149,13 +149,18 @@ const ConversationScreen = () => {
           </Typography>
         </ButtonBase>
       </TopBar>
-      <MessagesList conversationID={conversationID} key={conversationID}/>
+      <MessagesList
+        conversationID={conversationID}
+        key={`messagesList-${conversationID}`}
+      />
       <ChatTextField
         conversationID={conversationID}
         files={files}
         fileRemoved={fileRemoved}
         submit={submit}
         addFileClicked={open}
+        filesPasted={onDrop}
+        key={`chatTextField-${conversationID}`}
       />
       <div className={classes.dragIndicator}>
         Drop files here

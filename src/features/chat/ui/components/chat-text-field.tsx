@@ -27,6 +27,7 @@ export type ChatTextFieldProps = {
   fileRemoved: (index: number) => void,
   submit: (text: string) => void,
   addFileClicked: () => void,
+  filesPasted: (files: File[]) => void,
 }
 
 const ChatTextField = (props: ChatTextFieldProps) => {
@@ -43,7 +44,6 @@ const ChatTextField = (props: ChatTextFieldProps) => {
   const classes = useStyles({typing: text.length > 0 || props.files.length > 0});
 
   const submit = useCallback(() => {
-    console.log("TOHOOOOO");
     props.submit(text);
     setText('');
   }, [text, props.submit]);
@@ -108,6 +108,17 @@ const ChatTextField = (props: ChatTextFieldProps) => {
     setText(text => `${text}${data.native}`);
   }, []);
 
+  //
+  const onPaste = useCallback((e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.files;
+    if (pasted.length) {
+      const files: File[] = [];
+      for (let i = 0; i < pasted.length; i++)
+        files.push(pasted.item(i)!);
+      props.filesPasted(files);
+    }
+  }, [props.filesPasted]);
+
   const mediaPreviews = props.files.map((f, i) => {
     return (
       <MediaPreview
@@ -151,6 +162,7 @@ const ChatTextField = (props: ChatTextFieldProps) => {
             onKeyPress={onKeyPress}
             rowsMax='5'
             placeholder='Aa'
+            onPaste={onPaste}
           />
           <IconButton
             className={`${classes.button} ${classes.rightButton}`}

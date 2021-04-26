@@ -4,6 +4,7 @@ import FullScreenDialog from "../../../../user/ui/components/fullscreen-dialog";
 import React from "react";
 import {Swiper, SwiperSlide} from 'swiper/react';
 import SwiperCore, {Navigation, Pagination} from 'swiper';
+import {nonSelectable} from "../../../../../shared/styles/shared";
 
 export type FullscreenMessageMediaProps = {
   visible: boolean,
@@ -45,6 +46,7 @@ const useStyles = makeStyles({
     position: "relative",
     width: '100%',
     height: '100%',
+    ...nonSelectable
   },
   media: {
     height: '100%',

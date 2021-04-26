@@ -205,7 +205,7 @@ const useStyles = makeStyles<Theme, messageListItemProps>({
     let background, color: string;
     let tl, tr, bl, br: string;
     if (props.incoming) {
-      background = 'grey';
+      background = "#E4E6EC";
       color = 'black';
       tr = br = '18px';
       [tl, bl] = _getBorderRadius(props.bubbleType);

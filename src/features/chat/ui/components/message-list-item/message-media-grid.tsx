@@ -84,13 +84,15 @@ const useStyles = makeStyles<Theme, BubbleMediasStyle>({
     };
   },
   cell: (props) => {
-    let height: string;
-    if (props.count > 2) height = '150px';
-    else height = '300px';
+    let maxHeight: string;
+    if (props.count > 1) maxHeight = '150px';
+    else maxHeight = '300px';
     return {
       position: 'relative',
       width: '100%',
-      height,
+      maxHeight,
+      minHeight: "38px",
+      minWidth: "36px",
       boxSizing: 'border-box',
     };
   },
