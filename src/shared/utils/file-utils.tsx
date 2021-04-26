@@ -25,7 +25,7 @@ export class FileUtils implements IFileUtils {
   async getMedia(file: File): Promise<Media> {
     const ext = file.name.split('.').pop()?.toLowerCase();
     let type: MediaType;
-    const imageExt = ['png', 'jpg', 'jpeg'];
+    const imageExt = ['png', 'jpg', 'jpeg', "gif"];
     if (imageExt.indexOf(ext!) != -1) type = MediaType.IMAGE;
     else if (ext == 'mp4') type = MediaType.VIDEO;
     else throw new Error('Unsupported media type');
