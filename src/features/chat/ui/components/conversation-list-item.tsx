@@ -1,7 +1,6 @@
 import React, {useCallback} from "react";
 import Conversation from "../../types/conversation";
 import {
-  Avatar,
   createStyles,
   Icon,
   ListItem,
@@ -12,6 +11,9 @@ import {Theme} from "@material-ui/core/styles/createMuiTheme";
 import {MediaType} from "../../types/media";
 import {formatDate} from "../../../../shared/utils/date-utils";
 import DeliveryStatus, {DeliveryStatusType} from "./delivery-status";
+import FriendAvatar from "../../../friend/ui/components/friend-avatar";
+import {useAppSelector} from "../../../../core/redux/hooks";
+import {shallowEqual} from "react-redux";
 
 export type ConversationListItemProps = {
   conversation: Conversation,
@@ -22,6 +24,11 @@ export type ConversationListItemProps = {
 };
 
 const ConversationListItem = (props: ConversationListItemProps) => {
+  const friend = useAppSelector(state => {
+    return state.friends.friends?.find(f => {
+      return f.user.id == props.conversation.participants[0].id;
+    });
+  }, shallowEqual);
   const message = props.conversation.messages.length > 0
     ? props.conversation.messages[props.conversation.messages.length - 1]
     : undefined;
@@ -68,20 +75,23 @@ const ConversationListItem = (props: ConversationListItemProps) => {
     }
     secondary = (
       <>
-        <Icon className={classes.secondaryIcon}>{icon}</Icon> {text} {date}
+        {mine && <span className={classes.span}>{"You: "}</span>}
+        <Icon className={classes.secondaryIcon}>{icon}</Icon>
+
+        {text}
+        {date}
       </>
     );
   } else {
     secondary = "";
   }
-
   return (
     <div style={props.style} data-testid='conversation-list-item'>
       <ListItem button onClick={onClick}>
         <ListItemAvatar>
-          <Avatar
+          <FriendAvatar
             src={user.photo?.small}
-            alt='conversation-avatar'
+            lastSeen={friend?.lastSeen}
           />
         </ListItemAvatar>
         <div className={classes.listItemText}>
@@ -167,6 +177,9 @@ const useStyles = makeStyles<Theme, StyleProps>(() => {
     },
     typing: {
       color: "grey"
+    },
+    span: {
+      whiteSpace: "pre"
     }
   });
 });

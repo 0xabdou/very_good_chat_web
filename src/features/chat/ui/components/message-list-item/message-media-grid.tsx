@@ -90,6 +90,7 @@ const useStyles = makeStyles<Theme, BubbleMediasStyle>({
     return {
       position: 'relative',
       width: '100%',
+      height: "100%",
       maxHeight,
       minHeight: "38px",
       minWidth: "36px",

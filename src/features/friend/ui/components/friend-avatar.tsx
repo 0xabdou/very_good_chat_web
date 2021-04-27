@@ -5,6 +5,7 @@ import {formatDate} from "../../../../shared/utils/date-utils";
 export type FriendAvatarProps = {
   src: string | undefined,
   lastSeen?: number,
+  className?: string,
 };
 
 const FriendAvatar = (props: FriendAvatarProps) => {
@@ -25,7 +26,8 @@ const FriendAvatar = (props: FriendAvatarProps) => {
         anchorOrigin={{vertical: 'bottom', horizontal: 'right'}}
         className={online ? classes.dot : classes.badge}
       >
-        <Avatar src={props.src} alt='friend-avatar'/>
+        <Avatar className={props.className} src={props.src}
+                alt='friend-avatar'/>
       </Badge>
     </ListItemAvatar>
   );
