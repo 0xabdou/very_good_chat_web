@@ -14,7 +14,7 @@ const FriendAvatar = (props: FriendAvatarProps) => {
   let online = false;
   let lastSeen: string | undefined;
   if (props.lastSeen) {
-    online = new Date().getTime() - props.lastSeen <= 60000;
+    online = new Date().getTime() - props.lastSeen <= 65000;
     lastSeen = formatDate(props.lastSeen, 'mini');
   }
   return (

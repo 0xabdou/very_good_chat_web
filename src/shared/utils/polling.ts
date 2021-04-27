@@ -1,4 +1,4 @@
-const _pollingInterval = 10000;
+const _pollingInterval = 60000;
 let _polling: NodeJS.Timeout;
 
 export const startPolling = (work: () => void) => {
