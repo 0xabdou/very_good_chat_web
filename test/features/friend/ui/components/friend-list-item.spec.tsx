@@ -48,12 +48,12 @@ it('should not display the last seen date if the user is online', () => {
   expect(screen.queryByText(lastSeen)).not.toBeInTheDocument();
 });
 
-it('should display the last seen date ff the user is offline', () => {
+it('should display the last seen date if the user is offline', () => {
   // arrange
   const props: FriendListItemProps = {
     friend: {
       ...mockFriend,
-      lastSeen: new Date().getTime() - 60001
+      lastSeen: new Date().getTime() - 65001
     }
   };
   // render
