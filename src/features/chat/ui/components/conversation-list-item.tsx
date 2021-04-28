@@ -96,7 +96,7 @@ const ConversationListItem = (props: ConversationListItemProps) => {
         </ListItemAvatar>
         <div className={classes.listItemText}>
           <span className={classes.primary}>
-            {user.username}
+            {user.name ?? user.username}
           </span>
           <span className={classes.secondary}>
             {secondary}
