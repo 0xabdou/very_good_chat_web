@@ -135,7 +135,6 @@ const subscribeToMessages = createAsyncThunk<void, void, ThunkAPI<ChatError>>(
   async (_, thunkAPI) => {
     thunkAPI.extra.chatRepo.subscribeToMessages().subscribe((sub) => {
         const message = sub.message;
-        console.log("GOT MESSAGE: ", message);
         const conv = thunkAPI.getState().chat.conversations?.find(conv => {
           return conv.id == message.conversationID;
         });

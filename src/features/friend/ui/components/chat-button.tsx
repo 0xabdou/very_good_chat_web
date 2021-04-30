@@ -33,7 +33,6 @@ const ChatButton = (props: ChatButtonProps) => {
   };
 
   const onTap = useCallback(() => {
-    console.log(store.getState());
     const conv = store.getState().chat.conversations?.find(c => {
       if (c.type == ConversationType.ONE_TO_ONE) {
         const u = c.participants.find(p => p.id == props.user.id);

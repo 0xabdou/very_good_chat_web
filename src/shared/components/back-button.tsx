@@ -17,7 +17,6 @@ const BackButton = (props: BackButtonProps) => {
   const classes = useStyles();
 
   const onClick = useCallback(() => {
-    console.log("CAN GO BACK: ", state && state.canGoBack);
     if (props.to) return history.replace(props.to, {canGoBack: true});
     if (state && state.canGoBack)
       history.goBack();

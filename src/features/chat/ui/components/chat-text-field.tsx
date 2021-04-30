@@ -52,12 +52,10 @@ const ChatTextField = (props: ChatTextFieldProps) => {
     if (sendButtonRef.current) {
       sendButtonRef.current.ontouchend = (e) => {
         e.preventDefault();
-        console.log(e);
         submit();
       };
       sendButtonRef.current.onmouseup = (e) => {
         e.preventDefault();
-        console.log(e);
         submit();
       };
     }

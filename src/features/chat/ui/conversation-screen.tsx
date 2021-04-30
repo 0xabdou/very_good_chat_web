@@ -68,7 +68,6 @@ const ConversationScreen = () => {
   // Callback for when a file is picked
   const onDrop = useCallback((newFiles: File[]) => {
     if (newFiles.length) {
-      console.log("GOT_FILE: ", newFiles[0].type);
       setFiles(files => {
         const allFiles = [...files, ...newFiles];
         if (allFiles.length > 10) {
@@ -93,8 +92,6 @@ const ConversationScreen = () => {
 
   // Callback for when the user sends the message
   const submit = useCallback((text: string) => {
-    console.log("TEXT: ", text);
-    console.log("FILES: ", files);
     // Remove leading/trailing whitespaces from the message text
     const msgText = text.trim();
     // Don't send the message if the text is empty after trimming it

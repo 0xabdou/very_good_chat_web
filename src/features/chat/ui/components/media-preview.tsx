@@ -28,7 +28,6 @@ const MediaPreview = (props: MediaPreviewProps) => {
   }, [props.file, props.index]);
 
   if (!type) return <div/>;
-  console.log("TYPE: ", type);
   return (
     <div className={classes.root}>
       <IconButton className={classes.clear} onClick={remove}>

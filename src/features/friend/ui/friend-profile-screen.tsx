@@ -28,7 +28,6 @@ const FriendProfileScreen = () => {
   const isMobile = useMobileMQ();
 
   useEffect(() => {
-    console.log("GETTING: ", routeParams);
     dispatch(actions.getFriendshipInfo(routeParams.username));
     const searchedUser = searchResults?.find(u => u.username == routeParams.username);
     setCachedUser(searchedUser);

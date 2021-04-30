@@ -41,7 +41,6 @@ const MessagesList = (props: MessagesListProps) => {
   });
 
   useEffect(() => {
-    console.log("CURRENT: ", div);
     if (div) div.onscroll = onScroll;
     return () => {
       if (div) div.onscroll = null;
