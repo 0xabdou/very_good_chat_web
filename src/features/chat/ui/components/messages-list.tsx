@@ -45,7 +45,7 @@ const MessagesList = (props: MessagesListProps) => {
     return () => {
       if (div) div.onscroll = null;
     };
-  }, [div]);
+  }, [div, hasMore]);
 
   const onMount = useCallback((div: HTMLDivElement) => {
     setDiv(div);
